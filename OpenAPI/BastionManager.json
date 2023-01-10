@@ -1,0 +1,475 @@
+{
+  "openapi": "3.1.0",
+  "x-stoplight": {
+    "id": "6b66789b0d1d1"
+  },
+  "info": {
+    "title": "UserAPI",
+    "version": "1.0",
+    "description": "API avec laquelle intéragi le front"
+  },
+  "servers": [
+    {
+      "url": "http://bastions/api/v1"
+    }
+  ],
+  "paths": {
+    "/bastions": {
+      "get": {
+        "summary": "Bastions list",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Bastion"
+                  }
+                },
+                "examples": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-bastions",
+        "description": "Get the list of available bastions"
+      },
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions",
+        "responses": {
+          "201": {
+            "description": "bastion created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Bastion"
+                      }
+                    }
+                  }
+                },
+                "examples": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/bastions/{bastion-id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion-id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "operationId": "get-bastions-bastion-id"
+      },
+      "patch": {
+        "summary": "",
+        "operationId": "patch-bastions-bastion-id",
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastions-bastion-id",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/bastions/{bastion-id}/wireguard": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion-id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "operationId": "get-bastions-bastion-id"
+      },
+      "patch": {
+        "summary": "",
+        "operationId": "patch-bastions-bastion-id",
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/bastions/{bastion-id}/users": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion-id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "operationId": "get-bastions-bastion-id-users"
+      },
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion-id-users",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/bastions/{bastion-id}/users/{user-id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion-id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "user-id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "protocols": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "operationId": "get-bastions-bastion-id-users-user-id"
+      },
+      "patch": {
+        "summary": "",
+        "operationId": "patch-bastions-bastion-id-users-user-id",
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastions-bastion-id-users-user-id",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/bastions/{bastion-id}/users/{user-id}/wireguard": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion-id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "user-id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WireguardServerConf"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "publicKey": {
+                      "type": "string"
+                    },
+                    "presharedKey": {
+                      "type": "string"
+                    },
+                    "ip": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-bastions-bastion-id-users-user-id"
+      },
+      "patch": {
+        "summary": "",
+        "operationId": "patch-bastions-bastion-id-users-user-id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastions-bastion-id-users-user-id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Bastion": {
+        "title": "Bastion",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "protocols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WireguardRequest": {
+        "title": "WireguardRequest",
+        "type": "object",
+        "properties": {
+          "generatePrivKey": {
+            "type": "boolean"
+          },
+          "publicKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "generatePrivKey"
+        ]
+      },
+      "WireguardClientConf": {
+        "title": "WireguardConf",
+        "x-stoplight": {
+          "id": "7cicqsscwozgc"
+        },
+        "type": "object",
+        "properties": {
+          "privateKey": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "peerPublicKey": {
+            "type": "string"
+          },
+          "peerAllowedIPs": {
+            "type": "string"
+          },
+          "peerEndpoint": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "peerPublicKey",
+          "peerAllowedIPs",
+          "peerEndpoint"
+        ]
+      },
+      "WireguardServerConf": {
+        "type": "object",
+        "properties": {
+          "publicKey": {
+            "type": "string"
+          },
+          "presharedKey": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          }
+        },
+        "x-examples": {
+          "example-1": {
+            "publicKey": "string",
+            "presharedKey": "string",
+            "ip": "string"
+          }
+        }
+      }
+    },
+    "responses": {},
+    "requestBodies": {}
+  }
+}

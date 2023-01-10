@@ -1,0 +1,408 @@
+{
+  "openapi": "3.1.0",
+  "x-stoplight": {
+    "id": "2yi51anghkf55"
+  },
+  "info": {
+    "title": "bastion_authentification",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "parameters": [],
+      "post": {
+        "summary": "",
+        "operationId": "post-login",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAuthentication"
+              }
+            }
+          },
+          "description": ""
+        }
+      }
+    },
+    "/login/otp": {
+      "post": {
+        "summary": "",
+        "operationId": "post-login-otp",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeOtp"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login/admin": {
+      "post": {
+        "summary": "",
+        "operationId": "post-login-admin",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAuthentication"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login/admin/otp": {
+      "post": {
+        "summary": "",
+        "operationId": "post-login-admin-otp",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden",
+            "headers": {}
+          }
+        },
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeOtp"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "summary": "",
+        "operationId": "post-users",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admins": {
+      "post": {
+        "summary": "",
+        "operationId": "post-admins",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Admin"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admins/id": {
+      "patch": {
+        "summary": "",
+        "operationId": "patch-admins-id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredEnvoyeParMSAdminUser"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-admins-id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/users/id": {
+      "patch": {
+        "summary": "",
+        "operationId": "patch-users-id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredEnvoyeParMSAdminUser"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-users-id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/admins/id/otp": {
+      "post": {
+        "summary": "",
+        "operationId": "post-admins-id-otp",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredEnvoyeParMSAdminUser"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/id/otp": {
+      "post": {
+        "summary": "",
+        "operationId": "post-users-id-otp",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredEnvoyeParMSAdminUser"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/premiere_utilisation": {
+      "post": {
+        "summary": "",
+        "operationId": "post-premiere_utilisation",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Admin"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserAuthentication": {
+        "title": "UserAuthentication",
+        "x-stoplight": {
+          "id": "4087bl8yfrxgz"
+        },
+        "type": "object",
+        "properties": {
+          "mail": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminAuthentication": {
+        "title": "AdminAuthentication",
+        "x-stoplight": {
+          "id": "n9l9bub5a4lhi"
+        },
+        "type": "object",
+        "properties": {
+          "mail": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "CodeOtp": {
+        "title": "CodeOtp",
+        "x-stoplight": {
+          "id": "b97prd58yby0b"
+        },
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "title": "User",
+        "x-stoplight": {
+          "id": "8zvmb4vl682iq"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "mail": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "Admin": {
+        "title": "Admin",
+        "x-stoplight": {
+          "id": "8ewyuy8juyblu"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "mail": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "CredEnvoyeParMSAdminUser": {
+        "title": "CredEnvoyeParMSAdminUser",
+        "x-stoplight": {
+          "id": "3m03p6jsppgdy"
+        },
+        "type": "object",
+        "properties": {
+          "info": {
+            "type": "string"
+          },
+          "claimJWT": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "API Key - 1": {
+        "name": "API Key",
+        "type": "apiKey",
+        "in": "query"
+      }
+    }
+  }
+}
