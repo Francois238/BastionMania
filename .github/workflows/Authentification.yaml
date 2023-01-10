@@ -1,4 +1,4 @@
-name: Build and upload User Management
+name: Build and upload Authentification
 
 on:
   schedule:
@@ -8,8 +8,8 @@ on:
       - master
       - dev
     paths:
-      - 'UserManagement/**'
-      - '.github/workflows/UserManagement.yaml'
+      - 'Authentification/**'
+      - '.github/workflows/Authentification.yaml'
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
@@ -19,9 +19,9 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}/usermanagement
+  IMAGE_NAME: ${{ github.repository }}/authentification
 
-  DOCKERFILE_PATH: './UserManagement'
+  DOCKERFILE_PATH: './Authentification'
 
 jobs:
   build:
