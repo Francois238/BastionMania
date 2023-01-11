@@ -1,0 +1,16 @@
+version: "2.1"
+services:
+  agent:
+    image: ghcr.io/bastionmania/bastionmania/agent:dev
+    container_name: bastion-mania-agent
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PRIVATE_KEY= # Private key of the agent
+      - PEER_PUBLIC= # Public key of the server
+    ports:
+      - "60469:60469/udp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped

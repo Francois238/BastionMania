@@ -1,23 +1,39 @@
-use std::env;
+use std::{env, fs, thread, time};
+use std::process::Command;
 use bastion_mania_agent::wireguard::WireguardConf;
 
 fn main() {
-    let config = WireguardConf{
+    let config = WireguardConf {
         priv_key: env::var("PRIVATE_KEY").expect("need PRIVATE_KEY"),
-        listen_port: env::var("LISTEN_PORT").expect("need LISTEN_PORT"),
-        address: env::var("ADDRESS").expect("need ADDRESS"),
         peer_public: env::var("PEER_PUBLIC").expect("need PEER_PUBLIC"),
-        peer_ip: env::var("PEER_IP").expect("need PEER_IP"),
     };
 
-    println!("config: {:?}" ,config);
     match config.validate() {
         Ok(_) => println!("Valid config"),
         Err(e) => {
             println!("Invalid config: {}", e);
             panic!();
-        },
+        }
     }
 
-    println!("{}", config.to_string());
+    fs::write("/etc/wireguard/wg0.conf", config.to_string()).expect("Unable to write file");
+
+    let out = Command::new("/usr/bin/wg-quick")
+        .arg("up")
+        .arg("wg0")
+        .output()
+        .expect("failed to execute process");
+
+    if !out.status.success() {
+        println!("stdout: {}", String::from_utf8_lossy(&out.stdout));
+        println!("Error: {}", String::from_utf8_lossy(&out.stderr));
+        panic!();
+    }
+
+    println!("Wireguard server started");
+
+    // infinite sleep
+    loop {
+        thread::sleep(time::Duration::from_secs(1000));
+    }
 }
