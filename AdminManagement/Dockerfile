@@ -10,8 +10,6 @@ FROM rust:1.64.0
 
 COPY --from=build /app/target/release/admin_management /app/admin_management
 
-RUN rm -r /app/.env
-
 #WORKDIR /tmp
 
 #RUN  apt-get update  \
