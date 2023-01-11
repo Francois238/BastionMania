@@ -6,9 +6,9 @@ COPY src/ /app/src
 
 RUN cargo build --release
 
-FROM rust:1.64.0
+#FROM rust:1.64.0
 
-COPY --from=build /app/target/release/admin_management /app/admin_management
+#COPY --from=build /app/target/release/admin_management /app/admin_management
 
 #WORKDIR /tmp
 
@@ -22,4 +22,4 @@ COPY --from=build /app/target/release/admin_management /app/admin_management
 
 EXPOSE 8081
 
-CMD ["/app/admin_management"]
+CMD ["/app/target/release/admin_management"]
