@@ -11,12 +11,10 @@ FROM ubuntu:23.04
 WORKDIR /app
 COPY --from=build /app/target/release/admin_management /app/admin_management
 
-RUN  apt-get update \
-  && apt-get install -y wget \
+RUN  apt-get update  \
+  && apt-get install -y libpq-dev libssl-dev\
   && rm -rf /var/lib/apt/lists/*
 
-RUN apt update
-RUN apt install -y libpq-dev
 
 EXPOSE 8081
 
