@@ -3,15 +3,21 @@ FROM rust:1.64.0 as build
 WORKDIR /app
 COPY Cargo.* /app/
 COPY src/ /app/src
-COPY .env /app/
 
 RUN cargo build --release
 
+FROM ubuntu:23.04
 
-#FROM gcr.io/distroless/cc
-#COPY --from=build /app/target/release/user_management /
-#COPY --from=build /app/.env /
+WORKDIR /app
+COPY --from=build /app/target/release/user_management /app/user_management
+
+RUN  apt-get update \
+  && apt-get install -y wget \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN apt update
+RUN apt install -y libpq-dev
 
 EXPOSE 8082
 
-CMD ["/app/target/release/user_management"]
+CMD ["/app/user_management"]
