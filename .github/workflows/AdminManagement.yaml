@@ -4,9 +4,7 @@ on:
   schedule:
     - cron: '39 20 * * *'
   push:
-    branches:
-      - master
-      - dev
+    branches: [ "main", "dev" ]
     paths:
       - 'AdminManagement/**'
       - '.github/workflows/AdminManagement.yaml'
@@ -14,6 +12,9 @@ on:
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main", "dev" ]
+    paths:
+      - 'AdminManagement/**'
+      - '.github/workflows/AdminManagement.yaml'
 
 env:
   # Use docker.io for Docker Hub if empty
