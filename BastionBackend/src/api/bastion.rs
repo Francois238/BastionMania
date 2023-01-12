@@ -12,12 +12,12 @@ use actix_web::{get,
 use crate::api::*;
 use crate::api_error::ApiError;
 use crate::db;
-use derive_more::{Display};
+//use derive_more::{Display};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 
 
-
+/*
 #[derive(Debug, Display)]
 pub enum TaskError {
     NonAuthentifie,
@@ -42,32 +42,24 @@ impl ResponseError for TaskError {
         }
     }
 }
+*/
+
+// /bastion =======================================================================================
 
 #[get("/bastion")]
 pub async fn get_bastion() -> Result<HttpResponse, ApiError>{
     let bastion_insere = find_all()?;
-
-
- 
-        Ok(HttpResponse::Ok().json(bastion_insere))
+    Ok(HttpResponse::Ok().json(bastion_insere))
 }
 
 #[post("/bastion")]
 pub async fn create_bastion( bastion: web::Json<BastionCreation>) -> Result<HttpResponse, ApiError>{
 
     let bastion_insere = create(bastion.into_inner())?;
-
-
- 
-        Ok(HttpResponse::Ok().json(bastion_insere))
-        
-
-    
+    Ok(HttpResponse::Ok().json(bastion_insere))
 }
 
-
-
-
+// /bastion/{bastion_id} ==========================================================================
 
 #[get("/bastion/{bastion_id}")]
 pub async fn find_a_bastion(bastion_id:  web::Path<i32>) -> Result<HttpResponse, ApiError>{
@@ -88,11 +80,8 @@ pub async fn delete_a_bastion(bastion_id:web::Path<i32>) -> Result<HttpResponse,
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 
-
-
-
-
-
+// /bastion/{bastion_id}/wireguard ================================================================
+/*
 #[get("/bastion/{bastion_id}/wireguard")]
 pub async fn find_server_config(bastion_id:  web::Path<i32>) -> Result<HttpResponse, ApiError>{
 
@@ -106,10 +95,6 @@ pub async fn find_server_config(bastion_id:  web::Path<i32>) -> Result<HttpRespo
 
         None => Err(ApiError::new(400, "pas de bastion".to_string()))
     }
-    
-
-    
-
 }
 
 #[patch("/bastion/{bastion_id}/wireguard")]
@@ -123,14 +108,9 @@ pub async fn update_server_config(bastion_id:web::Path<i32>, modifs:web::Json<Wi
         }
         None => Err(ApiError { status_code: (400), message: ("pas de bastion".to_string()) })
     }
-
-   
 }
-
-
-
-
-
+*/
+//  /bastion/{bastion_id}/users ===================================================================
 
 #[get("/bastion/{bastion_id}/users")]
 pub async fn get_users() -> impl Responder{
@@ -142,6 +122,7 @@ pub async fn create_users() -> impl Responder{
     HttpResponse::Ok().body("création_droits_accés")
 }
 
+// /bastion/{bastion_id}/users/{user_id} =========================================================
 
 #[get("/bastion/{bastion_id}/users/{user_id}")]
 pub async fn get_a_user() -> impl Responder{
@@ -158,6 +139,7 @@ pub async fn delete_a_user() -> impl Responder{
     HttpResponse::Ok().body("delete_user_x")
 }
 
+// /bastion/{bastion_id}/users/{user_id}/wireguard" ===============================================
 
 #[get("/bastion/{bastion_id}/users/{user_id}/wireguard")]
 pub async fn get_user_wireguard() -> impl Responder{
@@ -177,11 +159,13 @@ pub async fn delete_user_wireguard() -> impl Responder{
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(create_bastion);
     cfg.service(get_bastion);
+
     cfg.service(update_a_bastion);
     cfg.service(find_a_bastion);
-    cfg.service(delete_a_bastion);   
+    cfg.service(delete_a_bastion);
+/*
     cfg.service(find_server_config); 
-    cfg.service(update_server_config); 
+    cfg.service(update_server_config); */
 }
     
    

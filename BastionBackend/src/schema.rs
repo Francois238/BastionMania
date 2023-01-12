@@ -1,37 +1,50 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    bastion (id) {
+    agent (id) {
         id -> Int4,
-        name -> Text,
-        protocols -> Text,
-        wireguard_id -> Nullable<Int4>,
+        privatekey -> Text,
+        publickey -> Text,
+        address -> Text,
     }
 }
 
 diesel::table! {
-    client_config (privatekey) {
+    bastion (id) {
+        id -> Int4,
+        name -> Text,
+        protocols -> Text,
+        subnet_cidr -> Text,
+        endpoint_ip -> Text,
+        endpoint_port -> Text,
+        serveur_config_id -> Text,
+        client_config_id -> Text,
+    }
+}
+
+diesel::table! {
+    to_agent_config (id) {
+        id -> Int4,
         privatekey -> Text,
+        publickey -> Text,
         address -> Text,
-        peerpublickey -> Text,
         peerallowedips -> Text,
         peerendpoint -> Text,
     }
 }
 
 diesel::table! {
-    serveur_config (id) {
+    to_user_config (id) {
         id -> Int4,
-        publikey -> Text,
-        presharedkey -> Text,
+        publickey -> Text,
+        privatekey -> Text,
         ip -> Text,
     }
 }
 
-diesel::joinable!(bastion -> serveur_config (wireguard_id));
-
 diesel::allow_tables_to_appear_in_same_query!(
+    agent,
     bastion,
-    client_config,
-    serveur_config,
+    to_agent_config,
+    to_user_config,
 );
