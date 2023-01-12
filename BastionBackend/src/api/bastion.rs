@@ -1,20 +1,25 @@
+use std::borrow::BorrowMut;
 use actix_web::{get,
-    post,
-    patch,
-    delete,
-    error::ResponseError,
-     
-    Responder,
-    HttpResponse,
-    http::{header::ContentType, StatusCode}, web
+                post,
+                patch,
+                delete,
+                error::ResponseError,
+
+                Responder,
+                HttpResponse,
+                http::{header::ContentType, StatusCode}, web
 };
 
 use crate::api::*;
 use crate::api_error::ApiError;
 use crate::db;
+use crate::services::{generate_freenetid, generate_freeport};
 //use derive_more::{Display};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
+use repository::*;
+use crate::entities::{Bastion, BastionInsertable};
+use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI};
 
 
 /*
@@ -48,35 +53,81 @@ impl ResponseError for TaskError {
 
 #[get("/bastion")]
 pub async fn get_bastion() -> Result<HttpResponse, ApiError>{
-    let bastion_insere = find_all()?;
+    let bastion_insere = Bastion::find_all()?;
     Ok(HttpResponse::Ok().json(bastion_insere))
 }
 
 #[post("/bastion")]
-pub async fn create_bastion( bastion: web::Json<BastionCreation>) -> Result<HttpResponse, ApiError>{
+pub async fn create_bastion( bastion: web::Json<BastionModification>) -> Result<HttpResponse, ApiError>{
 
-    let bastion_insere = create(bastion.into_inner())?;
-    Ok(HttpResponse::Ok().json(bastion_insere))
+    //generation pair de clé pour agent et bastion
+    let agent_priv = wireguard_keys::Privkey::generate();
+    let agent_pub = agent_priv.pubkey();
+    let bastion_priv = wireguard_keys::Privkey::generate();
+    let bastion_pub = bastion_priv.pubkey();
+
+    let liste_bastions=Bastion::find_all()?;
+    //generation d'un port libre pour le bastion
+    let ports: Vec<i32> = (&liste_bastions).into_iter().map(|b| b.port ).collect();
+    let port = generate_freeport(&ports);
+    //generation d'un net_id libre pour le bastion
+    let net_ids: Vec<i32> = liste_bastions.into_iter().map(|b| b.net_id ).collect();
+    let net_id = generate_freenetid(&net_ids);
+
+    //creation du bastion
+    let bastion_insertion: BastionInsertable = BastionInsertable{
+        name: bastion.name.clone(),
+        subnet_cidr: bastion.subnet_cidr.clone(),
+        pubkey: bastion_pub.to_base64(),
+        port,
+        net_id,
+    };
+
+    let bastion_insere = Bastion::create(bastion_insertion)?;
+
+    let bastion_instance_create = BastionInstanceCreate {
+        privkey: bastion_priv.to_base64(),
+        subnet_cidr: bastion.subnet_cidr.clone(),
+        agent_pubkey: agent_pub.to_base64(),
+        agent_endpoint: bastion.agent_endpoint.clone(),
+        net_id,
+    };
+
+    //TODO: envoyer la requete de creation de bastion a l'intancieur
+
+    let retour_api= RetourAPI{
+        success: true,
+        message:  "Bastion créé".to_string(),
+        data: ConfigAgent{
+            privkey: agent_priv.to_base64(),
+            pubkey: bastion_pub.to_base64(),
+        }
+    };
+
+    Ok(HttpResponse::Ok().json(retour_api))
+
+
+
 }
 
 // /bastion/{bastion_id} ==========================================================================
 
 #[get("/bastion/{bastion_id}")]
 pub async fn find_a_bastion(bastion_id:  web::Path<i32>) -> Result<HttpResponse, ApiError>{
-    let bastion_affiche = find_un_bastion(bastion_id.into_inner())?;
+    let bastion_affiche = Bastion::find_un_bastion(bastion_id.into_inner())?;
     Ok(HttpResponse::Ok().json(bastion_affiche))
 
 }
 
 #[patch("/bastion/{bastion_id}")]
 pub async fn update_a_bastion(bastion_id:web::Path<i32>, modifs:web::Json<BastionModification>) -> Result<HttpResponse, ApiError>{
-    let bastion_modif = update_un_bastion(bastion_id.into_inner(), modifs.into_inner())?;
+    let bastion_modif = Bastion::update_un_bastion(bastion_id.into_inner(), modifs.into_inner())?;
     Ok(HttpResponse::Ok().json(bastion_modif))
 }
 
 #[delete("/bastion/{bastion_id}")]
 pub async fn delete_a_bastion(bastion_id:web::Path<i32>) -> Result<HttpResponse, ApiError>{
-    let bastion_suppr = delete_un_bastion(bastion_id.into_inner())?;
+    let bastion_suppr = Bastion::delete_un_bastion(bastion_id.into_inner())?;
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 

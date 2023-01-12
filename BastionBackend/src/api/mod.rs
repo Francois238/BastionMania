@@ -1,8 +1,8 @@
 mod bastion;
 pub use bastion::*;
 
-mod model;
-pub use model::*;
+mod repository;
+pub use repository::*;
 
-pub use model::*;
+pub use repository::*;
 pub use bastion::routes_bastion;

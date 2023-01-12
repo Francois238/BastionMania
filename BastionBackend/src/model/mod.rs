@@ -1,4 +1,9 @@
-pub mod Bastion;
-pub mod WireguardRQ;
-pub mod WireguardCC;
-pub mod WireguardSC;
+pub mod bastionmodification;
+pub mod configagent;
+pub mod bastioninstancecreate;
+pub mod retourapi;
+
+pub use bastionmodification::BastionModification;
+pub use configagent::ConfigAgent;
+pub use bastioninstancecreate::BastionInstanceCreate;
+pub use retourapi::RetourAPI;
