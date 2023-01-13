@@ -1,0 +1,52 @@
+<div class="login">
+  <div class="row" class="title-name">BastionMania </div>
+  <img src="assets/logobm.png"class="logo">
+  <main>
+    <div class="row" *ngIf="success">
+      <ngb-alert type="success" [dismissible]="false">
+        {{ success }}
+      </ngb-alert>
+    </div>
+    <div class="row" *ngIf="error">
+      <ngb-alert type="danger" [dismissible]="false">
+        {{ error }}
+      </ngb-alert>
+    </div>
+    <form method="post">
+      <div class="row">
+        <div class="col-4 label">Identifiant</div>
+        <div class="col-6">
+          <input
+            type="text"
+            class="form-control"
+            id="login"
+            name="login"
+            [(ngModel)]="login"
+          />
+        </div>
+      </div>
+      <br />
+      <div class="row">
+        <div class="col-4 label">Mot de passe</div>
+        <div class="col-6">
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            [(ngModel)]="pwd"
+          />
+        </div>
+      </div>
+      <br />
+      <div class="button">
+        <input
+          type="button"
+          name="submit"
+          value="Valider"
+          (click)="authenticate()"
+        />
+      </div>
+    </form>
+  </main>
+</div>

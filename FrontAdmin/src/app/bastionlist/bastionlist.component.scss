@@ -1,0 +1,55 @@
+.bastionlist {
+  //color: white;
+  background: black;
+}
+
+
+ngx-datatable {
+    border: 1px #000000 solid;
+}
+
+datatable-header {
+    display: flex;
+    padding: 10px 0px;
+    align-items: center;
+    background: rgb(220, 220, 220, 0.671);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+  datatable-body-cell {
+    padding: 10px 15px;
+    border: 1px #56215c37 solid;
+  }
+
+  ul.pager li {
+    margin: 0 1px !important;
+  }
+
+
+  datatable-footer {
+    padding: 0px 15px;
+    background: rgb(220, 220, 220, 0.671);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+
+.dark-modal .modal-content {
+    background-color: #292b2c;
+    color: white;
+}
+.dark-modal .close {
+    color: rgb(0, 0, 0);
+}
+.light-blue-backdrop {
+    background-color: #5cb3fd;
+}
+
+.ptb-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}

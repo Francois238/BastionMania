@@ -1,0 +1,122 @@
+<div class="row">
+  <h3>Gestion des bastions</h3>
+</div>
+<div class="row">
+  <div class="col-sm-1">
+    <a
+      class="btn btn-sm btn-primary btn-block"
+      type="button"
+      (click)="openWindowCustomClass(addEditBastion)"
+    >
+      Nouveau bastion</a
+    >
+  </div>
+  <div class="col-sm-8"></div>
+  <div class="col-sm-3"></div>
+</div>
+<div>
+  <ngx-datatable
+    class="border data-table dt-chk"
+    [messages]="{
+      emptyMessage: 'Aucune donnée a afficher',
+      totalMessage: 'Total',
+      selectedMessage: 'Sélectionné'
+    }"
+    [loadingIndicator]="true"
+    [columns]="columns"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    rowHeight="auto"
+    [limit]="6"
+    [rows]="rows"
+    columnMode="force"
+  >
+    <ngx-datatable-column
+      *ngFor="let sHeader of columns"
+      name="{{ sHeader.name }}"
+      prop="{{ sHeader.prop }}"
+    >
+    </ngx-datatable-column>
+    <ngx-datatable-column
+      [resizeable]="false"
+      [width]="310"
+      [sortable]="false"
+      [canAutoResize]="false"
+      [draggable]="false"
+      name="Actions"
+      prop="action"
+      class="text-center"
+    >
+      <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+        <a
+          class="btn btn-sm btn-primary btn-block"
+          type="button"
+          href="javascript:"
+          (click)="openWindowCustomClass(addEditBastion, 'id_bastion')"
+        >
+          Editer le bastion </a
+        >&nbsp;&nbsp;
+        <a
+          class="btn btn-sm btn-secondary btn-block"
+          type="button"
+          href="javascript:"
+        >
+          Acceder au bastion
+        </a>
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
+</div>
+
+<!-- Debut de la modal pour l'edition du bastion -->
+<ng-template #addEditBastion let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Modification du bastion</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <div class="row ptb-5">
+      <div class="col-4">Nom :</div>
+      <div class="col-8">
+        <input
+          type="text"
+          class="form-control"
+          name="name"
+          placeholder="Le nom du bastion"
+        />
+      </div>
+    </div>
+    <div class="row ptb-5">
+      <div class="col-4">Prenom :</div>
+      <div class="col-8">
+        <input
+          type="text"
+          class="form-control"
+          name="prenom"
+          placeholder="Le Prénom du bastion"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-sm btn-light"
+      (click)="modal.close('Close click')"
+    >
+      Close
+    </button>
+    <button
+      type="button"
+      class="btn btn-sm btn-primary"
+      (click)="saveEditBastion(addEditBastion)"
+    >
+      Sauvegarder
+    </button>
+  </div>
+</ng-template>
