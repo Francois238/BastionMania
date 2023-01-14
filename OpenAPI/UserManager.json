@@ -90,15 +90,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "firstName": {
+                  "password": {
                     "type": "string"
-                  },
-                  "lastName": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string",
-                    "description": "If a new email is given, the user's email verified property will be set to false."
                   }
                 }
               },
@@ -198,6 +191,45 @@
         },
         "description": "Get all users"
       }
+    },
+    "/users/{userId}/otp": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "userId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-users-userId-otp",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "operationId": "get-logout"
+      }
     }
   },
   "components": {
@@ -205,7 +237,6 @@
       "User": {
         "title": "User",
         "type": "object",
-        "description": "",
         "examples": [],
         "x-internal": true,
         "properties": {
@@ -213,42 +244,37 @@
             "type": "integer",
             "description": "Unique identifier for the given user."
           },
-          "firstName": {
+          "name": {
             "type": "string"
           },
-          "lastName": {
+          "last_name": {
             "type": "string"
           },
-          "email": {
+          "mail": {
             "type": "string",
             "format": "email"
-          },
-          "firstLogin": {
-            "type": "boolean"
           }
         },
         "required": [
           "id",
-          "firstName",
-          "lastName",
-          "email",
-          "firstLogin"
+          "name",
+          "last_name",
+          "mail"
         ]
       },
       "UserEnroll": {
         "title": "UserEnroll",
         "type": "object",
-        "description": "",
         "examples": [],
         "x-internal": true,
         "properties": {
-          "firstName": {
+          "name": {
             "type": "string"
           },
-          "lastName": {
+          "last_name": {
             "type": "string"
           },
-          "email": {
+          "mail": {
             "type": "string",
             "format": "email"
           },
@@ -258,9 +284,9 @@
           }
         },
         "required": [
-          "firstName",
-          "lastName",
-          "email",
+          "name",
+          "last_name",
+          "mail",
           "password"
         ]
       }
