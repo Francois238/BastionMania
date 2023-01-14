@@ -7,7 +7,7 @@ CREATE TABLE "admins" (
     password BYTEA NOT NULL,
     change BOOLEAN NOT NULL,
     otp TEXT,
-    optactive BOOLEAN NOT NULL
+    otpactive BOOLEAN NOT NULL
 );
 
 
@@ -19,5 +19,5 @@ CREATE TABLE "users" (
     password BYTEA NOT NULL,
     change BOOLEAN NOT NULL,
     otp TEXT,
-    optactive BOOLEAN NOT NULL
+    otpactive BOOLEAN NOT NULL
 );
