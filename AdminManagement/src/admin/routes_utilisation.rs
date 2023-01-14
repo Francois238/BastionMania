@@ -74,7 +74,7 @@ async fn create_admin(session: Session, admin: web::Json<AdminMessage>) -> Resul
 
 }
 
-#[get("/admins/{id}/otp")]
+#[post("/admins/{id}/otp")]
 async fn ajout_2fa(session: Session,id: web::Path<i32>) -> Result<HttpResponse, ApiError> { //Fct pour ajouter la 2fa
 
     println!("ok0");
