@@ -9,7 +9,7 @@ diesel::table! {
         password -> Bytea,
         change -> Bool,
         otp -> Nullable<Text>,
-        optactive -> Bool,
+        otpactive -> Bool,
     }
 }
 
@@ -22,7 +22,7 @@ diesel::table! {
         password -> Bytea,
         change -> Bool,
         otp -> Nullable<Text>,
-        optactive -> Bool,
+        otpactive -> Bool,
     }
 }
 

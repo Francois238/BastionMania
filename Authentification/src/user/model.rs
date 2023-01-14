@@ -47,7 +47,7 @@ pub struct UserInserable { //Structure inseree en BDD pour ajouter un user
     pub mail : String,
     pub password: Vec<u8>,
     pub change : bool,
-    pub optactive : bool
+    pub otpactive : bool
 }
 
 #[derive( Queryable)]
@@ -59,7 +59,7 @@ pub struct User { //Structure recupere par requete BDD
     pub password: Vec<u8>,
     pub change : bool,
     pub otp : Option<String>,
-    pub optactive : bool
+    pub otpactive : bool
 }
 
 #[derive(Serialize, Deserialize)]
@@ -69,7 +69,7 @@ pub struct UserEnvoye { //Structure a envoye dans la reponse http de l'admin
     pub last_name : String,
     pub mail: String,
     pub change : bool,
-    pub optactive : bool
+    pub otpactive : bool
 }
 
 
@@ -180,7 +180,7 @@ pub fn chiffrer_password(password : String) -> Vec<u8> { //Fct pour chiffrer le 
             mail : user.mail,
             password : chiffrer_password(user.password),
             change : false,  //on creer le user donc mot de passe par defaut
-            optactive : false
+            otpactive : false
         }
 
 
@@ -198,8 +198,8 @@ impl UserEnvoye {
             name: user.name, 
             last_name: user.last_name, 
             mail: user.mail.to_string(), 
-            change : user.change, optactive : 
-            user.optactive 
+            change : user.change, 
+            otpactive : user.otpactive 
         }
     }
     
@@ -287,7 +287,7 @@ impl User {
 
         let admin = diesel::update(users::table)
             .filter(users::id.eq(id))
-            .set((users::otp.eq(graine), users::optactive.eq(true)))  //on ajoute la graine de l otp
+            .set((users::otp.eq(graine), users::otpactive.eq(true)))  //on ajoute la graine de l otp
             .get_result(&mut conn)?;
 
         Ok(admin)
