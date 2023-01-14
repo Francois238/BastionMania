@@ -128,7 +128,7 @@ async fn update(session: Session,id: web::Path<i32>, cred: web::Json<UserChangeC
 
 }
 
-#[get("/users/{id}/otp")]
+#[post("/users/{id}/otp")]
 async fn ajout_2fa(session: Session,id: web::Path<i32>) -> Result<HttpResponse, ApiError> { //Fct pour activer la 2fa
 
     let mut claims = verifier_session_simple(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
