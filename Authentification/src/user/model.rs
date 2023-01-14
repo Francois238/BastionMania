@@ -161,7 +161,7 @@ pub fn chiffrer_password(password : String) -> Vec<u8> { //Fct pour chiffrer le 
             mail : user.mail.clone(),
             admin : false,
             change_password : user.change,
-            mfa_active : user.optactive,
+            mfa_active : user.otpactive,
             complete_authentication : verif,
             iat : iat,
             exp : exp,

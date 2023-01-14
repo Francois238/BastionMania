@@ -129,7 +129,7 @@ pub struct AdminSupprimer { //Structure recu dans le JSON pour supprimmer admin
             mail : admin.mail.clone(),
             admin : true,
             change_password : admin.change,
-            mfa_active : admin.optactive,
+            mfa_active : admin.otpactive,
             complete_authentication : verif,
             iat : iat,
             exp : exp,
