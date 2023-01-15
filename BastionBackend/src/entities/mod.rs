@@ -1,4 +1,8 @@
 pub mod bastion;
+pub mod users;
 
-pub use bastion::Bastion;
-pub use bastion::BastionInsertable;
+pub use bastion::*;
+
+
+
+pub use users::*;

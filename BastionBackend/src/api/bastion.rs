@@ -13,13 +13,14 @@ use actix_web::{get,
 use crate::api::*;
 use crate::api_error::ApiError;
 use crate::db;
-use crate::services::{generate_freenetid, generate_freeport};
+use crate::services::{generate_bastion_freenetid, generate_bastion_freeport, generate_user_freenetid};
 //use derive_more::{Display};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use repository::*;
-use crate::entities::{Bastion, BastionInsertable};
-use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI};
+use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
+use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation};
+
 
 
 /*
@@ -69,15 +70,16 @@ pub async fn create_bastion( bastion: web::Json<BastionModification>) -> Result<
     let liste_bastions=Bastion::find_all()?;
     //generation d'un port libre pour le bastion
     let ports: Vec<i32> = (&liste_bastions).into_iter().map(|b| b.port ).collect();
-    let port = generate_freeport(&ports);
+    let port = generate_bastion_freeport(&ports);
     //generation d'un net_id libre pour le bastion
     let net_ids: Vec<i32> = liste_bastions.into_iter().map(|b| b.net_id ).collect();
-    let net_id = generate_freenetid(&net_ids);
+    let net_id = generate_bastion_freenetid(&net_ids);
 
     //creation du bastion
-    let bastion_insertion: BastionInsertable = BastionInsertable{
+    let bastion_insertion = BastionInsertable{
         name: bastion.name.clone(),
         subnet_cidr: bastion.subnet_cidr.clone(),
+        agent_endpoint: bastion.agent_endpoint.clone(),
         pubkey: bastion_pub.to_base64(),
         port,
         net_id,
@@ -164,47 +166,62 @@ pub async fn update_server_config(bastion_id:web::Path<i32>, modifs:web::Json<Wi
 //  /bastion/{bastion_id}/users ===================================================================
 
 #[get("/bastion/{bastion_id}/users")]
-pub async fn get_users() -> impl Responder{
-    HttpResponse::Ok().body("liste_users")
+pub async fn get_users(bastion_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
+    let users = Users::find_users_bastion(bastion_id.into_inner())?;
+    Ok(HttpResponse::Ok().json(users))
 }
 
 #[post("/bastion/{bastion_id}/users")]
-pub async fn create_users() -> impl Responder{
-    HttpResponse::Ok().body("création_droits_accés")
+pub async fn create_users(users: web::Json<UsersCreation>, bastion_id:web::Path<i32> ) -> Result<HttpResponse, ApiError>{
+
+    let bastion_id = bastion_id.into_inner();
+
+    let liste_users=Users::find_users_bastion(bastion_id)?;
+
+    let net_ids: Vec<i32> = liste_users.into_iter().map(|b| b.net_id ).collect();
+    let net_id = generate_bastion_freenetid(&net_ids);
+
+    let users_insertion = Users {
+        id: users.id.clone(),
+        bastion_id,
+        wireguard: false,
+        net_id,
+    };
+
+    let users = Users::create_users( users_insertion)?;
+
+    let retour_api= RetourAPI{
+        success: true,
+        message:  "Bastion créé".to_string(),
+        data: ConfigUser{
+            id: users.id.clone(),
+            net_id,
+        }
+    };
+
+
+    Ok(HttpResponse::Ok().json(retour_api))
 }
 
 // /bastion/{bastion_id}/users/{user_id} =========================================================
 
 #[get("/bastion/{bastion_id}/users/{user_id}")]
-pub async fn get_a_user() -> impl Responder{
-    HttpResponse::Ok().body("user_x")
-}
-
-#[patch("/bastion/{bastion_id}/users/{user_id}")]
-pub async fn modify_a_user() -> impl Responder{
-    HttpResponse::Ok().body("modification_user_x")
+pub async fn get_a_user(user_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
+    let users = Users::find_un_user(user_id.into_inner())?;
+    Ok(HttpResponse::Ok().json(users))
 }
 
 #[delete("/bastion/{bastion_id}/users/{user_id}")]
-pub async fn delete_a_user() -> impl Responder{
-    HttpResponse::Ok().body("delete_user_x")
+pub async fn delete_a_user(user_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
+    let user_suppr = Users::delete_un_user(user_id.into_inner())?;
+    Ok(HttpResponse::Ok().json("supprimé"))
 }
 
-// /bastion/{bastion_id}/users/{user_id}/wireguard" ===============================================
+// /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
 
-#[get("/bastion/{bastion_id}/users/{user_id}/wireguard")]
-pub async fn get_user_wireguard() -> impl Responder{
+#[get("/bastion/{bastion_id}/users/{user_id}/generate_wireguard")]
+pub async fn get_user_wireguard_status() -> impl Responder{
     HttpResponse::Ok().body("wireguard_user_x_info")
-}
-
-#[patch("/bastion/{bastion_id}/users/{user_id}/wireguard")]
-pub async fn modify_user_wireguard() -> impl Responder{
-    HttpResponse::Ok().body("wireguard_user_x_modified")
-}
-
-#[delete("/bastion/{bastion_id}/users/{user_id}/wireguard")]
-pub async fn delete_user_wireguard() -> impl Responder{
-    HttpResponse::Ok().body("wireguard_user_x_severed")
 }
 
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
@@ -214,6 +231,12 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(update_a_bastion);
     cfg.service(find_a_bastion);
     cfg.service(delete_a_bastion);
+
+    cfg.service(get_users);
+    cfg.service(create_users);
+
+    cfg.service(get_a_user);
+    cfg.service(delete_a_user);
 /*
     cfg.service(find_server_config); 
     cfg.service(update_server_config); */

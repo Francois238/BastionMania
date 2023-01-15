@@ -4,9 +4,9 @@ use std::env;
 //use crate::schema::to_user_config::publikey;
 use crate::{api_error::ApiError};
 use crate::db;
-use crate::schema::{bastion};
+use crate::schema::{bastion, users};
 use crate::model::{BastionModification};
-use crate::entities::{Bastion, BastionInsertable};
+use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
 use diesel::query_dsl::RunQueryDsl;
 use wireguard_keys;
 use actix_web::Result;
@@ -15,6 +15,7 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use time::{OffsetDateTime};
 use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
+
 
 
 impl Bastion {
@@ -51,13 +52,13 @@ impl Bastion {
 
         let name = modifications.name;
         let subnet_cidr = modifications.subnet_cidr;
-        let endpoint_port = modifications.agent_endpoint;
+        let agent_endpoint = modifications.agent_endpoint;
 
         let bastion = diesel::update(bastion::table)
             .filter(bastion::id.eq(id))
             .set((bastion::name.eq(name),
                   bastion::subnet_cidr.eq(subnet_cidr),
-                  bastion::endpoint_port.eq(endpoint_port)))
+                  bastion::agent_endpoint.eq(agent_endpoint)))
             .get_result(&mut conn)?;
 
         Ok(bastion)
@@ -74,6 +75,52 @@ impl Bastion {
 
         Ok(bastion)
     }
+}
+
+// /bastion/{bastion_id}/users
+
+impl Users{
+    pub fn find_users_bastion(_bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+        let mut conn = db::connection()?;
+        let des_users = users::table
+            .filter(users::bastion_id.eq(_bastion_id))
+            .load::<Users>(&mut conn)?;
+        Ok(des_users)
+
+    }
+
+    pub fn create_users(users: Users) -> Result<Users, ApiError> {
+        let mut conn = db::connection()?;
+        let newusers: Users = diesel::insert_into(users::table)
+            .values(users)
+            .get_result(&mut conn)?;
+        Ok(newusers)
+    }
+
+    // /bastion/{bastion_id}/users/{user_id} endpoint =================================================================
+
+    pub fn find_un_user(id: i32) -> Result<Users, ApiError> {
+        let mut conn = db::connection()?;
+
+        let user = users::table
+            .filter(users::id.eq(id))
+            .first(&mut conn)?;
+
+        Ok(user)
+    }
+
+    pub fn delete_un_user(id: i32) -> Result<usize, ApiError> {
+        let mut conn = db::connection()?;
+
+        let user = diesel::delete(
+            users::table
+                .filter(users::id.eq(id))
+        )
+            .execute(&mut conn)?;
+
+        Ok(user)
+    }
+
 }
 
 
