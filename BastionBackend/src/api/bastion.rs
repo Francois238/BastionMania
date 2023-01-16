@@ -17,38 +17,11 @@ use crate::services::{generate_bastion_freenetid, generate_bastion_freeport, gen
 //use derive_more::{Display};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
+use actix_session::Session;
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
-use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation};
+use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims};
 
-
-
-/*
-#[derive(Debug, Display)]
-pub enum TaskError {
-    NonAuthentifie,
-    NonAutorise,
-    Inexistant
-
-}
-
-impl ResponseError for TaskError {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code())
-            .insert_header(ContentType::json())
-            .body(self.to_string())
-    }
-
-    fn status_code(&self) -> StatusCode {
-        match self {
-            TaskError::NonAuthentifie => StatusCode::UNAUTHORIZED,
-            TaskError::NonAutorise => StatusCode::FORBIDDEN,
-            TaskError::Inexistant => StatusCode::NOT_FOUND,
-
-        }
-    }
-}
-*/
 
 // /bastion =======================================================================================
 
@@ -59,7 +32,9 @@ pub async fn get_bastion() -> Result<HttpResponse, ApiError>{
 }
 
 #[post("/bastion")]
-pub async fn create_bastion( bastion: web::Json<BastionModification>) -> Result<HttpResponse, ApiError>{
+pub async fn create_bastion( bastion: web::Json<BastionModification>, session: Session) -> Result<HttpResponse, ApiError>{
+
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
 
     //generation pair de clé pour agent et bastion
     let agent_priv = wireguard_keys::Privkey::generate();
@@ -107,79 +82,56 @@ pub async fn create_bastion( bastion: web::Json<BastionModification>) -> Result<
     };
 
     Ok(HttpResponse::Ok().json(retour_api))
-
-
-
+    
 }
 
 // /bastion/{bastion_id} ==========================================================================
 
 #[get("/bastion/{bastion_id}")]
-pub async fn find_a_bastion(bastion_id:  web::Path<i32>) -> Result<HttpResponse, ApiError>{
-    let bastion_affiche = Bastion::find_un_bastion(bastion_id.into_inner())?;
+pub async fn find_a_bastion(bastion_id:  web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
+    let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+    let bastion_id = bastion_id.into_inner();
+    let authorisation = Bastion::verification_appartenance( claims.id, bastion_id).map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    
+    let bastion_affiche = Bastion::find_un_bastion(bastion_id)?;
     Ok(HttpResponse::Ok().json(bastion_affiche))
 
 }
 
 #[patch("/bastion/{bastion_id}")]
-pub async fn update_a_bastion(bastion_id:web::Path<i32>, modifs:web::Json<BastionModification>) -> Result<HttpResponse, ApiError>{
+pub async fn update_a_bastion(bastion_id:web::Path<i32>, modifs:web::Json<BastionModification>, session: Session) -> Result<HttpResponse, ApiError>{
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let bastion_modif = Bastion::update_un_bastion(bastion_id.into_inner(), modifs.into_inner())?;
     Ok(HttpResponse::Ok().json(bastion_modif))
 }
 
 #[delete("/bastion/{bastion_id}")]
-pub async fn delete_a_bastion(bastion_id:web::Path<i32>) -> Result<HttpResponse, ApiError>{
+pub async fn delete_a_bastion(bastion_id:web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let bastion_suppr = Bastion::delete_un_bastion(bastion_id.into_inner())?;
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 
-// /bastion/{bastion_id}/wireguard ================================================================
-/*
-#[get("/bastion/{bastion_id}/wireguard")]
-pub async fn find_server_config(bastion_id:  web::Path<i32>) -> Result<HttpResponse, ApiError>{
-
-    let bastion = find_un_bastion(bastion_id.into_inner())?;
-    match bastion.wireguard_id{
-        Some(value) => {
-            let serveur_conf = get_server_config(value)?;
-            Ok(HttpResponse::Ok().json(serveur_conf))
-
-        }
-
-        None => Err(ApiError::new(400, "pas de bastion".to_string()))
-    }
-}
-
-#[patch("/bastion/{bastion_id}/wireguard")]
-pub async fn update_server_config(bastion_id:web::Path<i32>, modifs:web::Json<WireguardServerModification>) -> Result<HttpResponse, ApiError>{
-
-    let bastion = find_un_bastion(bastion_id.into_inner())?;
-    match bastion.wireguard_id{
-        Some(value) =>{
-            let server_modif = patch_server_config(value, modifs.into_inner())?;
-            Ok(HttpResponse::Ok().json(server_modif))            
-        }
-        None => Err(ApiError { status_code: (400), message: ("pas de bastion".to_string()) })
-    }
-}
-*/
 //  /bastion/{bastion_id}/users ===================================================================
 
 #[get("/bastion/{bastion_id}/users")]
 pub async fn get_users(bastion_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let users = Users::find_users_bastion(bastion_id.into_inner())?;
     Ok(HttpResponse::Ok().json(users))
 }
 
 #[post("/bastion/{bastion_id}/users")]
-pub async fn create_users(users: web::Json<UsersCreation>, bastion_id:web::Path<i32> ) -> Result<HttpResponse, ApiError>{
+pub async fn create_users(users: web::Json<UsersCreation>, bastion_id:web::Path<i32>, session: Session ) -> Result<HttpResponse, ApiError>{
+
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
 
     let bastion_id = bastion_id.into_inner();
 
     let liste_users=Users::find_users_bastion(bastion_id)?;
 
     let net_ids: Vec<i32> = liste_users.into_iter().map(|b| b.net_id ).collect();
-    let net_id = generate_bastion_freenetid(&net_ids);
+    let net_id = generate_user_freenetid(&net_ids);
 
     let users_insertion = Users {
         id: users.id.clone(),
@@ -206,13 +158,15 @@ pub async fn create_users(users: web::Json<UsersCreation>, bastion_id:web::Path<
 // /bastion/{bastion_id}/users/{user_id} =========================================================
 
 #[get("/bastion/{bastion_id}/users/{user_id}")]
-pub async fn get_a_user(user_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
+pub async fn get_a_user(user_id: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let users = Users::find_un_user(user_id.into_inner())?;
     Ok(HttpResponse::Ok().json(users))
 }
 
 #[delete("/bastion/{bastion_id}/users/{user_id}")]
-pub async fn delete_a_user(user_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
+pub async fn delete_a_user(user_id: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let user_suppr = Users::delete_un_user(user_id.into_inner())?;
     Ok(HttpResponse::Ok().json("supprimé"))
 }
@@ -220,7 +174,8 @@ pub async fn delete_a_user(user_id: web::Path<i32>) -> Result<HttpResponse, ApiE
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
 
 #[get("/bastion/{bastion_id}/users/{user_id}/generate_wireguard")]
-pub async fn get_user_wireguard_status() -> impl Responder{
+pub async fn get_user_wireguard_status(session: Session) -> impl Responder{
+    let _claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     HttpResponse::Ok().body("wireguard_user_x_info")
 }
 

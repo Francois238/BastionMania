@@ -5,17 +5,101 @@ use std::env;
 use crate::{api_error::ApiError};
 use crate::db;
 use crate::schema::{bastion, users};
-use crate::model::{BastionModification};
+use crate::model::{BastionModification, Claims};
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
 use diesel::query_dsl::RunQueryDsl;
 use wireguard_keys;
+use actix_session::Session;
 use actix_web::Result;
 use diesel::associations::HasTable;
 use diesel::prelude::*;
+use diesel::row::NamedRow;
 use serde::{Deserialize, Serialize};
 use time::{OffsetDateTime};
 use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
 
+
+impl Claims{
+    pub fn verifier_session_admin(session : &Session) -> Option<Claims> { //Fct pour verifier valider du JWT
+
+        let session = session.get::<String>("claim");
+
+        let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
+
+        match session {
+
+            Ok(data_session) => {
+
+                match data_session {
+
+                    Some(data) =>{
+                        let token_message = decode::<Claims>(&data, &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256));
+
+                        match token_message{
+                            Ok(claim) => {
+                                let my_claims = claim.claims;
+
+                                if my_claims.admin ==true && my_claims.change_password == true &&  my_claims.complete_authentication==true{
+                                    Some(my_claims)
+                                }
+                                else{
+                                    None
+                                }
+                            },
+                            _=> None
+                        }
+
+                    },
+                    _ => None
+                }
+
+
+            },
+            _ => None
+        }
+    }
+
+    pub fn verifier_session_user(session : &Session) -> Option<Claims> { //Fct pour verifier valider du JWT
+
+        let session = session.get::<String>("claim");
+
+        let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
+
+        match session {
+
+            Ok(data_session) => {
+
+                match data_session {
+
+                    Some(data) =>{
+                        let token_message = decode::<Claims>(&data, &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256));
+
+                        match token_message{
+                            Ok(claim) => {
+                                let my_claims = claim.claims;
+
+                                if my_claims.admin ==false && my_claims.change_password == true &&  my_claims.complete_authentication==true{
+                                    Some(my_claims)
+                                }
+                                else{
+                                    None
+                                }
+                            },
+                            _=> None
+                        }
+
+                    },
+                    _ => None
+                }
+
+
+            },
+            _ => None
+        }
+    }
+
+
+}
 
 
 impl Bastion {
@@ -75,6 +159,18 @@ impl Bastion {
 
         Ok(bastion)
     }
+
+    pub fn verification_appartenance(user_id: i32, bastion_id: i32) -> Result<bool, ApiError> {
+
+        let mut conn = db::connection()?;
+
+        let users: Vec<Users> = users::table
+                .filter(users::id.eq(user_id))
+                .filter(users::bastion_id.eq(bastion_id))
+                .load::<Users>(&mut conn)?;
+
+        Ok(users.is_empty())
+    }
 }
 
 // /bastion/{bastion_id}/users
@@ -123,143 +219,4 @@ impl Users{
 
 }
 
-
-// /bastion/{bastion_id}/wireguard ================================================================
-/*
-pub fn get_user_config(id: i32) -> Result<WireguardUserConf, ApiError> {
-
-    let mut conn = db::connection()?;
-
-    let form = to_user_config::table
-        .filter(to_user_config::id.eq(id))
-        .first(&mut conn)?;
-
-    Ok(form)
-}
-
-pub fn patch_user_config(id: i32, modifications: WireguardUserConfModification) -> Result<WireguardUserConf, ApiError> {
-    let mut conn = db::connection()?;
-
-    let ip = modifications.ip;
-
-    let form = diesel::update(to_user_config::table)
-        .filter(to_user_config::id.eq(id))
-        .set((to_user_config::ip.eq(ip)))
-        .get_result(&mut conn)?;
-
-    Ok(form)
-}
-
-// /bastion/{bastion_id}/user =====================================================================
-// /bastion/{bastion_id}/user/{user_id} ===========================================================
-// /bastion/{bastion_id}//user/{user_id}/wireguard ================================================
-
-
-
-//fin de fichier
-
-/*
-pub fn verifier_session_admin(session : &Session) -> Option<Claims> { //Fct pour verifier valider du JWT
-
-    let session = session.get::<String>("claim");
-
-    let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
-
-    match session {
-
-        Ok(data_session) => {
-
-            match data_session {
-
-                Some(data) =>{
-
-                    let token_message = decode::<Claims>(&data, &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256));
-
-                    match token_message{
-                        Ok(claim) => {
-                            let my_claims = claim.claims;
-
-                            if my_claims.admin ==true  && my_claims.change_password == true &&  my_claims.complete_authentication==true{
-                                Some(my_claims)
-                            }
-                            else{
-                                None
-                            }
-                        },
-                        _=> None
-                    }
-
-                },
-                _ => None
-            }
-
-
-        },
-        _ => None
-    }
-}
-
-pub fn verifier_session_user(session : &Session) -> Option<Claims> { //Fct pour verifier valider du JWT
-
-    let session = session.get::<String>("claim");
-
-    let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
-
-    match session {
-
-        Ok(data_session) => {
-
-            match data_session {
-
-                Some(data) =>{
-
-                    let token_message = decode::<Claims>(&data, &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256));
-
-                    match token_message{
-                        Ok(claim) => {
-                            let my_claims = claim.claims;
-
-                            if my_claims.admin ==false  && my_claims.change_password == true &&  my_claims.complete_authentication==true{
-                                Some(my_claims)
-                            }
-                            else{
-                                None
-                            }
-                        },
-                        _=> None
-                    }
-
-                },
-                _ => None
-            }
-
-
-        },
-        _ => None
-    }
-}
-*/
-mod jwt_numeric_date {
-    //! Custom serialization of OffsetDateTime to conform with the JWT spec (RFC 7519 section 2, "Numeric Date")
-    use serde::{self, Deserialize, Deserializer, Serializer};
-    use time::OffsetDateTime;
-
-    /// Serializes an OffsetDateTime to a Unix timestamp (milliseconds since 1970/1/1T00:00:00T)
-    pub fn serialize<S>(date: &OffsetDateTime, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let timestamp = date.unix_timestamp();
-        serializer.serialize_i64(timestamp)
-    }
-
-    /// Attempts to deserialize an i64 and use as a Unix timestamp
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<OffsetDateTime, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        OffsetDateTime::from_unix_timestamp(i64::deserialize(deserializer)?)
-            .map_err(|_| serde::de::Error::custom("invalid Unix timestamp value"))
-    }
-
-}*/
+// /bastion/{bastion_id}/users/{user_id}/generate_wireguard
