@@ -12,11 +12,13 @@ use wireguard_keys;
 use actix_session::Session;
 use actix_web::Result;
 use diesel::associations::HasTable;
+use diesel::dsl::Update;
 use diesel::prelude::*;
 use diesel::row::NamedRow;
 use serde::{Deserialize, Serialize};
 use time::{OffsetDateTime};
 use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
+use crate::schema::users::wireguard;
 
 
 impl Claims{
@@ -220,3 +222,70 @@ impl Users{
 }
 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard
+
+pub fn build_client_address(bastion_id:i32, user_id: i32) -> Result<String, ApiError> {
+    let mut conn = db::connection()?;
+
+    let bastion = bastion::table
+        .filter(bastion::id.eq(bastion_id))
+        .first(&mut conn)?;
+
+    let user = users::table
+        .filter(users::id.eq(user_id))
+        .first(&mut conn)?;
+
+    let mut client_address = "10.10.";
+    client_address.push_str(bastion.net_id.clone().as_str());
+    client_address.push_str(".");
+    client_address.push_str(user.net_id.clone().as_str());
+
+
+    Ok(client_address.to_string())
+}
+
+pub fn build_endpoint_user(bastion_ip: String, bastion_id: i32) -> Result<String, ApiError> {
+
+    let bastion = bastion::table
+        .filter(bastion::id.eq(bastion_id))
+        .first(&mut conn)?;
+
+    let mut endpoint_user = bastion_ip;
+    endpoint_user.push_str(":");
+    endpoint_user.push_str(bastion.port.clone().as_str());
+
+    Ok(endpoint_user.to_string())
+}
+
+pub fn get_bastion_public_key(bastion_id: i32) -> Result<String, ApiError> {
+    let mut conn = db::connection()?;
+
+    let bastion = bastion::table
+        .filter(bastion::id.eq(bastion_id))
+        .first(&mut conn)?;
+
+    Ok(bastion.pubkey.clone())
+}
+
+pub fn get_bastion_subnet_cidr(bastion_id: i32) -> Result<String, ApiError> {
+    let mut conn = db::connection()?;
+
+    let bastion:Bastion = bastion::table
+        .filter(bastion::id.eq(bastion_id))
+        .first(&mut conn)?;
+
+    Ok(bastion.subnet_cidr.clone())
+}
+
+pub fn update_un_user(user_id: i32) -> Result<Users, ApiError> {
+    let mut conn = db::connection()?;
+
+    let user = diesel::update(users::table)
+        .filter(users::id.eq(user_id))
+        .set((users::wireguard.eq(true)))
+        .get_result(&mut conn)?;
+
+    Ok(user)
+}
+
+
+

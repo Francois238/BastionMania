@@ -1,4 +1,5 @@
 use std::borrow::BorrowMut;
+use std::env;
 use actix_web::{get,
                 post,
                 patch,
@@ -20,7 +21,7 @@ use serde_json::json;
 use actix_session::Session;
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
-use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims};
+use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient};
 
 
 // /bastion =======================================================================================
@@ -115,7 +116,7 @@ pub async fn delete_a_bastion(bastion_id:web::Path<i32>, session: Session) -> Re
 //  /bastion/{bastion_id}/users ===================================================================
 
 #[get("/bastion/{bastion_id}/users")]
-pub async fn get_users(bastion_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
+pub async fn get_users(bastion_id: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let users = Users::find_users_bastion(bastion_id.into_inner())?;
     Ok(HttpResponse::Ok().json(users))
@@ -174,9 +175,49 @@ pub async fn delete_a_user(user_id: web::Path<i32>, session: Session) -> Result<
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
 
 #[get("/bastion/{bastion_id}/users/{user_id}/generate_wireguard")]
-pub async fn get_user_wireguard_status(session: Session) -> impl Responder{
+pub async fn get_user_wireguard_status(session: Session, bastion_id: web::Path<i32>, user_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
-    HttpResponse::Ok().body("wireguard_user_x_info")
+
+    let bastion_id = bastion_id.into_inner();
+    let user_id = user_id.into_inner();
+
+    let client_priv = wireguard_keys::Privkey::generate();
+    let client_pub = client_priv.pubkey();
+
+    let bastion_ip = bastion_ip: env::var("BASTION_IP").expect("BASTION_IP must be set");
+
+    let client_address= build_client_address(bastion_id, user_id)?;
+    let bastion_endpoint = build_endpoint_user(bastion_ip, bastion_id)?;
+
+    let client_public_key = client_pub.to_string();
+    let client_private_key = client_priv.to_string();
+
+    let instance_client = InstanceClient{
+        client_public_key,
+        client_address,
+    };
+
+    //TODO instancier le client dans l'instancieur
+
+    update_un_user(user_id)?;
+
+    let bastion_public_key = get_bastion_public_key(bastion_id)?;
+    let subnet_cidr = get_bastion_subnet_cidr(bastion_id)?;
+
+    RetourAPI{
+        success: true,
+        message:  "accés client créé".to_string(),
+        data: ConfigClient{
+            client_private_key,
+            client_address, //TODO mettre en mutable
+            bastion_public_key,
+            bastion_endpoint,
+            subnet_cidr
+
+        }
+    };
+
+    Ok(HttpResponse::Ok().json(retour_api))
 }
 
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
