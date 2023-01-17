@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bastionbackend-db
+  namespace: bastion
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    pod-name: bastionbackend-db
+  type: ClusterIP
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bastionbackend-db
+  namespace: bastion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod-name: bastionbackend-db
+  template:
+    metadata:
+      labels:
+        pod-name: bastionbackend-db
+    spec:
+      containers:
+        - name: bastionbackend-db
+          image: ghcr.io/bastionmania/bastionmania/bastionbackend-db:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8080
+          volumeMounts:
+            - name: mnt
+              mountPath: /.env
+              subPath: fichier.properties
+      imagePullSecrets:
+        - name: repogithub
+      volumes:
+        - name: mnt
+          configMap:
+            name: gestionbastionbackend.configmap
