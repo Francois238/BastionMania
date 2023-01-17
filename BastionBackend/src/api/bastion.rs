@@ -21,7 +21,7 @@ use serde_json::json;
 use actix_session::Session;
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
-use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient};
+use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient, retourapi};
 
 
 // /bastion =======================================================================================
@@ -184,10 +184,10 @@ pub async fn get_user_wireguard_status(session: Session, bastion_id: web::Path<i
     let client_priv = wireguard_keys::Privkey::generate();
     let client_pub = client_priv.pubkey();
 
-    let bastion_ip = bastion_ip: env::var("BASTION_IP").expect("BASTION_IP must be set");
+    let bastion_ip = "10.10.45.34"; //bastion_ip: env::var("BASTION_IP").expect("BASTION_IP must be set");
 
     let client_address= build_client_address(bastion_id, user_id)?;
-    let bastion_endpoint = build_endpoint_user(bastion_ip, bastion_id)?;
+    let bastion_endpoint = build_endpoint_user(bastion_ip.to_string(), bastion_id)?;
 
     let client_public_key = client_pub.to_base64();
     let client_private_key = client_priv.to_base64();
@@ -204,16 +204,15 @@ pub async fn get_user_wireguard_status(session: Session, bastion_id: web::Path<i
     let bastion_public_key = get_bastion_public_key(bastion_id)?;
     let subnet_cidr = get_bastion_subnet_cidr(bastion_id)?;
 
-    RetourAPI{
+    let retour_api = RetourAPI {
         success: true,
-        message:  "accés client créé".to_string(),
+        message: "accés client créé".to_string(),
         data: ConfigClient{
             client_private_key,
             client_address,
             bastion_public_key,
             bastion_endpoint,
-            subnet_cidr
-
+            subnet_cidr,
         }
     };
 
@@ -233,6 +232,8 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
 
     cfg.service(get_a_user);
     cfg.service(delete_a_user);
+
+    cfg.service(get_user_wireguard_status);
 /*
     cfg.service(find_server_config); 
     cfg.service(update_server_config); */
