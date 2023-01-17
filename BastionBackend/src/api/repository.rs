@@ -276,12 +276,12 @@ pub fn get_bastion_subnet_cidr(bastion_id: i32) -> Result<String, ApiError> {
     Ok(bastion.subnet_cidr.clone())
 }
 
-pub fn update_un_user(user_id: i32) -> Result<Users, ApiError> {
+pub fn update_un_user(user_id: i32, bool: bool) -> Result<Users, ApiError> {
     let mut conn = db::connection()?;
 
     let user = diesel::update(users::table)
         .filter(users::id.eq(user_id))
-        .set((users::wireguard.eq(true)))
+        .set((users::wireguard.eq(bool)))
         .get_result(&mut conn)?;
 
     Ok(user)

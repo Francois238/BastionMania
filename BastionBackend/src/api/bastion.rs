@@ -189,17 +189,17 @@ pub async fn get_user_wireguard_status(session: Session, bastion_id: web::Path<i
     let client_address= build_client_address(bastion_id, user_id)?;
     let bastion_endpoint = build_endpoint_user(bastion_ip, bastion_id)?;
 
-    let client_public_key = client_pub.to_string();
-    let client_private_key = client_priv.to_string();
+    let client_public_key = client_pub.to_base64();
+    let client_private_key = client_priv.to_base64();
 
     let instance_client = InstanceClient{
         client_public_key,
-        client_address,
+        client_address: client_address.clone(),
     };
 
     //TODO instancier le client dans l'instancieur
 
-    update_un_user(user_id)?;
+    update_un_user(user_id, true)?;
 
     let bastion_public_key = get_bastion_public_key(bastion_id)?;
     let subnet_cidr = get_bastion_subnet_cidr(bastion_id)?;
@@ -209,7 +209,7 @@ pub async fn get_user_wireguard_status(session: Session, bastion_id: web::Path<i
         message:  "accés client créé".to_string(),
         data: ConfigClient{
             client_private_key,
-            client_address, //TODO mettre en mutable
+            client_address,
             bastion_public_key,
             bastion_endpoint,
             subnet_cidr
