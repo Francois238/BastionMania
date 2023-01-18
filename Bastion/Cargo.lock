@@ -241,6 +241,7 @@ dependencies = [
  "actix-web",
  "regex",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
