@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: bastion
+  namespace: bastion
 spec:
   containers:
     - image: ghcr.io/bastionmania/bastionmania/bastion:dev
@@ -17,7 +18,7 @@ spec:
         - name: BASTION_PRIVATE_KEY
           value: "KBuirIxRe0d8wVw/juiDE5kkCyWtDRVeQtCE+QLxn0U="
         - name: AGENT_ENDPOINT
-          value: "10.10.40.10:8080"
+          value: "10.10.40.10:60469"
         - name: AGENT_PUBLIC_KEY
           value: "80wp0f9G/CGkYbtMN4ZmFIknOX9mO57BVo6bK5w02Ek="
         - name: NET_CIDR
@@ -34,5 +35,5 @@ spec:
       image: busybox
       command: [ 'sh', '-c', 'echo 1 > /proc/sys/net/ipv4/ip_forward' ]
   imagePullSecrets:
-    - name: regcred
+    - name: repogithub
   restartPolicy: Always
