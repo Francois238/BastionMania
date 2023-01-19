@@ -7,15 +7,18 @@ static PEERS_FILE: &str = "peers.json";
 
 
 pub fn init_peers() -> Result<(), String> {
-    let peers_path = format!("{}{}", PEERS_PATH, PEERS_FILE);
-    let peers_path = Path::new(peers_path.as_str());
-    if peers_path.exists() {
+    let peers_files_path = Path::new(PEERS_PATH);
+    if !peers_files_path.exists() {
+        fs::create_dir_all(PEERS_PATH)
+            .map_err(|e| format!("Error creating peers directory: {}", e))?;
+    }
+    let peers_files_path = format!("{}{}", PEERS_PATH, PEERS_FILE);
+    let peers_files_path = Path::new(peers_files_path.as_str());
+    if peers_files_path.exists() {
         println!("Peers file already exists");
         return Ok(());
     }
     println!("Peers file does not exist, creating it");
-    fs::create_dir_all(PEERS_PATH)
-        .map_err(|e| format!("Error creating peers directory: {}", e))?;
 
     fs::write(format!("{}{}", PEERS_PATH, PEERS_FILE), "[]")
         .map_err(|e| format!("Error creating peers file: {}", e))?;
