@@ -26,8 +26,12 @@ async fn main() -> std::io::Result<()> {
         net_id: bastion_config.net_id,
     };
 
+
+    let peers = persistance::get_peers().unwrap();
+
     wgconfigure::configure_to_agent(config_to_agent);
-    wgconfigure::configure_to_client(config_to_client, vec![]);
+    wgconfigure::configure_to_client(config_to_client, peers);
+
 
 
     HttpServer::new(|| {
