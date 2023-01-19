@@ -1,12 +1,15 @@
-use bastion_mania_bastion::{BastionConfig, WGToAgent, WGToClient};
+use actix_web::{App, HttpServer};
+
+use bastion_mania_bastion::{api, BastionConfig, persistance, WGToAgent, WGToClient};
 use bastion_mania_bastion::startup::startup;
 use bastion_mania_bastion::wgconfigure;
 
-
-fn main() {
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
     let bastion_config = BastionConfig::new();
 
     startup();
+    persistance::init_peers().expect("Erreur création fichier persistance !");
 
     let private_key_path = wgconfigure::write_key_to_file
         ("bastion", "private", &bastion_config.bastion_private_key).unwrap();
@@ -26,7 +29,12 @@ fn main() {
     wgconfigure::configure_to_agent(config_to_agent);
     wgconfigure::configure_to_client(config_to_client, vec![]);
 
-    loop {
-        std::thread::sleep(std::time::Duration::from_secs(10));
-    }
+
+    HttpServer::new(|| {
+        App::new().configure(api::config)
+    })
+        .bind(("0.0.0.0", 9000))?
+        .run()
+        .await
 }
+

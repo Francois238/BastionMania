@@ -44,10 +44,10 @@ pub fn save_peers(peers: Vec<WGPeerConfig>) -> Result<(), String> {
     Ok(())
 }
 
-pub fn add_peer(peer: WGPeerConfig) -> Result<(), String> {
+pub fn add_peer(peer: &WGPeerConfig) -> Result<(), String> {
     let mut peers = get_peers()?;
 
-    peers.push(peer);
+    peers.push(peer.to_owned());
 
     save_peers(peers)?;
 
