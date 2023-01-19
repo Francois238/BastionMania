@@ -5,6 +5,7 @@ use std::path::Path;
 
 static COMMAND_WIREGUARD: &str = "/usr/bin/wireguard-go";
 static COMMAND_MKNOD: &str = "/bin/mknod";
+static COMMAND_IPTABLES: &str = "/sbin/iptables";
 
 fn get_ipv4_forward_status() -> Result<bool> {
     let str_ip4f = fs::read_to_string("/proc/sys/net/ipv4/ip_forward")?;
@@ -17,11 +18,11 @@ fn init_routing() {
     let active = get_ipv4_forward_status().expect("Can't read ipv4 forward status");
     let status = if active {
         "OK"
-    }else{
+    } else {
         "FAIL"
     };
     println!("{}", status);
-    if !active{
+    if !active {
         panic!("IPv4 routing must be enable");
     }
 }
@@ -29,7 +30,7 @@ fn init_routing() {
 fn create_tun_device() {
     // create /dev/net if not exist
     let exist = Path::new("/dev/net").exists();
-    if !exist{
+    if !exist {
         println!("Creating /dev/net");
         fs::create_dir("/dev/net").expect("Can't create /dev/net");
     }
@@ -54,9 +55,25 @@ fn add_wg_interface(name: &str) {
     }
 }
 
+// iptables -t nat -I POSTROUTING -o eth0 -j MASQUERADE
+fn iptables_masquerade() {
+    let output = Command::new(COMMAND_IPTABLES)
+        .arg("-t").arg("nat")
+        .arg("-I").arg("POSTROUTING")
+        .arg("-o").arg("wg-agent")
+        .arg("-j").arg("MASQUERADE")
+        .output()
+        .expect("Failed to execute MASQUERADE");
+    if !output.status.success() {
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        panic!("Can't create ip masquerading");
+    }
+}
+
 pub fn startup() {
     init_routing();
     create_tun_device();
     add_wg_interface("wg-agent");
     add_wg_interface("wg-client");
+    iptables_masquerade();
 }
