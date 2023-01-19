@@ -57,12 +57,13 @@ fn configure_wg_interface(interface: &str, config: WGInterfaceConfig) {
 
 fn load_peers(interface: &str, peers: Vec<WGPeerConfig>) -> Result<(), String> {
     for peer in peers {
-        add_peer(interface, peer)?;
+        add_peer(interface, &peer)?;
     }
     Ok(())
 }
 
-pub fn add_peer(interface: &str, peer: WGPeerConfig) -> Result<(), String> {
+pub fn add_peer(interface: &str, peer: &WGPeerConfig) -> Result<(), String> {
+    let peer = peer.to_owned();
     let output = if let Some(endpoint) = peer.endpoint {
         Command::new(COMMAND_WG)
             .arg("set").arg(interface).arg("peer").arg(peer.public_key)
@@ -98,7 +99,7 @@ pub fn remove_peer(interface: &str, peer_public_key: &str) -> Result<(), String>
 // Ecrit la clé dans un fichier et renvoie le chemin du fichier
 pub fn write_key_to_file(name: &str, keytype: &str, value: &str) -> Result<String, String> {
     let exist = Path::new("/keys").exists();
-    if !exist{
+    if !exist {
         println!("Creating /keys");
         fs::create_dir("/keys").expect("Can't create /keys");
     }
@@ -123,7 +124,7 @@ pub fn configure_to_agent(config: WGToAgent) {
         allowed_ips: config.net_cidr,
         endpoint: Some(config.agent_endpoint),
     };
-    add_peer(interface, peer).unwrap();
+    add_peer(interface, &peer).unwrap();
 }
 
 pub fn configure_to_client(config: WGToClient, peers: Vec<WGPeerConfig>) {

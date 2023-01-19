@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 pub struct WGToAgent{
     pub agent_endpoint: String,
     pub agent_public_key: String,
@@ -15,8 +17,14 @@ pub struct WGInterfaceConfig{
     pub private_key_path: String,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
 pub struct WGPeerConfig{
     pub public_key: String,
     pub endpoint: Option<String>,
     pub allowed_ips: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct WGPeerPublicKey{
+    pub public_key: String,
 }
