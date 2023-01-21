@@ -1,22 +1,21 @@
 {
   "openapi": "3.1.0",
   "x-stoplight": {
-    "id": "6b66789b0d1d1"
+    "id": "5rtjmrxf7j4ik"
   },
   "info": {
-    "title": "UserAPI",
-    "version": "1.0",
-    "description": "API avec laquelle intéragi le front"
+    "title": "BastionManager",
+    "version": "1.0"
   },
   "servers": [
     {
-      "url": "http://bastions/api/v1"
+      "url": "http://localhost:3000"
     }
   ],
   "paths": {
-    "/bastions": {
+    "/bastion": {
       "get": {
-        "summary": "Bastions list",
+        "summary": "Your GET endpoint",
         "tags": [],
         "responses": {
           "200": {
@@ -24,69 +23,55 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Bastion"
-                  }
-                },
-                "examples": {}
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {}
+                  "$ref": "#/components/schemas/Bastion"
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
-        "operationId": "get-bastions",
-        "description": "Get the list of available bastions"
+        "operationId": "get-bastion",
+        "parameters": []
       },
       "post": {
         "summary": "",
-        "operationId": "post-bastions",
+        "operationId": "post-bastion",
         "responses": {
-          "201": {
-            "description": "bastion created",
+          "200": {
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Bastion"
-                      }
-                    }
-                  }
-                },
-                "examples": {}
+                  "$ref": "#/components/schemas/ConfigAgent"
+                }
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
+          "404": {
+            "description": "Not Found"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BastionModification"
+              }
+            }
+          },
+          "description": ""
         }
       }
     },
-    "/bastions/{bastion-id}": {
+    "/bastion/{bastion_id}": {
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "bastion-id",
+          "name": "bastion_id",
           "in": "path",
           "required": true
         }
@@ -96,55 +81,69 @@
         "tags": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bastion"
+                }
+              }
+            }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
+          "404": {
+            "description": "Not Found"
           }
         },
-        "operationId": "get-bastions-bastion-id"
+        "operationId": "get-bastion-bastion_id"
       },
       "patch": {
         "summary": "",
-        "operationId": "patch-bastions-bastion-id",
+        "operationId": "patch-bastion-bastion_id",
         "responses": {
-          "202": {
-            "description": "Accepted"
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Bastion"
+                }
+              }
+            }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BastionModification"
+              }
+            }
           }
         }
       },
       "delete": {
         "summary": "",
-        "operationId": "delete-bastions-bastion-id",
+        "operationId": "delete-bastion-bastion_id",
         "responses": {
-          "204": {
-            "description": "No Content"
+          "200": {
+            "description": "\"supprimé\""
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
+          "404": {
+            "description": "Not Found"
           }
         }
       }
     },
-    "/bastions/{bastion-id}/wireguard": {
+    "/bastion/{bastion_id}/users": {
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "bastion-id",
+          "name": "bastion_id",
           "in": "path",
           "required": true
         }
@@ -154,83 +153,73 @@
         "tags": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users"
+                }
+              }
+            }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
+          "404": {
+            "description": "Not Found"
           }
         },
-        "operationId": "get-bastions-bastion-id"
-      },
-      "patch": {
-        "summary": "",
-        "operationId": "patch-bastions-bastion-id",
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        }
-      }
-    },
-    "/bastions/{bastion-id}/users": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "bastion-id",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Your GET endpoint",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "operationId": "get-bastions-bastion-id-users"
+        "operationId": "get-bastion-bastion_id-users"
       },
       "post": {
         "summary": "",
-        "operationId": "post-bastions-bastion-id-users",
+        "operationId": "post-bastion-bastion_id-users",
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ConfigUser"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserModification"
+              }
+            }
           }
         }
       }
     },
-    "/bastions/{bastion-id}/users/{user-id}": {
+    "/bastion/{bastion_id}/users/{user_id}": {
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "bastion-id",
+          "name": "bastion_id",
           "in": "path",
           "required": true
         },
@@ -238,7 +227,59 @@
           "schema": {
             "type": "string"
           },
-          "name": "user-id",
+          "name": "user_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "operationId": "get-bastion-bastion_id-users-user_id"
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastion-bastion_id-users-user_id",
+        "responses": {
+          "200": {
+            "description": "\"supprimé\""
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/bastion/{bastion_id}/users/{user_id}/wireguard": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "user_id",
           "in": "path",
           "required": true
         }
@@ -254,131 +295,25 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "protocols": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ConfigClient"
                     }
                   }
                 }
               }
             }
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
+          "404": {
+            "description": "Not Found"
           }
         },
-        "operationId": "get-bastions-bastion-id-users-user-id"
-      },
-      "patch": {
-        "summary": "",
-        "operationId": "patch-bastions-bastion-id-users-user-id",
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        }
-      },
-      "delete": {
-        "summary": "",
-        "operationId": "delete-bastions-bastion-id-users-user-id",
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        }
-      }
-    },
-    "/bastions/{bastion-id}/users/{user-id}/wireguard": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "bastion-id",
-          "in": "path",
-          "required": true
-        },
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "user-id",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Your GET endpoint",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WireguardServerConf"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "publicKey": {
-                      "type": "string"
-                    },
-                    "presharedKey": {
-                      "type": "string"
-                    },
-                    "ip": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "operationId": "get-bastions-bastion-id-users-user-id"
-      },
-      "patch": {
-        "summary": "",
-        "operationId": "patch-bastions-bastion-id-users-user-id",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "summary": "",
-        "operationId": "delete-bastions-bastion-id-users-user-id",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "operationId": "get-bastion-bastion_id-users-user_id-wireguard"
       }
     }
   },
@@ -386,90 +321,169 @@
     "schemas": {
       "Bastion": {
         "title": "Bastion",
+        "x-stoplight": {
+          "id": "tddw6lrvd6ztr"
+        },
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "integer"
           },
           "name": {
             "type": "string"
           },
-          "protocols": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "subnet_cidr": {
+            "type": "string"
+          },
+          "agent_endpoint": {
+            "type": "string"
+          },
+          "pubkey": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "net_id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "subnet_cidr",
+          "agent_endpoint",
+          "pubkey",
+          "port",
+          "net_id"
+        ]
+      },
+      "Users": {
+        "title": "User",
+        "x-stoplight": {
+          "id": "e6423xqu0qwe5"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "bastion_id": {
+            "type": "integer"
+          },
+          "wireguard": {
+            "type": "boolean"
+          },
+          "net_id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "bastion_id",
+          "wireguard",
+          "net_id"
+        ]
+      },
+      "ConfigAgent": {
+        "title": "ConfigAgent",
+        "x-stoplight": {
+          "id": "0ms8xmek5bsnl"
+        },
+        "type": "object",
+        "properties": {
+          "privkey": {
+            "type": "string",
+            "description": "de l'agent"
+          },
+          "pubkey": {
+            "type": "string",
+            "description": "du bastion"
+          }
+        },
+        "required": [
+          "privkey",
+          "pubkey"
+        ]
+      },
+      "BastionModification": {
+        "title": "BastionModification",
+        "x-stoplight": {
+          "id": "v5012yxuuz7ey"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "subnet_cidr": {
+            "type": "string"
+          },
+          "agent_endpoint": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "subnet_cidr",
+          "agent_endpoint"
+        ]
+      },
+      "ConfigUser": {
+        "title": "ConfigUser",
+        "x-stoplight": {
+          "id": "pafnkoi4az70m"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "net_id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "net_id"
+        ]
+      },
+      "UserModification": {
+        "title": "UserModification",
+        "x-stoplight": {
+          "id": "e5ckopu2vd3q9"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
           }
         }
       },
-      "WireguardRequest": {
-        "title": "WireguardRequest",
-        "type": "object",
-        "properties": {
-          "generatePrivKey": {
-            "type": "boolean"
-          },
-          "publicKey": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "generatePrivKey"
-        ]
-      },
-      "WireguardClientConf": {
-        "title": "WireguardConf",
+      "ConfigClient": {
+        "title": "ConfigClient",
         "x-stoplight": {
-          "id": "7cicqsscwozgc"
+          "id": "xaymm88bi2der"
         },
         "type": "object",
         "properties": {
-          "privateKey": {
+          "client_private_key": {
             "type": "string"
           },
-          "address": {
+          "client_address": {
             "type": "string"
           },
-          "peerPublicKey": {
+          "bastion_public_key": {
             "type": "string"
           },
-          "peerAllowedIPs": {
+          "bastion_endpoint": {
             "type": "string"
           },
-          "peerEndpoint": {
+          "subnet_cidr": {
             "type": "string"
-          }
-        },
-        "required": [
-          "address",
-          "peerPublicKey",
-          "peerAllowedIPs",
-          "peerEndpoint"
-        ]
-      },
-      "WireguardServerConf": {
-        "type": "object",
-        "properties": {
-          "publicKey": {
-            "type": "string"
-          },
-          "presharedKey": {
-            "type": "string"
-          },
-          "ip": {
-            "type": "string"
-          }
-        },
-        "x-examples": {
-          "example-1": {
-            "publicKey": "string",
-            "presharedKey": "string",
-            "ip": "string"
           }
         }
       }
-    },
-    "responses": {},
-    "requestBodies": {}
+    }
   }
 }
