@@ -33,7 +33,16 @@
           }
         },
         "operationId": "get-bastion",
-        "parameters": []
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "affichage différent selon user ou admin"
+          }
+        ]
       },
       "post": {
         "summary": "",
@@ -62,7 +71,17 @@
             }
           },
           "description": ""
-        }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "admin seulement"
+          }
+        ]
       }
     },
     "/bastion/{bastion_id}": {
@@ -94,7 +113,17 @@
             "description": "Not Found"
           }
         },
-        "operationId": "get-bastion-bastion_id"
+        "operationId": "get-bastion-bastion_id",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "affiche un bastion correspondant à l'URL"
+          }
+        ]
       },
       "patch": {
         "summary": "",
@@ -122,7 +151,17 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "admin seulement"
+          }
+        ]
       },
       "delete": {
         "summary": "",
@@ -134,7 +173,17 @@
           "404": {
             "description": "Not Found"
           }
-        }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "admin seulement"
+          }
+        ]
       }
     },
     "/bastion/{bastion_id}/users": {
@@ -166,7 +215,17 @@
             "description": "Not Found"
           }
         },
-        "operationId": "get-bastion-bastion_id-users"
+        "operationId": "get-bastion-bastion_id-users",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "admin seulement"
+          }
+        ]
       },
       "post": {
         "summary": "",
@@ -210,7 +269,17 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "admin seulement"
+          }
+        ]
       }
     },
     "/bastion/{bastion_id}/users/{user_id}": {
@@ -250,7 +319,17 @@
             "description": "Not Found"
           }
         },
-        "operationId": "get-bastion-bastion_id-users-user_id"
+        "operationId": "get-bastion-bastion_id-users-user_id",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "admin seulement"
+          }
+        ]
       },
       "delete": {
         "summary": "",
@@ -262,7 +341,17 @@
           "404": {
             "description": "Not Found"
           }
-        }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "admin seulement"
+          }
+        ]
       }
     },
     "/bastion/{bastion_id}/users/{user_id}/wireguard": {
@@ -313,7 +402,17 @@
             "description": "Not Found"
           }
         },
-        "operationId": "get-bastion-bastion_id-users-user_id-wireguard"
+        "operationId": "get-bastion-bastion_id-users-user_id-wireguard",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "id",
+            "description": "user seulement"
+          }
+        ]
       }
     }
   },
