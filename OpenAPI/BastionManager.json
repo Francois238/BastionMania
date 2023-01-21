@@ -13,7 +13,7 @@
     }
   ],
   "paths": {
-    "/bastion": {
+    "/bastions": {
       "get": {
         "summary": "Your GET endpoint",
         "tags": [],
@@ -42,7 +42,8 @@
             "name": "id",
             "description": "affichage différent selon user ou admin"
           }
-        ]
+        ],
+        "description": "affiche la liste complète/d'appartenance selon si l'on est admin/user"
       },
       "post": {
         "summary": "",
@@ -81,10 +82,12 @@
             "name": "id",
             "description": "admin seulement"
           }
-        ]
-      }
+        ],
+        "description": "création d'un bastion"
+      },
+      "parameters": []
     },
-    "/bastion/{bastion_id}": {
+    "/bastions/{bastion_id}": {
       "parameters": [
         {
           "schema": {
@@ -123,7 +126,8 @@
             "name": "id",
             "description": "affiche un bastion correspondant à l'URL"
           }
-        ]
+        ],
+        "description": "affiche le bastion d'id {bastion_id}"
       },
       "patch": {
         "summary": "",
@@ -161,7 +165,8 @@
             "name": "id",
             "description": "admin seulement"
           }
-        ]
+        ],
+        "description": "modifie le bastion"
       },
       "delete": {
         "summary": "",
@@ -183,10 +188,11 @@
             "name": "id",
             "description": "admin seulement"
           }
-        ]
+        ],
+        "description": "supprime le bastion"
       }
     },
-    "/bastion/{bastion_id}/users": {
+    "/bastions/{bastion_id}/users": {
       "parameters": [
         {
           "schema": {
@@ -225,7 +231,8 @@
             "name": "id",
             "description": "admin seulement"
           }
-        ]
+        ],
+        "description": "affiche la liste d'utilisateur sur le bastion"
       },
       "post": {
         "summary": "",
@@ -279,10 +286,11 @@
             "name": "id",
             "description": "admin seulement"
           }
-        ]
+        ],
+        "description": "ajout d'un utilisateur au bastion"
       }
     },
-    "/bastion/{bastion_id}/users/{user_id}": {
+    "/bastions/{bastion_id}/users/{user_id}": {
       "parameters": [
         {
           "schema": {
@@ -329,7 +337,8 @@
             "name": "id",
             "description": "admin seulement"
           }
-        ]
+        ],
+        "description": "affiche la description d'un utilisateur"
       },
       "delete": {
         "summary": "",
@@ -351,10 +360,11 @@
             "name": "id",
             "description": "admin seulement"
           }
-        ]
+        ],
+        "description": "supprime l'accés de l'utilisateur"
       }
     },
-    "/bastion/{bastion_id}/users/{user_id}/wireguard": {
+    "/bastions/{bastion_id}/users/{user_id}/wireguard": {
       "parameters": [
         {
           "schema": {
@@ -412,7 +422,8 @@
             "name": "id",
             "description": "user seulement"
           }
-        ]
+        ],
+        "description": "envoie une demande d'accés au bastion"
       }
     }
   },
