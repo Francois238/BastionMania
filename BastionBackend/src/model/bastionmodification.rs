@@ -9,3 +9,9 @@ pub struct BastionModification {
     pub subnet_cidr: String,
     pub agent_endpoint: String,
 }
+
+#[derive(Serialize, Deserialize, Insertable)]
+#[table_name="bastion"]
+pub struct BastionSuppression {
+    pub id: i32,
+}

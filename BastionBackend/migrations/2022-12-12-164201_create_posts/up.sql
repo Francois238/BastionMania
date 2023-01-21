@@ -14,6 +14,4 @@ CREATE TABLE "users"(
     wireguard BOOLEAN NOT NULL,
     net_id INT NOT NULL,
     PRIMARY KEY (id, bastion_id)
-
-
 );

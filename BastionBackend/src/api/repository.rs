@@ -112,7 +112,7 @@ impl Bastion {
         Ok(un_bastion)
     }
 
-    pub fn create(bastion: BastionInsertable) -> Result<Bastion, ApiError> {
+    pub fn create(bastion: BastionInsertable) -> Result<Self, ApiError> {
         let mut conn = db::connection()?;
         let newbastion: Bastion = diesel::insert_into(bastion::table)
             .values(bastion)
@@ -171,7 +171,7 @@ impl Bastion {
                 .filter(users::bastion_id.eq(bastion_id))
                 .load::<Users>(&mut conn)?;
 
-        Ok(users.is_empty())
+        Ok(!users.is_empty())
     }
 }
 
@@ -203,6 +203,18 @@ impl Users{
         let user = users::table
             .filter(users::id.eq(id))
             .first(&mut conn)?;
+
+        Ok(user)
+    }
+
+    pub fn delete_all_users(bastion_id: i32) -> Result<usize, ApiError> {
+        let mut conn = db::connection()?;
+
+        let user = diesel::delete(
+            users::table
+                .filter(users::bastion_id.eq(bastion_id))
+        )
+            .execute(&mut conn)?;
 
         Ok(user)
     }

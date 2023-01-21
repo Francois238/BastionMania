@@ -10,6 +10,7 @@ pub mod configclient;
 pub mod instanceclient;
 
 pub use bastionmodification::BastionModification;
+pub use bastionmodification::BastionSuppression;
 pub use configagent::ConfigAgent;
 pub use bastioninstancecreate::BastionInstanceCreate;
 pub use retourapi::RetourAPI;

@@ -21,7 +21,7 @@ use serde_json::json;
 use actix_session::Session;
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
-use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient, retourapi};
+use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient, BastionSuppression, UsersInstanceCreate};
 
 
 // /bastion =======================================================================================
@@ -102,6 +102,15 @@ pub async fn find_a_bastion(bastion_id:  web::Path<i32>, session: Session) -> Re
 #[patch("/bastion/{bastion_id}")]
 pub async fn update_a_bastion(bastion_id:web::Path<i32>, modifs:web::Json<BastionModification>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+
+    let bastion_modification = BastionModification{
+        name: modifs.name.clone(),
+        subnet_cidr: modifs.subnet_cidr.clone(),
+        agent_endpoint: modifs.agent_endpoint.clone(),
+    };
+
+    //TODO: envoyer la requete de modification de bastion a l'intancieur
+
     let bastion_modif = Bastion::update_un_bastion(bastion_id.into_inner(), modifs.into_inner())?;
     Ok(HttpResponse::Ok().json(bastion_modif))
 }
@@ -109,7 +118,16 @@ pub async fn update_a_bastion(bastion_id:web::Path<i32>, modifs:web::Json<Bastio
 #[delete("/bastion/{bastion_id}")]
 pub async fn delete_a_bastion(bastion_id:web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
-    let bastion_suppr = Bastion::delete_un_bastion(bastion_id.into_inner())?;
+    let bastion_id = bastion_id.into_inner();
+
+    let bastion_suppression = BastionSuppression{
+        id: bastion_id.clone(),
+    };
+
+    // TODO: envoyer la requete de suppression de bastion a l'intancieur qui doit aussi approuver la suppression des users
+    let _users = Users::delete_all_users(bastion_id)?;
+
+    let bastion_suppr = Bastion::delete_un_bastion(bastion_id)?;
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 
