@@ -26,13 +26,13 @@ use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, Reto
 
 // /bastion =======================================================================================
 
-#[get("/bastion")]
+#[get("/bastions")]
 pub async fn get_bastion() -> Result<HttpResponse, ApiError>{
     let bastion_insere = Bastion::find_all()?;
     Ok(HttpResponse::Ok().json(bastion_insere))
 }
 
-#[post("/bastion")]
+#[post("/bastions")]
 pub async fn create_bastion( bastion: web::Json<BastionModification>, session: Session) -> Result<HttpResponse, ApiError>{
 
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
@@ -88,7 +88,7 @@ pub async fn create_bastion( bastion: web::Json<BastionModification>, session: S
 
 // /bastion/{bastion_id} ==========================================================================
 
-#[get("/bastion/{bastion_id}")]
+#[get("/bastions/{bastion_id}")]
 pub async fn find_a_bastion(bastion_id:  web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
     let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let bastion_id = bastion_id.into_inner();
@@ -99,7 +99,7 @@ pub async fn find_a_bastion(bastion_id:  web::Path<i32>, session: Session) -> Re
 
 }
 
-#[patch("/bastion/{bastion_id}")]
+#[patch("/bastions/{bastion_id}")]
 pub async fn update_a_bastion(bastion_id:web::Path<i32>, modifs:web::Json<BastionModification>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
 
@@ -115,7 +115,7 @@ pub async fn update_a_bastion(bastion_id:web::Path<i32>, modifs:web::Json<Bastio
     Ok(HttpResponse::Ok().json(bastion_modif))
 }
 
-#[delete("/bastion/{bastion_id}")]
+#[delete("/bastions/{bastion_id}")]
 pub async fn delete_a_bastion(bastion_id:web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let bastion_id = bastion_id.into_inner();
@@ -133,14 +133,14 @@ pub async fn delete_a_bastion(bastion_id:web::Path<i32>, session: Session) -> Re
 
 //  /bastion/{bastion_id}/users ===================================================================
 
-#[get("/bastion/{bastion_id}/users")]
+#[get("/bastions/{bastion_id}/users")]
 pub async fn get_users(bastion_id: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let users = Users::find_users_bastion(bastion_id.into_inner())?;
     Ok(HttpResponse::Ok().json(users))
 }
 
-#[post("/bastion/{bastion_id}/users")]
+#[post("/bastions/{bastion_id}/users")]
 pub async fn create_users(users: web::Json<UsersCreation>, bastion_id:web::Path<i32>, session: Session ) -> Result<HttpResponse, ApiError>{
 
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
@@ -176,14 +176,14 @@ pub async fn create_users(users: web::Json<UsersCreation>, bastion_id:web::Path<
 
 // /bastion/{bastion_id}/users/{user_id} =========================================================
 
-#[get("/bastion/{bastion_id}/users/{user_id}")]
+#[get("/bastions/{bastion_id}/users/{user_id}")]
 pub async fn get_a_user(user_id: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let users = Users::find_un_user(user_id.into_inner())?;
     Ok(HttpResponse::Ok().json(users))
 }
 
-#[delete("/bastion/{bastion_id}/users/{user_id}")]
+#[delete("/bastions/{bastion_id}/users/{user_id}")]
 pub async fn delete_a_user(user_id: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let user_suppr = Users::delete_un_user(user_id.into_inner())?;
@@ -192,7 +192,7 @@ pub async fn delete_a_user(user_id: web::Path<i32>, session: Session) -> Result<
 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
 
-#[get("/bastion/{bastion_id}/users/{user_id}/generate_wireguard")]
+#[get("/bastions/{bastion_id}/users/{user_id}/generate_wireguard")]
 pub async fn get_user_wireguard_status(session: Session, bastion_id: web::Path<i32>, user_id: web::Path<i32>) -> Result<HttpResponse, ApiError>{
     let _claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
 
