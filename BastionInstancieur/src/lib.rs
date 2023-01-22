@@ -1,5 +1,6 @@
 mod model;
-mod pods;
+mod k8s;
+pub mod api;
 
 pub use model::*;
-pub use pods::*;
+pub use k8s::*;

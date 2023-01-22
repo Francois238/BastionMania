@@ -3,20 +3,6 @@
 version = 3
 
 [[package]]
-name = "BastionInstancieur"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "k8s-openapi",
- "kube",
- "regex",
- "serde",
- "serde_json",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "actix-codec"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -285,6 +271,20 @@ name = "base64"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ea22880d78093b0cbe17c89f64a7d457941e65759157ec6cb31a31d652b05e5"
+
+[[package]]
+name = "bastion-mania-bastioninstancieur"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "k8s-openapi",
+ "kube",
+ "regex",
+ "serde",
+ "serde_json",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "bitflags"
