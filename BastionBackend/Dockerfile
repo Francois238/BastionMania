@@ -9,7 +9,7 @@ RUN cargo build --release
 FROM ubuntu:23.04
 
 WORKDIR /app
-COPY --from=build /app/target/release/bastionbackend /app/bastionbackend
+COPY --from=build /app/target/release/BastionManager /app/BastionManager
 
 RUN  apt-get update \
   && apt-get install -y libpq-dev \
@@ -17,4 +17,4 @@ RUN  apt-get update \
 
 EXPOSE 8080
 
-CMD ["/app/authentication"]
+CMD ["/app/BastionManager"]
