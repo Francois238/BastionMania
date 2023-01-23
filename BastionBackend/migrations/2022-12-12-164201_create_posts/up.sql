@@ -9,9 +9,10 @@ CREATE TABLE "bastion"(
 );
 
 CREATE TABLE "users"(
-    id INT,
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
     bastion_id INT NOT NULL,
     wireguard BOOLEAN NOT NULL,
-    net_id INT NOT NULL,
-    PRIMARY KEY (id, bastion_id)
+    net_id INT NOT NULL
+
 );

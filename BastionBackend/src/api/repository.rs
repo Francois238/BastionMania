@@ -5,7 +5,7 @@ use std::env;
 use crate::{api_error::ApiError};
 use crate::db;
 use crate::schema::{bastion, users};
-use crate::model::{BastionModification, Claims};
+use crate::model::{BastionModification, Claims, UsersInstanceCreate};
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
 use diesel::query_dsl::RunQueryDsl;
 use wireguard_keys;
@@ -167,11 +167,22 @@ impl Bastion {
         let mut conn = db::connection()?;
 
         let users: Vec<Users> = users::table
-                .filter(users::id.eq(user_id))
+                .filter(users::user_id.eq(user_id))
                 .filter(users::bastion_id.eq(bastion_id))
                 .load::<Users>(&mut conn)?;
 
         Ok(!users.is_empty())
+    }
+
+    pub fn bastion_user(user_id: i32) -> Result<Vec<Users>, ApiError> {
+
+        let mut conn = db::connection()?;
+
+        let users: Vec<Users> = users::table
+            .filter(users::user_id.eq(user_id))
+            .load::<Users>(&mut conn)?;
+
+        Ok(users)
     }
 }
 
@@ -187,7 +198,7 @@ impl Users{
 
     }
 
-    pub fn create_users(users: Users) -> Result<Users, ApiError> {
+    pub fn create_users(users: UsersModification) -> Result<Users, ApiError> {
         let mut conn = db::connection()?;
         let newusers: Users = diesel::insert_into(users::table)
             .values(users)
@@ -197,11 +208,12 @@ impl Users{
 
     // /bastion/{bastion_id}/users/{user_id} endpoint =================================================================
 
-    pub fn find_un_user(id: i32) -> Result<Users, ApiError> {
+    pub fn find_un_user(bastion_id: i32, user_id: i32) -> Result<Users, ApiError> {
         let mut conn = db::connection()?;
 
         let user = users::table
-            .filter(users::id.eq(id))
+            .filter(users::user_id.eq(user_id))
+            .filter(users::bastion_id.eq(bastion_id))
             .first(&mut conn)?;
 
         Ok(user)
@@ -219,12 +231,13 @@ impl Users{
         Ok(user)
     }
 
-    pub fn delete_un_user(id: i32) -> Result<usize, ApiError> {
+    pub fn delete_un_user(bastion_id: i32, user_id:i32) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
         let user = diesel::delete(
             users::table
-                .filter(users::id.eq(id))
+                .filter(users::user_id.eq(user_id))
+                .filter(users::bastion_id.eq(bastion_id))
         )
             .execute(&mut conn)?;
 
@@ -243,7 +256,7 @@ pub fn build_client_address(bastion_id:i32, user_id: i32) -> Result<String, ApiE
         .first(&mut conn)?;
 
     let user:Users = users::table
-        .filter(users::id.eq(user_id))
+        .filter(users::user_id.eq(user_id))
         .first(&mut conn)?;
 
     let mut client_address = "10.10".to_string();
@@ -291,7 +304,7 @@ pub fn update_un_user(user_id: i32, bool: bool) -> Result<Users, ApiError> {
     let mut conn = db::connection()?;
 
     let user = diesel::update(users::table)
-        .filter(users::id.eq(user_id))
+        .filter(users::user_id.eq(user_id))
         .set((users::wireguard.eq(bool)))
         .get_result(&mut conn)?;
 
