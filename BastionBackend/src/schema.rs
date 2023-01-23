@@ -21,6 +21,7 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Int4,
+        user_id -> Int4,
         bastion_id -> Int4,
         wireguard -> Bool,
         net_id -> Int4,
