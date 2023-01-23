@@ -478,6 +478,9 @@
           "id": {
             "type": "integer"
           },
+          "user_id": {
+            "type": "integer"
+          },
           "bastion_id": {
             "type": "integer"
           },
@@ -489,7 +492,7 @@
           }
         },
         "required": [
-          "id",
+          "user_id",
           "bastion_id",
           "wireguard",
           "net_id"
