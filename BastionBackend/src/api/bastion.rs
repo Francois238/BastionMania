@@ -121,12 +121,29 @@ pub async fn create_bastion( bastion: web::Json<BastionModification>, session: S
 
 #[get("/bastions/{bastion_id}")]
 pub async fn find_a_bastion(bastion_id:  web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError>{
-    let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+    let claims_admin = Claims::verifier_session_admin(&session);
     let bastion_id = bastion_id.into_inner();
-    let authorisation = Bastion::verification_appartenance( claims.id, bastion_id).map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
-    
-    let bastion_affiche = Bastion::find_un_bastion(bastion_id)?;
-    Ok(HttpResponse::Ok().json(bastion_affiche))
+
+    match claims_admin {
+
+        Some(_claims) => {
+
+            let bastion_affiche = Bastion::find_un_bastion(bastion_id)?;
+            Ok(HttpResponse::Ok().json(bastion_affiche))
+        },
+        None => {
+            let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+            let authorisation = Bastion::verification_appartenance( claims.id, bastion_id).map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+            if !authorisation{
+                return Err(ApiError::new(404, "Not Found".to_string()));
+            }
+            let bastion = Bastion::find_un_bastion(bastion_id)?;
+
+
+            Ok(HttpResponse::Ok().json(bastion))
+
+        }
+    }
 
 }
 
