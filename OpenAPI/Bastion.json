@@ -1,0 +1,98 @@
+{
+  "openapi": "3.1.0",
+  "x-stoplight": {
+    "id": "at2zi0x58xejc"
+  },
+  "info": {
+    "title": "Bastion",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://intern-bastion-id:9000",
+      "description": "internal"
+    }
+  ],
+  "paths": {
+    "/adduser": {
+      "post": {
+        "summary": "",
+        "operationId": "post-adduser",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "description": "Ajoute un peer à la configuration wireguard",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "x-examples": {
+                  "Example 1": {
+                    "public_key": "EtzVua6mUvDrs9Y1ve/VOA5wkZWqLu36CFduyZr4LgE=",
+                    "allowed_ips": "10.10.5.2/32"
+                  }
+                },
+                "properties": {
+                  "public_key": {
+                    "type": "string"
+                  },
+                  "allowed_ips": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "public_key",
+                  "allowed_ips"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deluser": {
+      "post": {
+        "summary": "",
+        "operationId": "post-deluser",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "description": "Supprime un peer avec sa clé publique",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "x-examples": {
+                  "Example 1": {
+                    "public_key": "EtzVua6mUvDrs9Y1ve/VOA5wkZWqLu36CFduyZr4LgE="
+                  }
+                },
+                "properties": {
+                  "public_key": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "public_key"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {}
+  },
+  "x-internal": true
+}
