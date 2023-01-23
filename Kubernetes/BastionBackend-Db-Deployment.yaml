@@ -46,5 +46,5 @@ spec:
         - name: repogithub
       volumes:
         - name: mnt
-          configMap:
-            name: gestionbastionbackend.configmap
+          secret:
+            secretName: gestionbastionbackend.conf
