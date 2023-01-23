@@ -33,7 +33,7 @@ spec:
       containers:
         - name: bastionbackend
           image: ghcr.io/bastionmania/bastionmania/bastionbackend:dev
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               protocol: TCP
