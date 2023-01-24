@@ -37,7 +37,7 @@ async fn find_user(session: Session, id: web::Path<i32>) -> Result<HttpResponse,
 
 }
 
-#[get("/users/me")]
+#[get("/me")]
 async fn find_user_me(session: Session) -> Result<HttpResponse, ApiError> { //Recupere un user
 
     let claims = verifier_session(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
