@@ -37,6 +37,19 @@ async fn find_user(session: Session, id: web::Path<i32>) -> Result<HttpResponse,
 
 }
 
+#[get("/users/me")]
+async fn find_user_me(session: Session) -> Result<HttpResponse, ApiError> { //Recupere un user
+
+    let claims = verifier_session(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+
+
+    let user = User::find(claims.id)?;
+    Ok(HttpResponse::Ok().json(user))  //Retourne l'user
+
+
+
+}
+
 
 #[post("/users")]
 async fn create_user(session: Session, user: web::Json<UserMessage>) -> Result<HttpResponse, ApiError> { //Enregistre un user
@@ -236,6 +249,7 @@ async fn logout(session: Session) -> Result<HttpResponse, ApiError> {
 pub fn routes_user_utilisation(cfg: &mut web::ServiceConfig) {
     cfg.service(find_all_users);
     cfg.service(find_user);
+    cfg.service(find_user_me);
     cfg.service(create_user);
     cfg.service(ajout_2fa);
     cfg.service(update);
