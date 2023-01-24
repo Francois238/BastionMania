@@ -7,7 +7,7 @@ use dotenvy::dotenv;
 async fn main() -> std::io::Result<()> {
 
     dotenv().ok();
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     
     HttpServer::new(|| {

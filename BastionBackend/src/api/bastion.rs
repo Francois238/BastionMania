@@ -19,7 +19,7 @@ use crate::services::{generate_bastion_freenetid, generate_bastion_freeport, gen
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use actix_session::Session;
-use log::{debug, info};
+use tracing::info;
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
 use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient, BastionSuppression, UsersInstanceCreate};
@@ -252,10 +252,10 @@ pub async fn delete_a_user(données: web::Path<(i32,i32)>, session: Session) -> 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
 
 #[post("/bastions/{bastion_id}/users/{user_id}/generate_wireguard")]
-pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i32, i32)>) -> Result<HttpResponse, ApiError>{
+pub async fn get_user_wireguard_status(session: Session, donnees: web::Path<(i32, i32)>) -> Result<HttpResponse, ApiError>{
     info!("request: generation_wireguard");
     let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
-    let (bastion_id, user_id) = données.into_inner();
+    let (bastion_id, user_id) = donnees.into_inner();
     let authorisation = Bastion::verification_appartenance( claims.id, bastion_id).map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
     if !authorisation{
         return Err(ApiError::new(404, "Not Found".to_string()));
@@ -273,14 +273,14 @@ pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i3
     let client_private_key = client_priv.to_base64();
 
     let instance_client = InstanceClient{
-        client_public_key,
-        client_address: client_address.clone(),
+        public_key: client_public_key,
+        allowed_ips: client_address.clone(),
     };
 
     //instancier le client dans Bastion
     info!("ajout du peer dans le bastion : {:?}", instance_client);
     let _client = reqwest::Client::new();
-    let url = format!("http://intern-bastion-{}/adduser", bastion_id);
+    let url = format!("http://intern-bastion-{}:9000/adduser", bastion_id);
     let _response = _client.post(&url)
         .json(&instance_client)
         .send()
