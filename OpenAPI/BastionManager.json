@@ -364,7 +364,7 @@
         "description": "supprime l'accés de l'utilisateur"
       }
     },
-    "/bastions/{bastion_id}/users/{user_id}/wireguard": {
+    "/bastions/{bastion_id}/users/{user_id}/generate_wireguard": {
       "parameters": [
         {
           "schema": {
@@ -383,9 +383,9 @@
           "required": true
         }
       ],
-      "get": {
-        "summary": "Your GET endpoint",
-        "tags": [],
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-users-user_id-generate_wireguard",
         "responses": {
           "200": {
             "description": "OK",
@@ -412,7 +412,6 @@
             "description": "Not Found"
           }
         },
-        "operationId": "get-bastion-bastion_id-users-user_id-wireguard",
         "parameters": [
           {
             "schema": {
@@ -420,10 +419,9 @@
             },
             "in": "cookie",
             "name": "id",
-            "description": "user seulement"
+            "description": "pour utilisateur uniquement"
           }
-        ],
-        "description": "envoie une demande d'accés au bastion"
+        ]
       }
     }
   },
