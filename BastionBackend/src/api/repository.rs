@@ -257,9 +257,11 @@ pub fn build_client_address(bastion_id:i32, user_id: i32) -> Result<String, ApiE
 
     let user:Users = users::table
         .filter(users::user_id.eq(user_id))
+        .filter(users::bastion_id.eq(bastion_id))
         .first(&mut conn)?;
 
     let mut client_address = "10.10".to_string();
+    client_address.push_str(".");
     client_address.push_str(bastion.net_id.clone().to_string().as_str());
     client_address.push_str(".");
     client_address.push_str(user.net_id.clone().to_string().as_str());
