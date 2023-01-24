@@ -19,7 +19,7 @@ use crate::services::{generate_bastion_freenetid, generate_bastion_freeport, gen
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use actix_session::Session;
-use log::{debug, info};
+use tracing::info;
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
 use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient, BastionSuppression, UsersInstanceCreate};
