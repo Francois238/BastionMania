@@ -273,8 +273,8 @@ pub async fn get_user_wireguard_status(session: Session, donnees: web::Path<(i32
     let client_private_key = client_priv.to_base64();
 
     let instance_client = InstanceClient{
-        client_public_key,
-        client_address: client_address.clone(),
+        public_key: client_public_key,
+        allowed_ips: client_address.clone(),
     };
 
     //instancier le client dans Bastion
