@@ -29,6 +29,7 @@ spec:
     metadata:
       labels:
         pod-name: bastionbackend
+        app: bastionbackend
     spec:
       containers:
         - name: bastionbackend

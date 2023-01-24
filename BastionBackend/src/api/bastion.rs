@@ -252,10 +252,10 @@ pub async fn delete_a_user(données: web::Path<(i32,i32)>, session: Session) -> 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
 
 #[post("/bastions/{bastion_id}/users/{user_id}/generate_wireguard")]
-pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i32, i32)>) -> Result<HttpResponse, ApiError>{
+pub async fn get_user_wireguard_status(session: Session, donnees: web::Path<(i32, i32)>) -> Result<HttpResponse, ApiError>{
     info!("request: generation_wireguard");
     let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
-    let (bastion_id, user_id) = données.into_inner();
+    let (bastion_id, user_id) = donnees.into_inner();
     let authorisation = Bastion::verification_appartenance( claims.id, bastion_id).map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
     if !authorisation{
         return Err(ApiError::new(404, "Not Found".to_string()));
