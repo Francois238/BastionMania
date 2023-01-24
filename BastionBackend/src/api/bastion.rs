@@ -252,11 +252,12 @@ pub async fn delete_a_user(données: web::Path<(i32,i32)>, session: Session) -> 
 
 #[post("/bastions/{bastion_id}/users/{user_id}/generate_wireguard")]
 pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i32, i32)>) -> Result<HttpResponse, ApiError>{
-    let _claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
-
+    let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let (bastion_id, user_id) = données.into_inner();
-
-
+    let authorisation = Bastion::verification_appartenance( claims.id, bastion_id).map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation{
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
 
     let client_priv = wireguard_keys::Privkey::generate();
     let client_pub = client_priv.pubkey();
@@ -275,8 +276,9 @@ pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i3
     };
 
     //instancier le client dans Bastion
+
     let _client = reqwest::Client::new();
-    let url = format!("http://interne-abstion-{}/adduser", bastion_id);
+    let url = format!("http://intern-abstion-{}/adduser", bastion_id);
     let _response = _client.post(&url)
         .json(&instance_client)
         .send()
