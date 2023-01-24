@@ -19,6 +19,7 @@ use crate::services::{generate_bastion_freenetid, generate_bastion_freeport, gen
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use actix_session::Session;
+use log::{debug, info};
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
 use crate::model::{BastionInstanceCreate, BastionModification, ConfigAgent, RetourAPI, ConfigUser, UsersCreation, Claims, ConfigClient, InstanceClient, BastionSuppression, UsersInstanceCreate};
@@ -252,13 +253,14 @@ pub async fn delete_a_user(données: web::Path<(i32,i32)>, session: Session) -> 
 
 #[post("/bastions/{bastion_id}/users/{user_id}/generate_wireguard")]
 pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i32, i32)>) -> Result<HttpResponse, ApiError>{
+    info!("request: generation_wireguard");
     let claims = Claims::verifier_session_user(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let (bastion_id, user_id) = données.into_inner();
     let authorisation = Bastion::verification_appartenance( claims.id, bastion_id).map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
     if !authorisation{
         return Err(ApiError::new(404, "Not Found".to_string()));
     }
-
+    info!("request: generation_wireguard, user_id: {} autorisé", user_id);
     let client_priv = wireguard_keys::Privkey::generate();
     let client_pub = client_priv.pubkey();
 
@@ -276,7 +278,7 @@ pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i3
     };
 
     //instancier le client dans Bastion
-
+    info!("ajout du peer dans le bastion : {:?}", instance_client);
     let _client = reqwest::Client::new();
     let url = format!("http://intern-bastion-{}/adduser", bastion_id);
     let _response = _client.post(&url)
@@ -285,7 +287,7 @@ pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i3
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
 
-
+    info!("Peer ajouté au bastion");
 
     update_un_user(user_id, true)?;
 
