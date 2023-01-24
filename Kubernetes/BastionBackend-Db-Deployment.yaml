@@ -32,6 +32,14 @@ spec:
     spec:
       containers:
         - name: bastionbackend
+          env:
+            - name: INSTANCIEUR_ENDPOINT
+              value: "bastion-instancieur-service:9000"
+            - name: BASTION_IP
+              valueFrom:
+                secretKeyRef:
+                  key: externalip
+                  name: externalip
           image: ghcr.io/bastionmania/bastionmania/bastionbackend:dev
           imagePullPolicy: Always
           ports:

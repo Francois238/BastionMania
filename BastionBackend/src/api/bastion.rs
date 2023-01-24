@@ -261,7 +261,7 @@ pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i3
     let client_priv = wireguard_keys::Privkey::generate();
     let client_pub = client_priv.pubkey();
 
-    let bastion_ip = "10.10.45.34"; //bastion_ip: env::var("BASTION_IP").expect("BASTION_IP must be set");
+    let bastion_ip = env::var("BASTION_IP").expect("BASTION_IP must be set");
 
     let client_address= build_client_address(bastion_id, user_id)?;
     let bastion_endpoint = build_endpoint_user(bastion_ip.to_string(), bastion_id)?;
