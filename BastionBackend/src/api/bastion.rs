@@ -278,7 +278,7 @@ pub async fn get_user_wireguard_status(session: Session, données: web::Path<(i3
     //instancier le client dans Bastion
 
     let _client = reqwest::Client::new();
-    let url = format!("http://intern-abstion-{}/adduser", bastion_id);
+    let url = format!("http://intern-bastion-{}/adduser", bastion_id);
     let _response = _client.post(&url)
         .json(&instance_client)
         .send()
