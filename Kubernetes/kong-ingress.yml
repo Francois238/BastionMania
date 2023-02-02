@@ -1,0 +1,54 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bastionmania-ingress
+  annotations:
+    konghq.com/strip-path: 'true'
+    konghq.com/protocols: 'https'
+    konghq.com/https-redirect-status-code: '308'
+    konghq.com/plugins: cors-example
+spec:
+  ingressClassName: kong
+  tls:
+    - hosts:
+        - bastionmania.intra
+      secretName: bastionmania.intra
+  rules:
+    - host: bastionmania.intra
+      http:
+        paths:
+          - path: /user
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: front-user
+                port:
+                  number: 80
+          - path: /admin
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: front-admin
+                port:
+                  number: 80
+          - path: /authentication
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: authentication
+                port:
+                  number: 80
+          - path: /admin-management
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: admin-management
+                port:
+                  number: 80
+          - path: /user-management
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: user-management
+                port:
+                  number: 80
