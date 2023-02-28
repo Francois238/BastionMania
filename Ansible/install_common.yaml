@@ -1,0 +1,98 @@
+---
+- name: Common node configuration
+  hosts: all
+  become: yes
+  tasks:
+    - name: Configure kernel modules
+      block:
+        - modprobe:
+            name: "{{ item }}"
+            state: present
+          loop:
+            - overlay
+            - br_netfilter
+        - name: modprobe persistant
+          copy:
+            content: |
+              overlay
+              br_netfilter
+            dest: /etc/modules-load.d/containerd.conf
+
+
+    - name: Configure sysctl
+      sysctl:
+        name: "{{ item }}"
+        value: 1
+        sysctl_set: yes
+        state: present
+        reload: yes
+        sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+      loop:
+        - net.bridge.bridge-nf-call-iptables
+        - net.ipv4.ip_forward
+        - net.bridge.bridge-nf-call-ip6tables
+
+
+    - name: Install containerd
+      block:
+        - name: Add docker key
+          apt_key:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            keyring: /etc/apt/keyrings/docker.gpg
+            state: present
+        - name: Add docker repo
+          apt_repository:
+            repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   jammy stable
+            filename: docker
+            state: present
+            update_cache: yes
+        - name: install containerd
+          apt:
+            name: containerd.io
+            state: present
+        - file:
+            path: /etc/containerd
+            state: directory
+
+    - name: install kubernetes
+      block:
+        - name: Install k8s requirements
+          apt:
+            name:
+              - apt-transport-https
+              - ca-certificates
+              - curl
+            state: present
+            update_cache: yes
+        - name: add kubernetes keyring
+          apt_key:
+            url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+            keyring: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+            state: present
+        - name: add kubernetes repo
+          apt_repository:
+            repo: deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+            filename: kubernetes
+            state: present
+            update_cache: yes
+        - name: Install kubernetes 1.26
+          apt:
+            name:
+              - kubelet=1.26.1-00
+              - kubeadm=1.26.1-00
+              - kubectl=1.26.1-00
+            state: present
+            update_cache: yes
+        - name: hold packages
+          dpkg_selections:
+            name: "{{ item }}"
+            selection: hold
+          loop:
+            - kubelet
+            - kubeadm
+            - kubectl
+
+    - name: disable swap
+      shell: |
+        sudo swapoff -a
+        sudo sed -ri '/\sswap\s/s/^#?/#/' /etc/fstab

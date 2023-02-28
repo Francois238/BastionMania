@@ -1,0 +1,10 @@
+- name: Reboot masters
+  hosts: masters
+  become: yes
+  tasks:
+    - name: reboot
+      reboot:
+        reboot_timeout: 240
+        post_reboot_delay: 60
+        test_command: uptime
+        msg: "Rebooting to apply changes"
