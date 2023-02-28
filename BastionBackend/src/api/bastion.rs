@@ -5,7 +5,6 @@ use actix_web::{get,
                 patch,
                 delete,
                 error::ResponseError,
-
                 Responder,
                 HttpResponse,
                 http::{header::ContentType, StatusCode}, web
@@ -19,6 +18,7 @@ use crate::services::{generate_bastion_freenetid, generate_bastion_freeport, gen
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use actix_session::Session;
+use log::error;
 use tracing::info;
 use repository::*;
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
@@ -98,7 +98,15 @@ pub async fn create_bastion( bastion: web::Json<BastionModification>, session: S
 
     // envoyer la requete de creation de bastion a l'intancieur
     let _client = reqwest::Client::new();
-    let url = format!("http://{}/create/{}", env::var("INSTANCIEUR_ENDPOINT").unwrap(), bastion_insere.id);
+    let endpoint = env::var("INSTANCIEUR_ENDPOINT");
+    let endpoint = if let Ok(endpoint) = endpoint {
+        endpoint
+    } else {
+        error!("Endpoint: {}", "Endpoint non défini");
+        return Err(ApiError::new(500, "Endpoint non défini".to_string()));
+    };
+
+    let url = format!("http://{}/create/{}", endpoint, bastion_insere.id);
     let _response = _client.post(&url)
         .json(&bastion_instance_create)
         .send()
@@ -174,9 +182,17 @@ pub async fn delete_a_bastion(bastion_id:web::Path<i32>, session: Session) -> Re
         id: bastion_id.clone(),
     };
 
+    let endpoint = env::var("INSTANCIEUR_ENDPOINT");
+    let endpoint = if let Ok(endpoint) = endpoint {
+        endpoint
+    } else {
+        error!("Endpoint: {}", "Endpoint non défini");
+        return Err(ApiError::new(500, "Endpoint non défini".to_string()));
+    };
+
     // envoyer la requete de suppression de bastion a l'intancieur qui doit aussi approuver la suppression des users
     let _client = reqwest::Client::new();
-    let url = format!("http://{}/delete/{}", env::var("INSTANCIEUR_ENDPOINT").unwrap(), bastion_id);
+    let url = format!("http://{}/delete/{}", endpoint, bastion_id);
     let _response = _client.post(&url)
         .send()
         .await
@@ -246,6 +262,7 @@ pub async fn delete_a_user(données: web::Path<(i32,i32)>, session: Session) -> 
     let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
     let (bastion_id, user_id) = données.into_inner();
     let user_suppr = Users::delete_un_user(bastion_id, user_id)?;
+    // TODO: envoyer la requete de suppression de user au bastion
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 
