@@ -313,5 +313,9 @@ pub fn update_un_user(user_id: i32, bool: bool) -> Result<Users, ApiError> {
     Ok(user)
 }
 
+// /bastion/{bastion_id}/ressources        ===================================================================
+
+
+
 
 

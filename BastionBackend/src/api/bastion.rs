@@ -326,6 +326,24 @@ pub async fn get_user_wireguard_status(session: Session, donnees: web::Path<(i32
     Ok(HttpResponse::Ok().json(retour_api))
 }
 
+// /bastion/{bastion_id}/ressources        ===================================================================
+/*
+#[get("/bastions/{bastion_id}/ressources")]
+pub async fn get_ressources(données: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError> {
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+    let bastion_id = données.into_inner();
+    let ressources = Ressources::find_ressources(bastion_id)?;
+    Ok(HttpResponse::Ok().json(ressources))
+}
+#[post("/bastions/{bastion_id}/ressources")]
+pub async fn create_ressources(données: web::Path<i32>, session: Session) -> Result<HttpResponse, ApiError> {
+    let _claims = Claims::verifier_session_admin(&session).ok_or(ApiError::new(404, "Not Found".to_string())).map_err(|e| e)?;
+    let bastion_id = données.into_inner();
+    let ressources = Ressources::create_ressources(bastion_id)?;
+    Ok(HttpResponse::Ok().json(ressources))
+}*/
+
+
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(create_bastion);
     cfg.service(get_bastion);
