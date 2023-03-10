@@ -3,6 +3,10 @@
   hosts: workers
   become: yes
   tasks:
+    - apt:
+        name: bc
+        state: present
+        update_cache: yes
     - name: Configure devmapper
       block:
         - copy:
