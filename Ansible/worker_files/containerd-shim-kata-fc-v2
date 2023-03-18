@@ -1,0 +1,2 @@
+#!/bin/bash
+KATA_CONF_FILE=/opt/kata/share/defaults/kata-containers/configuration-fc.toml /usr/local/bin/containerd-shim-kata-v2 $@

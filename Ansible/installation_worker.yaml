@@ -5,6 +5,9 @@
   tasks:
     - name: Configure devmapper
       block:
+        - apt:
+            name: bc
+            state: present
         - copy:
             src: worker_files/devmapper_create.sh
             dest: /usr/local/bin/devmapper_create

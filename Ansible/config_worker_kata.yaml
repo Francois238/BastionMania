@@ -1,0 +1,24 @@
+- name: Install kata container configuration
+  hosts: workers
+  become: yes
+  tasks:
+  - copy:
+      src: worker_files/configuration-kata-fc.toml
+      dest: /opt/kata/share/defaults/kata-containers/configuration-fc.toml
+      owner: root
+      group: root
+      mode: '0644'
+  - name: Config grub
+    block:
+      - name: set grub config
+        copy:
+          src: master_files/grub
+          dest: /etc/default/grub
+          owner: root
+          group: root
+          mode: '0644'
+        register: grub_change
+      - name: update grub
+        shell: |
+          sudo update-grub
+        when: grub_change.changed == true
