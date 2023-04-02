@@ -1,5 +1,7 @@
 use actix_web::{post, Responder, web};
-use crate::{persistance, wgconfigure, WGPeerConfig, WGPeerPublicKey};
+
+use crate::{persistance, ssh, wgconfigure, WGPeerConfig, WGPeerPublicKey};
+use crate::ssh::model::SSHRessource;
 
 static WG_INT: &str = "wg-client";
 
@@ -35,8 +37,21 @@ async fn del_user(user_config: web::Json<WGPeerPublicKey>) -> impl Responder {
     "success".to_string()
 }
 
+#[post("/ssh/addressource")]
+async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> impl Responder {
+    let ressource = ressource.into_inner();
+    //TODO Validate input
+    let res = ssh::config::add_ressource(ressource);
+    if let Err(e) = res {
+        return e.to_string();
+    }
+
+    "success".to_string()
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg
         .service(add_user)
-        .service(del_user);
+        .service(del_user)
+        .service(add_ssh_ressource);
 }
