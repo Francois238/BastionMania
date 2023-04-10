@@ -21,8 +21,8 @@ RUN cargo install --target x86_64-unknown-linux-musl --path .
 FROM alpine:3.17
 
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing wireguard-go \
-    && apk add -U wireguard-tools \
-    && apk add openssh \
+    && apk add --no-cache wireguard-tools \
+    && apk add --no-cache openssh \
     && ssh-keygen -A
 
 EXPOSE ${PORT}

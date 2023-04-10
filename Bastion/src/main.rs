@@ -1,4 +1,5 @@
 use actix_web::{App, HttpServer};
+use actix_web::middleware::Logger;
 
 use bastion_mania_bastion::{api, BastionConfig, persistance, WGToAgent, WGToClient};
 use bastion_mania_bastion::startup::startup;
@@ -7,6 +8,7 @@ use bastion_mania_bastion::wgconfigure;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let bastion_config = BastionConfig::new();
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     startup();
     persistance::init_peers().expect("Erreur création fichier persistance !");
@@ -35,7 +37,9 @@ async fn main() -> std::io::Result<()> {
 
 
     HttpServer::new(|| {
-        App::new().configure(api::config)
+        App::new()
+            .configure(api::config)
+            .wrap(Logger::default())
     })
         .bind(("0.0.0.0", 9000))?
         .run()
