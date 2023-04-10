@@ -1,7 +1,8 @@
-use actix_web::{post, Responder, web};
+use actix_web::{HttpResponse, post, Responder, web};
 
 use crate::{persistance, ssh, wgconfigure, WGPeerConfig, WGPeerPublicKey};
-use crate::ssh::model::SSHRessource;
+use crate::ssh::ressource::SSHRessource;
+use crate::ssh::user::SSHUser;
 
 static WG_INT: &str = "wg-client";
 
@@ -37,11 +38,11 @@ async fn del_user(user_config: web::Json<WGPeerPublicKey>) -> impl Responder {
     "success".to_string()
 }
 
-#[post("/ssh/addressource")]
+#[post("/ssh/ressources")]
 async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> impl Responder {
     let ressource = ressource.into_inner();
     //TODO Validate input
-    let res = ssh::config::add_ressource(ressource);
+    let res = ressource.save();
     if let Err(e) = res {
         return e.to_string();
     }
@@ -49,9 +50,32 @@ async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> impl Responder
     "success".to_string()
 }
 
+#[post("/ssh/ressources/{ressource_name}/users")]
+async fn add_ssh_user(ressource_name: web::Path<String>, user: web::Json<SSHUser>) -> impl Responder {
+    let ressource_name = ressource_name.into_inner();
+    let user = user.into_inner();
+
+    println!("Adding user to ressource: {}", ressource_name);
+    println!("{:?}", user);
+    //TODO Validate input
+
+    let ressource = SSHRessource::from_name(&ressource_name);
+    let ressource = match ressource {
+        Ok(r) => r,
+        Err(e) => return HttpResponse::NotFound().body("Ressource not found"),
+    };
+
+    if ressource.add_user(&user).is_err() {
+        return HttpResponse::InternalServerError().body("Error adding user");
+    }
+
+    HttpResponse::Ok().body("success")
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg
         .service(add_user)
         .service(del_user)
-        .service(add_ssh_ressource);
+        .service(add_ssh_ressource)
+        .service(add_ssh_user);
 }
