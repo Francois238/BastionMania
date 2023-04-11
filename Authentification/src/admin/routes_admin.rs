@@ -1,17 +1,18 @@
 use std::env;
 
-use crate::admin::*;
-use crate::api_error::ApiError;
+use crate::{admin::*, tools::password_management::verify_password};
+use crate::tools::api_error::ApiError;
 
-use actix_web::{ post,patch,delete, web,  HttpResponse};
+use actix_web::{post, patch, delete, web, HttpResponse, HttpRequest};
 use jsonwebtoken::{ encode, Header, EncodingKey};
-use actix_session::{Session};
+use uuid::Uuid;
+use crate::tools::claims::Claims;
 
 //Pour s'enregistrer en tant qu'admin
 
 
 #[post("/login/admin")]
-pub async fn sign_in(session: Session, credentials: web::Json<AdminAuthentication>) -> Result<HttpResponse, ApiError> {
+pub async fn sign_in(credentials: web::Json<AdminAuthentication>) -> Result<HttpResponse, ApiError> {
 
     let credentials = credentials.into_inner();
 
@@ -25,24 +26,32 @@ pub async fn sign_in(session: Session, credentials: web::Json<AdminAuthenticatio
         }
     })?;
 
+   if admin.password.is_none() {  // l admin utilise keycloack
+            return Err(ApiError::new(401, "Credentials not valid!".to_string()));
+    }
+
     //Verifie si le password est ok
 
-    let is_valid = admin.verify_password(credentials.password.as_bytes())?;
+    let is_valid = verify_password(&admin.password.as_ref().unwrap(), credentials.password.as_bytes())?; //safe unwrap car on verifie si le password est non none avant
 
 
     if is_valid == true {
 
-        let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
+        let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500, format!("Failed to load key")))?;
 
         let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
-        let my_claims = Claims::from_admin(&admin, false); //Creation du corps du token, false car c est la 1ere etape de la 2FA
+        let my_claims = Claims::new_admin(&admin,0,Some(false), false); //Creation du corps du token ici authenf classique
 
-        let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).unwrap(); //Creation du jwt
+        let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?;  //Creation du jwt
 
-        session.insert("claim", token).unwrap();
+        let tok = "Bearer ".to_string() + &token;
 
-        Ok(HttpResponse::Ok().json(admin))
+        Ok(HttpResponse::Ok()
+            .insert_header(("Authorization", tok))
+            .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+            .json(admin)
+        )
     }
     else {
 
@@ -53,25 +62,30 @@ pub async fn sign_in(session: Session, credentials: web::Json<AdminAuthenticatio
 }
 
 #[post("/login/admin/otp")]
-async fn double_authentication(session: Session, credentials: web::Json<CodeOtp>) -> Result<HttpResponse, ApiError>{
+async fn double_authentication(req : HttpRequest, credentials: web::Json<CodeOtp>) -> Result<HttpResponse, ApiError>{
     
 
-    let claims = verifier_session_2fa(&session).ok_or(ApiError::new(403, "Interdit".to_string())).map_err(|e| e)?; //verifie legitimite admin et que 2fa activee
+    let claims : Claims = Claims::verify_admin_session_first(req)?; //verifie legitimite admin et que 2fa activee
 
     let cred = credentials.into_inner();
 
     let admin = Admin::verification_2fa(claims.mail.clone(), cred.code)?; //verification du code envoye par l admin pour le 2FA
 
-    let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
+    let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500, format!("Failed to load key")))?;
 
-    let my_claims = Claims::from_admin(&admin, true); //Creation du corps du token, true car 2FA etablie
+    let change = admin.change; //recupere le changement de mdp
 
-    let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).unwrap(); //Creation du jwt
+    let my_claims = Claims::new_admin(&admin,0,Some(true) , change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
-    session.insert("claim", token).unwrap();
+    let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?;  //Creation du jwt
 
+    let tok = "Bearer ".to_string() + &token;
 
-    Ok(HttpResponse::Ok().json(admin))
+    Ok(HttpResponse::Ok()
+        .insert_header(("Authorization", tok))
+        .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+        .json(admin)
+    )
     
 
 }
@@ -81,7 +95,7 @@ async fn create_admin(admin: web::Json<AdminRecu>) -> Result<HttpResponse, ApiEr
 
     let admin = admin.into_inner();
 
-    let _claims = verifier_session(&admin.claim).ok_or(ApiError::new(403, "Interdit".to_string())).map_err(|e| e)?;
+    let _claims : Claims = Claims::verify_admin_session_complete(&admin.claim)?;
 
     let admin = Admin::create(admin)?;
     Ok(HttpResponse::Ok().json(admin))
@@ -90,15 +104,15 @@ async fn create_admin(admin: web::Json<AdminRecu>) -> Result<HttpResponse, ApiEr
 }
 
 #[patch("/admins/{id}")]
-async fn patch_admin( id: web::Path<i32>, cred: web::Json<AdminChangeCred> ) -> Result<HttpResponse, ApiError> { //Un admin peut modifier ses creds
+async fn patch_admin( id: web::Path<Uuid>, cred: web::Json<AdminChangeCred> ) -> Result<HttpResponse, ApiError> { //Un admin peut modifier ses creds
 
     let cred = cred.into_inner();
 
     let id = id.into_inner();
 
-    let claims = verifier_session(&cred.claim).ok_or(ApiError::new(403, "Interdit".to_string())).map_err(|e| e)?; //verifie legitimite admin
+    let claims : Claims = Claims::verify_admin_session_ext(&cred.claim)?; //verifie legitimite admin
    
-    if claims.id == id { //c'est bien l'admin lui meme qui veut changer ses creds
+    if claims.id == id && claims.otp_active == Some(true) && claims.method==0{ //c'est bien l'admin lui meme qui veut changer ses creds
 
         Admin::update_password(id, cred).map_err(|_| ApiError::new(400, "Mauvaise requete".to_string()))?;
 
@@ -116,15 +130,15 @@ async fn patch_admin( id: web::Path<i32>, cred: web::Json<AdminChangeCred> ) -> 
 }
 
 #[post("/admins/{id}/otp")]
-async fn create_otp_admin( id: web::Path<i32>, cred: web::Json<AdminChangeCred> ) -> Result<HttpResponse, ApiError> { //Un admin peut ajouter la 2FA a son compte
+async fn create_otp_admin( id: web::Path<Uuid>, cred: web::Json<AdminChangeCred> ) -> Result<HttpResponse, ApiError> { //Un admin peut ajouter la 2FA a son compte
 
     let cred = cred.into_inner();
 
     let id = id.into_inner();
 
-    let claims = verifier_session_activer_2fa(&cred.claim).ok_or(ApiError::new(403, "Interdit".to_string())).map_err(|e| e)?; //verifie legitimite admin
+    let claims: Claims = Claims::verify_admin_session_complete(&cred.claim)?; //verifie legitimite admin
    
-    if claims.id == id { //c'est bien l'admin lui meme qui veut activer la mfa
+    if claims.id == id && claims.method==0 { //c'est bien l'admin lui meme qui veut activer la mfa
 
         Admin::create_otp(id, cred.password).map_err(|_| ApiError::new(400, "Mauvaise requete".to_string()))?;
 
@@ -143,13 +157,13 @@ async fn create_otp_admin( id: web::Path<i32>, cred: web::Json<AdminChangeCred> 
 
 
 #[delete("/admins/{id}")]
-async fn delete_admin( id: web::Path<i32>, cred: web::Json<AdminSupprimer>, ) -> Result<HttpResponse, ApiError> { //Un admin peut modifier ses creds
+async fn delete_admin( id: web::Path<Uuid>, cred: web::Json<AdminSupprimer>, ) -> Result<HttpResponse, ApiError> { //Un admin peut modifier ses creds
 
     let cred = cred.into_inner();
 
     let id = id.into_inner();
 
-    let _claims = verifier_session(&cred.claim).ok_or(ApiError::new(403, "Interdit".to_string())).map_err(|e| e)?; //verifie legitimite admin
+    let _claims : Claims = Claims::verify_admin_session_complete(&cred.claim)?; //verifie legitimite admin
 
     Admin::delete(id).map_err(|_| ApiError::new(400, "Mauvaise requete".to_string()))?;
 

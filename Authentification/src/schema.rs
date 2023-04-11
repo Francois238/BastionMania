@@ -2,27 +2,27 @@
 
 diesel::table! {
     admins (id) {
-        id -> Int4,
+        id -> Uuid,
         name -> Text,
         last_name -> Text,
         mail -> Text,
-        password -> Bytea,
-        change -> Bool,
+        password -> Nullable<Bytea>,
+        change -> Nullable<Bool>,
         otp -> Nullable<Text>,
-        otpactive -> Bool,
+        otpactive -> Nullable<Bool>,
     }
 }
 
 diesel::table! {
     users (id) {
-        id -> Int4,
+        id -> Uuid,
         name -> Text,
         last_name -> Text,
         mail -> Text,
-        password -> Bytea,
-        change -> Bool,
+        password -> Nullable<Bytea>,
+        change -> Nullable<Bool>,
         otp -> Nullable<Text>,
-        otpactive -> Bool,
+        otpactive -> Nullable<Bool>,
     }
 }
 

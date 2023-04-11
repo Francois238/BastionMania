@@ -1,23 +1,23 @@
 -- Your SQL goes here
 CREATE TABLE "admins" (
-    id SERIAL PRIMARY KEY,
+    id uuid PRIMARY KEY,
     name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     mail TEXT UNIQUE NOT NULL,
-    password BYTEA NOT NULL,
-    change BOOLEAN NOT NULL,
+    password BYTEA,
+    change BOOLEAN,
     otp TEXT,
-    otpactive BOOLEAN NOT NULL
+    otpactive BOOLEAN
 );
 
 
 CREATE TABLE "users" (
-    id SERIAL PRIMARY KEY,
+    id uuid PRIMARY KEY,
     name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     mail TEXT UNIQUE NOT NULL,
-    password BYTEA NOT NULL,
-    change BOOLEAN NOT NULL,
+    password BYTEA,
+    change BOOLEAN,
     otp TEXT,
-    otpactive BOOLEAN NOT NULL
+    otpactive BOOLEAN
 );
