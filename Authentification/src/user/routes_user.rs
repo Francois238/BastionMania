@@ -1,5 +1,6 @@
 use std::env;
 
+use crate::tools::Keycloak;
 use crate::user::*;
 use crate::tools::api_error::ApiError;
 
@@ -43,7 +44,7 @@ pub async fn sign_in_basic( credentials: web::Json<UserAuthentication>) -> Resul
 
         let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-        let my_claims = Claims::new_user(&user,0,Some(false), false); //Creation du corps du token ici authenf classique
+        let my_claims = Claims::new_user(&user,0, false); //Creation du corps du token ici authenf classique
 
         let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?;  //Creation du jwt
 
@@ -78,9 +79,37 @@ async fn double_authentication(req : HttpRequest, credentials: web::Json<CodeOtp
 
     let change = user.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_user(&user,0,Some(true) ,change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_user(&user,0,change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
     let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?; //Creation du jwt
+
+    let tok = "Bearer ".to_string() + &token;
+
+    Ok(HttpResponse::Ok()
+        .insert_header(("Authorization", tok))
+        .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+        .json(user)
+    )
+    
+
+}
+
+
+
+#[post("/login/extern")]
+async fn authentication_ext(req : HttpRequest) -> Result<HttpResponse, ApiError>{
+    
+    let mail = Keycloak::get_token(req)?;
+
+    let user = User::find_by_mail(mail)?;
+
+    let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
+
+    let my_claims = Claims::new_user(&user,1, true); //Creation du corps du token, true car 2FA etablie
+
+    let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500, format!("Failed to load key")))?;
+
+    let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?;  //Creation du jwt
 
     let tok = "Bearer ".to_string() + &token;
 
@@ -115,7 +144,7 @@ async fn patch_user( id: web::Path<Uuid>, cred: web::Json<UserChangeCred>, ) -> 
 
     let claims : Claims =Claims::verify_user_session_ext(&cred.claim)?; //verifie legitimite du user
    
-    if claims.id == id && claims.otp_active == Some(true) && claims.method ==0 { //c'est bien le user lui meme qui veut changer ses creds et que 2FA est active
+    if claims.id == id && claims.method ==0 { //c'est bien le user lui meme qui veut changer ses creds et que 2FA est active
 
         User::update_password(id, cred).map_err(|_| ApiError::new(400, "Mauvaise requete".to_string()))?;
         Ok(HttpResponse::Ok().finish())

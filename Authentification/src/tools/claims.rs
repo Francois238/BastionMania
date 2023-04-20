@@ -16,7 +16,6 @@ pub struct Claims {  //Struture composant le JWT
     pub mail : String,
     pub admin : bool,
     pub method: i32, //Methode d'authentification, 1 keycloack, 0 authenf classique
-    pub otp_active : Option<bool>, //Si l'otp est active pour authenf classique
     pub complete_authentication : bool, //Si par keycloack forcement ok sinon verifier mfa + changement mdp
     #[serde(with = "jwt_numeric_date")]
     pub iat: OffsetDateTime,
@@ -56,7 +55,7 @@ pub struct Claims {  //Struture composant le JWT
 
  impl Claims {
 
-    pub fn new_user(user : &UserEnvoye, method : i32,otp_active : Option<bool>, verif :bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
+    pub fn new_user(user : &UserEnvoye, method : i32,verif :bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
 
         let iat = Hours::new().iat;
         let exp = Hours::new().exp;
@@ -68,14 +67,13 @@ pub struct Claims {  //Struture composant le JWT
             mail : user.mail.clone(),
             admin :  false,
             method,
-            otp_active,
             complete_authentication : verif,
             iat,
             exp,
         }
     }
 
-    pub fn new_admin(admin : &AdminEnvoye, method : i32,otp_active : Option<bool>,  verif :bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
+    pub fn new_admin(admin : &AdminEnvoye, method : i32, verif :bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
 
         let iat = Hours::new().iat;
         let exp = Hours::new().exp;
@@ -87,7 +85,6 @@ pub struct Claims {  //Struture composant le JWT
             mail : admin.mail.clone(),
             admin :  true,
             method,
-            otp_active,
             complete_authentication : verif,
             iat,
             exp,

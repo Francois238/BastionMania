@@ -100,9 +100,9 @@ impl Admin {
             last_name : admin.last_name,
             mail : admin.mail,
             password: Some(password),
-            change : None,
+            change : Some(false),
             otp : None,
-            otpactive : None
+            otpactive : Some(false)
         })
 
     }

@@ -7,6 +7,7 @@ use actix_web::{post, patch, delete, web, HttpResponse, HttpRequest};
 use jsonwebtoken::{ encode, Header, EncodingKey};
 use uuid::Uuid;
 use crate::tools::claims::Claims;
+use crate::tools::keycloak::Keycloak;
 
 //Pour s'enregistrer en tant qu'admin
 
@@ -41,7 +42,7 @@ pub async fn sign_in(credentials: web::Json<AdminAuthentication>) -> Result<Http
 
         let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
-        let my_claims = Claims::new_admin(&admin,0,Some(false), false); //Creation du corps du token ici authenf classique
+        let my_claims = Claims::new_admin(&admin,0, false); //Creation du corps du token ici authenf classique
 
         let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?;  //Creation du jwt
 
@@ -75,7 +76,35 @@ async fn double_authentication(req : HttpRequest, credentials: web::Json<CodeOtp
 
     let change = admin.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_admin(&admin,0,Some(true) , change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_admin(&admin,0,change.unwrap()); //Creation du corps du token, true car 2FA etablie
+
+    let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?;  //Creation du jwt
+
+    let tok = "Bearer ".to_string() + &token;
+
+    Ok(HttpResponse::Ok()
+        .insert_header(("Authorization", tok))
+        .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+        .json(admin)
+    )
+    
+
+}
+
+
+#[post("/login/admin/extern")]
+async fn authentication_ext(req : HttpRequest) -> Result<HttpResponse, ApiError>{
+    
+
+    let mail = Keycloak::get_token(req)?;
+
+    let admin = Admin::find_by_mail(mail)?;
+
+    let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
+
+    let my_claims = Claims::new_admin(&admin,1,true); //Creation du corps du token, true car 2FA etablie
+
+    let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500, format!("Failed to load key")))?;
 
     let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret(secret.as_ref())).map_err(|_| ApiError::new(500, format!("Failed to create jwt")))?;  //Creation du jwt
 
@@ -112,7 +141,7 @@ async fn patch_admin( id: web::Path<Uuid>, cred: web::Json<AdminChangeCred> ) ->
 
     let claims : Claims = Claims::verify_admin_session_ext(&cred.claim)?; //verifie legitimite admin
    
-    if claims.id == id && claims.otp_active == Some(true) && claims.method==0{ //c'est bien l'admin lui meme qui veut changer ses creds
+    if claims.id == id && claims.method==0{ //c'est bien l'admin lui meme qui veut changer ses creds
 
         Admin::update_password(id, cred).map_err(|_| ApiError::new(400, "Mauvaise requete".to_string()))?;
 
@@ -193,6 +222,7 @@ pub fn routes_admin(cfg: &mut web::ServiceConfig) {
     cfg.service(sign_in);
     cfg.service(create_admin);
     cfg.service(double_authentication);
+    cfg.service(authentication_ext);
     cfg.service(create_otp_admin);
     cfg.service(patch_admin);
     cfg.service(delete_admin);

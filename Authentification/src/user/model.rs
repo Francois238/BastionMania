@@ -101,9 +101,9 @@ impl User {
             last_name : user.last_name,
             mail : user.mail,
             password : Some(password),
-            change : None,  //on creer le user donc mot de passe par defaut
+            change : Some(false),  //on creer le user donc mot de passe par defaut
             otp : None,
-            otpactive : None
+            otpactive : Some(false)
         })
     }
 
@@ -167,7 +167,7 @@ impl User {
         .filter(users::id.eq(id))
         .first(&mut conn)?;
 
-        if user_verif.otpactive== Some(true) || user_verif.otpactive== None{
+        if user_verif.otpactive== Some(true) || user_verif.otpactive== None{ //S il utilise keycloack on ne peut pas creer d otp a partir de l api
             return Err(ApiError::new(403,"Unauthorized".to_string())) //Si l'otp est deja active on ne peut pas la creer
         }
 
@@ -188,7 +188,7 @@ impl User {
             .filter(users::mail.eq(mail))
             .first(&mut conn)?;
 
-        if user.otpactive == Some(false) || user.otp.is_none() || user.otpactive == None { //Si l'otp n'est pas active on renvoie une erreur
+        if user.otpactive == Some(false) || user.otp.is_none() || user.otpactive.is_none() { //Si l'otp n'est pas active on renvoie une erreur
             return Err(ApiError::new(403, "Interdit".to_string()))
         }
 
