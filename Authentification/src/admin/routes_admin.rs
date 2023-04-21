@@ -36,7 +36,7 @@ pub async fn sign_in(
     if is_valid {
         let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
-        let my_claims = Claims::new_admin(&admin, 0, false); //Creation du corps du token ici authenf classique
+        let my_claims = Claims::new_admin(&admin, 0, Some(false), false); //Creation du corps du token ici authenf classique
 
         let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -64,7 +64,7 @@ async fn double_authentication(
 
     let change = admin.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_admin(&admin, 0, change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_admin(&admin, 0, Some(true),change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -84,7 +84,7 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
 
     let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
-    let my_claims = Claims::new_admin(&admin, 1, true); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_admin(&admin, 1, None, true); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -102,7 +102,7 @@ async fn create_admin(admin: web::Json<AdminRecu>) -> Result<HttpResponse, ApiEr
 
     let admin = admin.into_inner();
 
-    let _claims: Claims = Claims::verify_admin_session_complete(&admin.claim)?;
+    let _claims: Claims = Claims::verify_admin_session_complete(&admin.claims)?;
 
     let admin = Admin::create(admin)?;
     Ok(HttpResponse::Ok().json(admin))
@@ -119,9 +119,9 @@ async fn patch_admin(
 
     let id = id.into_inner();
 
-    let claims: Claims = Claims::verify_admin_session_ext(&cred.claim)?; //verifie legitimite admin
+    let claims: Claims = Claims::verify_admin_session_ext(&cred.claims)?; //verifie legitimite admin
 
-    if claims.id == id && claims.method == 0 {
+    if claims.id == id && claims.method == 0 && claims.otp == Some(true) {
         //c'est bien l'admin lui meme qui veut changer ses creds
 
         Admin::update_password(id, cred)?;
@@ -143,7 +143,7 @@ async fn create_otp_admin(
 
     let id = id.into_inner();
 
-    let claims: Claims = Claims::verify_admin_session_complete(&cred.claim)?; //verifie legitimite admin
+    let claims: Claims = Claims::verify_admin_session_ext(&cred.claims)?; //verifie legitimite admin
 
     if claims.id == id && claims.method == 0 {
         //c'est bien l'admin lui meme qui veut activer la mfa
@@ -167,7 +167,7 @@ async fn delete_admin(
 
     let id = id.into_inner();
 
-    let _claims: Claims = Claims::verify_admin_session_complete(&cred.claim)?; //verifie legitimite admin
+    let _claims: Claims = Claims::verify_admin_session_complete(&cred.claims)?; //verifie legitimite admin
 
     Admin::delete(id)?;
 

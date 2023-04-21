@@ -37,7 +37,7 @@ pub async fn sign_in_basic(
     if is_valid {
         let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-        let my_claims = Claims::new_user(&user, 0, false); //Creation du corps du token ici authenf classique
+        let my_claims = Claims::new_user(&user, 0,Some(false), false); //Creation du corps du token ici authenf classique
 
         let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -65,7 +65,7 @@ async fn double_authentication(
 
     let change = user.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_user(&user, 0, change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_user(&user, 0,Some(true), change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -85,7 +85,7 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
 
     let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-    let my_claims = Claims::new_user(&user, 1, true); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_user(&user, 1,None, true); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -103,7 +103,7 @@ async fn create_user(user: web::Json<UserRecu>) -> Result<HttpResponse, ApiError
 
     let user = user.into_inner();
 
-    let _claims: Claims = Claims::verify_admin_session_complete(&user.claim)?;
+    let _claims: Claims = Claims::verify_admin_session_complete(&user.claims)?;
 
     let user = User::create(user)?;
     Ok(HttpResponse::Ok().json(user))
@@ -120,7 +120,7 @@ async fn patch_user(
 
     let id = id.into_inner();
 
-    let claims: Claims = Claims::verify_user_session_ext(&cred.claim)?; //verifie legitimite du user
+    let claims: Claims = Claims::verify_user_session_ext(&cred.claims)?; //verifie legitimite du user
 
     if claims.id == id && claims.method == 0 {
         //c'est bien le user lui meme qui veut changer ses creds et que 2FA est active
@@ -143,7 +143,7 @@ async fn create_otp_user(
 
     let id = id.into_inner();
 
-    let claims: Claims = Claims::verify_user_session_ext(&cred.claim)?; //verifie legitimite user
+    let claims: Claims = Claims::verify_user_session_ext(&cred.claims)?; //verifie legitimite user
 
     if claims.id == id && claims.method == 0 {
         //c'est bien l'admin lui meme qui veut activer la mfa
@@ -167,7 +167,7 @@ async fn delete_user(
 
     let id = id.into_inner();
 
-    let _claims = Claims::verify_admin_session_complete(&cred.claim)?; //verifie legitimite admin
+    let _claims = Claims::verify_admin_session_complete(&cred.claims)?; //verifie legitimite admin
 
     User::delete(id)?;
 

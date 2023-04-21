@@ -32,7 +32,7 @@ pub struct UserRecu {
     pub last_name: String,
     pub mail: String,
     pub password: String,
-    pub claim: String, //jwt de l admin qui ajoute l utilisateur
+    pub claims: String, //jwt de l admin qui ajoute l utilisateur
 }
 
 #[derive(AsChangeset, Insertable, Queryable)]
@@ -63,13 +63,13 @@ pub struct UserEnvoye {
 pub struct UserChangeCred {
     //Structure recu dans le JSON ajouter a la bdd
     pub password: String,
-    pub claim: String,
+    pub claims: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct UserSupprimer {
     //Structure recu dans le JSON pour supprimmer user
-    pub claim: String,
+    pub claims: String,
 }
 
 impl UserEnvoye {

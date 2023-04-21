@@ -4,7 +4,6 @@ use actix_web::{HttpResponse, ResponseError};
 use diesel::result::Error as DieselError;
 use serde::Deserialize;
 use serde_json::json;
-use simple_logger::SimpleLogger;
 use std::fmt;
 
 #[derive(Debug, Deserialize)]
@@ -44,8 +43,6 @@ impl ResponseError for ApiError {
             Ok(status_code) => status_code,
             Err(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
-
-        SimpleLogger::new().env().init().unwrap();
 
         let message = match status_code.as_u16() < 500 {
             true => {
