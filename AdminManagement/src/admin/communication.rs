@@ -1,10 +1,22 @@
 use reqwest::Response;
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, env};
 use uuid::Uuid;
 
 use crate::tools::{ApiError, Claims};
 
-use super::AdminReceived;
+use super::{AdminSent};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Sent{ //structure envoyee vers authentication
+
+    pub id: Uuid,
+    pub name: String,
+    pub last_name: String,
+    pub mail: String,
+    pub password : String,
+    pub claims : String
+}
 
 fn response_error(response: Response) -> Result<(), ApiError> {
     if response.status().is_server_error() {
@@ -22,7 +34,7 @@ fn response_error(response: Response) -> Result<(), ApiError> {
 }
 
 pub async fn send_admin_to_authentication(
-    admin: &AdminReceived,
+    admin: &AdminSent,
     claims: Claims,
 ) -> Result<(), ApiError> {
     let url = env::var("AUTHENTICATION_URL")
@@ -31,16 +43,19 @@ pub async fn send_admin_to_authentication(
 
     let jwt = Claims::create_jwt(&claims)?;
 
+    let admin_sent = Sent{
+        id : admin.id,
+        name : admin.name.clone(),
+        last_name : admin.last_name.clone(),
+        mail : admin.mail.clone(),
+        password : admin.password.clone(),
+        claims : jwt
+    };
+
     //creation du JSON a poster vers le micro service authentification
-    let mut map = HashMap::new();
-    map.insert("name".to_string(), admin.name.clone());
-    map.insert("last_name".to_string(), admin.last_name.clone());
-    map.insert("mail".to_string(), admin.mail.clone());
-    map.insert("password".to_string(), admin.password.clone());
-    map.insert("claim".to_string(), jwt);
 
     let client = reqwest::Client::new(); //Envoie une requete au micro service authentification pour ajouter l admin dans sa BDD
-    let response = client.post(url).json(&map).send().await.map_err(|_| {
+    let response = client.post(url).json(&admin_sent).send().await.map_err(|_| {
         ApiError::new(
             500,
             "Impossible to communicate with authentication".to_string(),
@@ -67,7 +82,7 @@ pub async fn send_otp_to_authentication(
     //json a poster vers le micro service authentification
     let mut map = HashMap::new();
     map.insert("password".to_string(), secret_otp);
-    map.insert("claim".to_string(), jwt);
+    map.insert("claims".to_string(), jwt);
 
     let client = reqwest::Client::new(); //Envoie une requete au micro service authentification pour ajouter la graine otp
     let response = client
@@ -95,7 +110,7 @@ pub async fn send_password_to_authentication(
 
     let mut map = HashMap::new();
     map.insert("password".to_string(), password);
-    map.insert("claim".to_string(), jwt);
+    map.insert("claims".to_string(), jwt);
 
     let client = reqwest::Client::new(); //Envoie une requete au micro service authentification pour modifier le mot de passe
 
@@ -121,7 +136,7 @@ pub async fn delete_admin_to_authentication(id: Uuid, claims: Claims) -> Result<
 
     //creation du JSON a poster vers le micro service authentification
     let mut map = HashMap::new();
-    map.insert("claim".to_string(), jwt);
+    map.insert("claims".to_string(), jwt);
 
     let client = reqwest::Client::new(); //Envoie une requete au micro service authentification pour supprimer l'admin dans sa BDD
 
@@ -137,24 +152,26 @@ pub async fn delete_admin_to_authentication(id: Uuid, claims: Claims) -> Result<
     Ok(())
 }
 
-pub async fn first_use_to_authentication(admin: &AdminReceived) -> Result<(), ApiError> {
+pub async fn first_use_to_authentication(admin: &AdminSent) -> Result<(), ApiError> {
     let url = env::var("AUTHENTICATION_URL")
         .map_err(|_| ApiError::new(500, "URL authentication missing".to_string()))?
         + "premiere_utilisation";
 
     //creation du JSON a poster vers le micro service authentification
-    let mut map = HashMap::new();
-    map.insert("name".to_string(), admin.name.clone());
-    map.insert("last_name".to_string(), admin.last_name.clone());
-    map.insert("mail".to_string(), admin.mail.clone());
-    map.insert("password".to_string(), admin.password.clone());
-    map.insert("claim".to_string(), " ".to_string());
+    let admin_sent = Sent{
+        id : admin.id,
+        name : admin.name.clone(),
+        last_name : admin.last_name.clone(),
+        mail : admin.mail.clone(),
+        password : admin.password.clone(),
+        claims : " ".to_string()
+    };
 
     let client = reqwest::Client::new(); //Envoie une requete au micro service authentification pour supprimer l'admin dans sa BDD
 
     let response = client
         .post(url)
-        .json(&map)
+        .json(&admin_sent)
         .send()
         .await
         .map_err(|_| ApiError::new(500, "Internal server error".to_string()))?;

@@ -17,6 +17,7 @@ pub struct Claims {
     pub mail: String,
     pub admin: bool,
     pub method: i32, //Methode d'authentification, 1 keycloack, 0 authenf classique
+    pub otp: Option<bool>,
     pub complete_authentication: bool, //Si par keycloack forcement ok sinon verifier mfa + changement mdp
     #[serde(with = "jwt_numeric_date")]
     pub iat: OffsetDateTime,

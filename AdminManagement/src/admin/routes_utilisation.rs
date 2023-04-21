@@ -40,6 +40,8 @@ async fn create_admin(
 
     let admin = admin.into_inner();
 
+    let admin = AdminSent::from_admin_received(admin); //Creation de la structure envoyee au micro service authentification
+
     send_admin_to_authentication(&admin, claims).await?; //Envoie l'admin au micro service authentification
 
     let admin = Admin::create(admin)?; //Insertion de l'admin en bdd
@@ -59,7 +61,7 @@ async fn ajout_2fa(req: HttpRequest, id: web::Path<Uuid>) -> Result<HttpResponse
 
     //Si c'est bien l'admin qui est connecte
 
-    if claims.id == id && !claims.complete_authentication {
+    if claims.id == id && !claims.complete_authentication && claims.otp == Some(false) {
         let auth = GoogleAuthenticator::new();
 
         let secret = auth.create_secret(32);
@@ -97,7 +99,7 @@ async fn update(
 
     let cred = cred.into_inner();
 
-    if claims.id == id {
+    if claims.id == id &&  claims.otp == Some(true) {
         send_password_to_authentication(cred.password, &claims).await?; //Envoie du nouveau mdp au micro service authentification
 
         let mut claims = claims;
@@ -137,6 +139,8 @@ async fn premiere_utilisation(admin: web::Json<AdminReceived>) -> Result<HttpRes
     //Enregistre un admin
 
     let admin = admin.into_inner();
+
+    let admin = AdminSent::from_admin_received(admin); //Creation de la structure envoyee au micro service authentification
 
     first_use_to_authentication(&admin).await?; //Envoie l'admin au micro service authentification
 

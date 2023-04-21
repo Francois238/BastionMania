@@ -11,7 +11,6 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
     SimpleLogger::new().env().init().unwrap();
-    log::warn!("This is an example message.");
 
     HttpServer::new(|| App::new().configure(admin::routes_admin_utilisation))
         .bind(("0.0.0.0", 8081))?

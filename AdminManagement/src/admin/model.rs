@@ -22,6 +22,15 @@ pub struct AdminReceived {
     pub password: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct AdminSent{ //structure envoyee vers authentication
+
+    pub id: Uuid,
+    pub name: String,
+    pub last_name: String,
+    pub mail: String,
+    pub password : String
+}
 #[derive(AsChangeset, Insertable)]
 #[diesel(table_name = admins)]
 pub struct AdminInserable {
@@ -47,15 +56,31 @@ pub struct AdminChangeCred {
     pub password: String,
 }
 
-impl AdminInserable {
-    pub fn from_admin_received(admin: AdminReceived) -> AdminInserable {
-        //Creation d un admin inserable
+impl AdminSent {
+    pub fn from_admin_received(admin: AdminReceived) -> AdminSent {
+        //Creation d un admin avec un id
 
         let id = Uuid::new_v4();
 
-        AdminInserable {
+        AdminSent {
             //Renvoie la structure qui peut etre inseree en BDD
             id,
+            name: admin.name,
+            last_name: admin.last_name,
+            mail: admin.mail,
+            password: admin.password
+        }
+    }
+}
+
+
+impl AdminInserable {
+    pub fn from_admin_sent(admin: AdminSent) -> AdminInserable {
+        //Creation d un admin inserable
+
+        AdminInserable {
+            //Renvoie la structure qui peut etre inseree en BDD
+            id : admin.id,
             name: admin.name,
             last_name: admin.last_name,
             mail: admin.mail,
@@ -83,11 +108,11 @@ impl Admin {
         Ok(admin)
     }
 
-    pub fn create(admin: AdminReceived) -> Result<Admin, ApiError> {
+    pub fn create(admin: AdminSent) -> Result<Admin, ApiError> {
         //Fct pour créer un admin à partir du JSON envoyé a l'api
         let mut conn = db::connection()?;
 
-        let admin = AdminInserable::from_admin_received(admin);
+        let admin = AdminInserable::from_admin_sent(admin);
 
         let admin = diesel::insert_into(admins::table)
             .values(admin)
@@ -106,7 +131,7 @@ impl Admin {
     }
 }
 
-pub fn premiere_utilisation_bastion(admin: AdminReceived) -> Result<Admin, ApiError> {
+pub fn premiere_utilisation_bastion(admin: AdminSent) -> Result<Admin, ApiError> {
     //Fct pour creer l'admin par défaut
 
     let mut conn = db::connection()?;
