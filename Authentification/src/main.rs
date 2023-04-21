@@ -1,19 +1,17 @@
+use actix_web::{App, HttpServer};
 use dotenvy::dotenv;
-use actix_web::{ App, HttpServer};
 use simple_logger::SimpleLogger;
 
-mod tools;
-mod schema;
 mod admin;
+mod schema;
+mod tools;
 mod user;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
     dotenv().ok();
 
     SimpleLogger::new().env().init().unwrap();
-
 
     HttpServer::new(|| {
         App::new()

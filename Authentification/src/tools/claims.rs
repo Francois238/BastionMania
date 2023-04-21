@@ -1,61 +1,56 @@
-use std::env;
-use actix_web::HttpRequest;
-use jsonwebtoken::{Algorithm, decode, DecodingKey, Validation, encode, Header, EncodingKey};
-use serde::{Deserialize, Serialize};
-use time::{Duration, OffsetDateTime};
-use uuid::Uuid;
 use crate::admin::AdminEnvoye;
 use crate::tools::api_error::ApiError;
 use crate::user::UserEnvoye;
+use actix_web::HttpRequest;
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use serde::{Deserialize, Serialize};
+use std::env;
+use time::{Duration, OffsetDateTime};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, PartialEq)]
-pub struct Claims {  //Struture composant le JWT
-    pub id : Uuid,
-    pub name:String,
-    pub last_name:String,
-    pub mail : String,
-    pub admin : bool,
+pub struct Claims {
+    //Struture composant le JWT
+    pub id: Uuid,
+    pub name: String,
+    pub last_name: String,
+    pub mail: String,
+    pub admin: bool,
     pub method: i32, //Methode d'authentification, 1 keycloack, 0 authenf classique
-    pub complete_authentication : bool, //Si par keycloack forcement ok sinon verifier mfa + changement mdp
+    pub complete_authentication: bool, //Si par keycloack forcement ok sinon verifier mfa + changement mdp
     #[serde(with = "jwt_numeric_date")]
     pub iat: OffsetDateTime,
     #[serde(with = "jwt_numeric_date")]
     pub exp: OffsetDateTime,
- }
+}
 
- struct Hours {
+struct Hours {
     iat: OffsetDateTime,
     exp: OffsetDateTime,
- }
+}
 
- impl Hours {
-     fn new() -> Hours {
+impl Hours {
+    fn new() -> Hours {
         let iat1 = OffsetDateTime::now_utc();
         let exp1 = iat1 + Duration::hours(10);
 
         let iat = iat1
-        .date()
-        .with_hms_milli(iat1.hour(), iat1.minute(), iat1.second(), 0)
-        .unwrap()
-        .assume_utc();
+            .date()
+            .with_hms_milli(iat1.hour(), iat1.minute(), iat1.second(), 0)
+            .unwrap()
+            .assume_utc();
 
         let exp = exp1
-        .date()
-        .with_hms_milli(exp1.hour(), exp1.minute(), exp1.second(), 0)
-        .unwrap()
-        .assume_utc();
+            .date()
+            .with_hms_milli(exp1.hour(), exp1.minute(), exp1.second(), 0)
+            .unwrap()
+            .assume_utc();
 
-        Hours {
-            iat,
-            exp,
-        }
-     }
- }
- 
+        Hours { iat, exp }
+    }
+}
 
- impl Claims {
-
-
+impl Claims {
     pub fn get_jwt_key() -> Result<String, ApiError> {
         //Fct pour recuperer la clef du JWT
 
@@ -78,145 +73,162 @@ pub struct Claims {  //Struture composant le JWT
         Ok(jwt)
     }
 
-    pub fn new_user(user : &UserEnvoye, method : i32,verif :bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
+    pub fn new_user(user: &UserEnvoye, method: i32, verif: bool) -> Claims {
+        //Creation du JWT a partir des infos recuperees en BDD
 
         let iat = Hours::new().iat;
         let exp = Hours::new().exp;
 
         Claims {
-            id : user.id,
-            name : user.name.clone(),
-            last_name : user.last_name.clone(),
-            mail : user.mail.clone(),
-            admin :  false,
+            id: user.id,
+            name: user.name.clone(),
+            last_name: user.last_name.clone(),
+            mail: user.mail.clone(),
+            admin: false,
             method,
-            complete_authentication : verif,
+            complete_authentication: verif,
             iat,
             exp,
         }
     }
 
-    pub fn new_admin(admin : &AdminEnvoye, method : i32, verif :bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
+    pub fn new_admin(admin: &AdminEnvoye, method: i32, verif: bool) -> Claims {
+        //Creation du JWT a partir des infos recuperees en BDD
 
         let iat = Hours::new().iat;
         let exp = Hours::new().exp;
 
         Claims {
-            id : admin.id,
-            name : admin.name.clone(),
-            last_name : admin.last_name.clone(),
-            mail : admin.mail.clone(),
-            admin :  true,
+            id: admin.id,
+            name: admin.name.clone(),
+            last_name: admin.last_name.clone(),
+            mail: admin.mail.clone(),
+            admin: true,
             method,
-            complete_authentication : verif,
+            complete_authentication: verif,
             iat,
             exp,
         }
     }
 
+    pub fn extract_jwt_header(req: HttpRequest) -> Result<String, ApiError> {
+        //Fct pour extraire le JWT du header
 
-
-     pub fn extract_jwt_header(req : HttpRequest) -> Result<String, ApiError> { //Fct pour extraire le JWT du header
-
-         let header = req.headers().get("Authorization");
+        let header = req.headers().get("Authorization");
 
         if header.is_none() {
-            return Err(ApiError::new(404,"Unauthorized".to_string()));
+            return Err(ApiError::new(404, "Unauthorized".to_string()));
         }
 
         let session = header.unwrap().to_str();
 
         if session.is_err() {
-            return Err(ApiError::new(404,"Unauthorized".to_string()));
+            return Err(ApiError::new(404, "Unauthorized".to_string()));
         }
 
-         let jwt = session.unwrap().split("Bearer ").collect::<Vec<&str>>()[1];
+        let jwt = session.unwrap().split("Bearer ").collect::<Vec<&str>>()[1];
 
-         Ok(jwt.to_string())
-
-     }
-
-
-     pub fn verify_admin_session_first(req : HttpRequest) -> Result<Claims, ApiError> { //Fct pour verifier valider du JWT 1ere etape connexion
-
-         let jwt = Self::extract_jwt_header(req)?;
-
-         let secret =  Self::get_jwt_key()?;
-
-         let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
- 
-         if token_message.claims.admin == true && token_message.claims.method == 0{ //Si c est un admin et que la methode d authentification est classique
-             return Ok(token_message.claims)
-         }
-
-         Err(ApiError::new(403,"Unauthorized".to_string()))
-
-     }
-
-     pub fn verify_user_session_first(req: HttpRequest) -> Result<Claims, ApiError> {
-
-         let jwt = Self::extract_jwt_header(req)?;
-
-         let secret =  Self::get_jwt_key()?;
-
-         let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
- 
-         if token_message.claims.admin == false && token_message.claims.method == 0{ //Si c est un user et que la methode d authentification est classique
-             return Ok(token_message.claims)
-         }
-
-         Err(ApiError::new(403,"Unauthorized".to_string()))
-
-     }
-
-
-
-     pub fn verify_admin_session_ext(jwt : &String) -> Result<Claims, ApiError> { //Fct pour verifier valider du JWT 1ere etape connexion
-
-        let secret =  Self::get_jwt_key()?;
-
-        let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
-
-        if token_message.claims.admin == true && token_message.claims.method == 0{ //Si c est un admin et que la methode d authentification est classique
-            return Ok(token_message.claims)
-        }
-
-        Err(ApiError::new(403,"Unauthorized".to_string()))
-
+        Ok(jwt.to_string())
     }
 
-    pub fn verify_user_session_ext(jwt : &String) -> Result<Claims, ApiError> {
+    pub fn verify_admin_session_first(req: HttpRequest) -> Result<Claims, ApiError> {
+        //Fct pour verifier valider du JWT 1ere etape connexion
 
+        let jwt = Self::extract_jwt_header(req)?;
 
-        let secret =  Self::get_jwt_key()?;
+        let secret = Self::get_jwt_key()?;
 
-        let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
+        let token_message = decode::<Claims>(
+            jwt.as_str(),
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::new(Algorithm::HS256),
+        )
+        .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        if token_message.claims.admin == false && token_message.claims.method == 0{ //Si c est un user et que la methode d authentification est classique
-            return Ok(token_message.claims)
+        if token_message.claims.admin && token_message.claims.method == 0 {
+            //Si c est un admin et que la methode d authentification est classique
+            return Ok(token_message.claims);
         }
 
-        Err(ApiError::new(403,"Unauthorized".to_string()))
-
+        Err(ApiError::new(403, "Unauthorized".to_string()))
     }
 
-     pub fn verify_admin_session_complete(jwt : &String) -> Result<Claims, ApiError> {
+    pub fn verify_user_session_first(req: HttpRequest) -> Result<Claims, ApiError> {
+        let jwt = Self::extract_jwt_header(req)?;
 
-        let secret =  Self::get_jwt_key()?;
+        let secret = Self::get_jwt_key()?;
 
-        let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
+        let token_message = decode::<Claims>(
+            jwt.as_str(),
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::new(Algorithm::HS256),
+        )
+        .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-         if token_message.claims.admin == true && token_message.claims.complete_authentication == true{ //Si c est un admin et que il est completement authentifie
-             return Ok(token_message.claims)
-         }
+        if !token_message.claims.admin && token_message.claims.method == 0 {
+            //Si c est un user et que la methode d authentification est classique
+            return Ok(token_message.claims);
+        }
 
-         Err(ApiError::new(403,"Unauthorized".to_string()))
+        Err(ApiError::new(403, "Unauthorized".to_string()))
+    }
 
-     }
+    pub fn verify_admin_session_ext(jwt: &str) -> Result<Claims, ApiError> {
+        //Fct pour verifier valider du JWT 1ere etape connexion
 
-     
- }
+        let secret = Self::get_jwt_key()?;
 
+        let token_message = decode::<Claims>(
+            jwt,
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::new(Algorithm::HS256),
+        )
+        .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
+
+        if token_message.claims.admin && token_message.claims.method == 0 {
+            //Si c est un admin et que la methode d authentification est classique
+            return Ok(token_message.claims);
+        }
+
+        Err(ApiError::new(403, "Unauthorized".to_string()))
+    }
+
+    pub fn verify_user_session_ext(jwt: &str) -> Result<Claims, ApiError> {
+        let secret = Self::get_jwt_key()?;
+
+        let token_message = decode::<Claims>(
+            jwt,
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::new(Algorithm::HS256),
+        )
+        .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
+
+        if !token_message.claims.admin && token_message.claims.method == 0 {
+            //Si c est un user et que la methode d authentification est classique
+            return Ok(token_message.claims);
+        }
+
+        Err(ApiError::new(403, "Unauthorized".to_string()))
+    }
+
+    pub fn verify_admin_session_complete(jwt: &str) -> Result<Claims, ApiError> {
+        let secret = Self::get_jwt_key()?;
+
+        let token_message = decode::<Claims>(
+            jwt,
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::new(Algorithm::HS256),
+        )
+        .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
+
+        if token_message.claims.admin && token_message.claims.complete_authentication {
+            //Si c est un admin et que il est completement authentifie
+            return Ok(token_message.claims);
+        }
+
+        Err(ApiError::new(403, "Unauthorized".to_string()))
+    }
+}
 
 mod jwt_numeric_date {
     //! Custom serialization of OffsetDateTime to conform with the JWT spec (RFC 7519 section 2, "Numeric Date")
@@ -240,5 +252,4 @@ mod jwt_numeric_date {
         OffsetDateTime::from_unix_timestamp(i64::deserialize(deserializer)?)
             .map_err(|_| serde::de::Error::custom("invalid Unix timestamp value"))
     }
-
 }
