@@ -200,6 +200,29 @@ impl Admin {
         }
     }
 
+
+    pub fn enable_extern(mail : String) -> Result<Self, ApiError> {
+
+        let mut conn = db::connection()?;
+
+        let admin_verif: Admin = admins::table
+            .filter(admins::mail.eq(mail.clone()))
+            .first(&mut conn)?;
+
+        if admin_verif.password.is_none()  || admin_verif.otpactive.is_none() {
+            //Si l admin utilise deja Keyckoak
+            return Err(ApiError::new(403, "Interdit".to_string()));
+        }
+
+        let admin = diesel::update(admins::table)
+            .filter(admins::id.eq(admin_verif.id))
+            .set((admins::password.eq(None::<Vec<u8>>), admins::change.eq(None::<bool>) ,admins::otpactive.eq(None::<bool>))) 
+            .get_result(&mut conn)?;
+
+
+        Ok(admin)
+    }
+
     pub fn delete(id: Uuid) -> Result<usize, ApiError> {
         //Supprimer un admin de la BDD
         let mut conn = db::connection()?;

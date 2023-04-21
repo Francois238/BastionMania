@@ -97,6 +97,17 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
         .json(user))
 }
 
+#[patch("/login/extern")]
+async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
+
+    let claims = Claims::verify_user_session_first(req)?; //verifie legitimite admin
+
+    let _user = User::enable_extern(claims.mail)?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+
 #[post("/users")]
 async fn create_user(user: web::Json<UserRecu>) -> Result<HttpResponse, ApiError> {
     //Enregistre un user
@@ -177,6 +188,8 @@ async fn delete_user(
 pub fn routes_user(cfg: &mut web::ServiceConfig) {
     cfg.service(sign_in_basic);
     cfg.service(double_authentication);
+    cfg.service(authentication_ext);
+    cfg.service(enable_authentication_ext);
     cfg.service(create_user);
     cfg.service(patch_user);
     cfg.service(create_otp_user);

@@ -96,6 +96,17 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
         .json(admin))
 }
 
+#[patch("/login/admin/extern")]
+async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
+
+    let claims = Claims::verify_admin_session_first(req)?; //verifie legitimite admin
+
+    let _admin = Admin::enable_extern(claims.mail)?;
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+
 #[post("/admins")]
 async fn create_admin(admin: web::Json<AdminRecu>) -> Result<HttpResponse, ApiError> {
     //Enregistre un admin
@@ -189,6 +200,7 @@ pub fn routes_admin(cfg: &mut web::ServiceConfig) {
     cfg.service(create_admin);
     cfg.service(double_authentication);
     cfg.service(authentication_ext);
+    cfg.service(enable_authentication_ext);
     cfg.service(create_otp_admin);
     cfg.service(patch_admin);
     cfg.service(delete_admin);

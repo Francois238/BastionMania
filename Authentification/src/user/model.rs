@@ -195,6 +195,29 @@ impl User {
         }
     }
 
+
+    pub fn enable_extern(mail : String) -> Result<Self, ApiError> {
+
+        let mut conn = db::connection()?;
+
+        let user_verif: User = users::table
+            .filter(users::mail.eq(mail.clone()))
+            .first(&mut conn)?;
+
+        if user_verif.password.is_none()  || user_verif.otpactive.is_none() {
+            //Si le user utilise deja Keyckoak
+            return Err(ApiError::new(403, "Interdit".to_string()));
+        }
+
+        let admin = diesel::update(users::table)
+            .filter(users::id.eq(user_verif.id))
+            .set((users::password.eq(None::<Vec<u8>>), users::change.eq(None::<bool>) ,users::otpactive.eq(None::<bool>)))
+            .get_result(&mut conn)?;
+
+
+        Ok(admin)
+    }
+
     pub fn delete(id: Uuid) -> Result<usize, ApiError> {
         //Supprimer un user de la BDD
         let mut conn = db::connection()?;
