@@ -5,11 +5,10 @@ use diesel::prelude::*;
 use std::env;
 
 
+pub fn connection() -> Result<PgConnection, ApiError> {
+    let database_url = env::var("DATABASE_URL")
+        .map_err(|_| ApiError::new(500, "DATABASE URL missing".to_string()))?;
 
-pub fn connection() -> Result<PgConnection , ApiError> {
-   
-
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    Ok(PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url)))
+    PgConnection::establish(&database_url)
+        .map_err(|_| ApiError::new(500, "Failed to connect to Postgres".to_string()))
 }

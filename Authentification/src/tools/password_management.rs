@@ -42,7 +42,7 @@ pub fn verify_password(password: &[u8], password_verify: &[u8]) -> Result<bool, 
     //On va dechiffrer le mot de passe de la BDD
     //On va comparer les hash entre le mot de passe BDD et celui envoyé a l'api
 
-    let secret = env::var("KEY_BDD").map_err(|_| ApiError::new(500, format!("Failed to load key")))?; //Charge la cle de chiffrement
+    let secret = env::var("KEY_BDD").map_err(|_| ApiError::new(500, format!("Failed to load KEY_BDD")))?; //Charge la cle de chiffrement
 
     let nonce = env::var("NONCE").map_err(|_| ApiError::new(500, format!("Failed to load nonce")))?; //Charge le nonce
 
@@ -52,7 +52,7 @@ pub fn verify_password(password: &[u8], password_verify: &[u8]) -> Result<bool, 
 
     let password_bdd = cipher.decrypt(nonce, password).map_err(|_| ApiError::new(500, format!("Internal error")))?;  //Dechiffre le hash du mot de passe
 
-    let password_bdd = String::from_utf8(password_bdd).expect("Echec lecture"); //Transforme le mot de passe hashe en String pour comparer
+    let password_bdd = String::from_utf8(password_bdd).map_err(|_| ApiError::new(403, format!("Failed to verify password")))?; //Transforme le mot de passe hashe en String pour comparer
 
     argon2::verify_encoded(password_bdd.as_str(), password_verify)   //Comparaison des hashs
         .map_err(|_| ApiError::new(403, format!("Failed to verify password")))

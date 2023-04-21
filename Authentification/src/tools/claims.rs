@@ -1,6 +1,6 @@
 use std::env;
 use actix_web::HttpRequest;
-use jsonwebtoken::{Algorithm, decode, DecodingKey, Validation};
+use jsonwebtoken::{Algorithm, decode, DecodingKey, Validation, encode, Header, EncodingKey};
 use serde::{Deserialize, Serialize};
 use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
@@ -54,6 +54,29 @@ pub struct Claims {  //Struture composant le JWT
  
 
  impl Claims {
+
+
+    pub fn get_jwt_key() -> Result<String, ApiError> {
+        //Fct pour recuperer la clef du JWT
+
+        let secret =
+            env::var("KEY_JWT").map_err(|_| ApiError::new(500, "KEY JWT missing".to_string()))?;
+
+        Ok(secret)
+    }
+
+    pub fn create_jwt(claims: &Claims) -> Result<String, ApiError> {
+        let secret_jwt = Claims::get_jwt_key()?;
+
+        let jwt = encode(
+            &Header::default(),
+            claims,
+            &EncodingKey::from_secret(secret_jwt.as_ref()),
+        )
+        .map_err(|_| ApiError::new(500, "Impossible to create JWT".to_string()))?; //Creation du jwt
+
+        Ok(jwt)
+    }
 
     pub fn new_user(user : &UserEnvoye, method : i32,verif :bool) -> Claims{  //Creation du JWT a partir des infos recuperees en BDD
 
@@ -118,7 +141,7 @@ pub struct Claims {  //Struture composant le JWT
 
          let jwt = Self::extract_jwt_header(req)?;
 
-         let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500,"Internal error".to_string()))?;
+         let secret =  Self::get_jwt_key()?;
 
          let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
  
@@ -134,7 +157,7 @@ pub struct Claims {  //Struture composant le JWT
 
          let jwt = Self::extract_jwt_header(req)?;
 
-         let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500,"Internal error".to_string()))?;
+         let secret =  Self::get_jwt_key()?;
 
          let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
  
@@ -150,7 +173,7 @@ pub struct Claims {  //Struture composant le JWT
 
      pub fn verify_admin_session_ext(jwt : &String) -> Result<Claims, ApiError> { //Fct pour verifier valider du JWT 1ere etape connexion
 
-        let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500,"Internal error".to_string()))?;
+        let secret =  Self::get_jwt_key()?;
 
         let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
 
@@ -165,7 +188,7 @@ pub struct Claims {  //Struture composant le JWT
     pub fn verify_user_session_ext(jwt : &String) -> Result<Claims, ApiError> {
 
 
-        let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500,"Internal error".to_string()))?;
+        let secret =  Self::get_jwt_key()?;
 
         let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
 
@@ -179,7 +202,7 @@ pub struct Claims {  //Struture composant le JWT
 
      pub fn verify_admin_session_complete(jwt : &String) -> Result<Claims, ApiError> {
 
-        let secret = env::var("KEY_JWT").map_err(|_| ApiError::new(500,"Internal error".to_string()))?;
+        let secret =  Self::get_jwt_key()?;
 
         let token_message = decode::<Claims>(jwt.as_str(), &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256)).map_err(|_| ApiError::new(403,"Unauthorized".to_string()))?;
 

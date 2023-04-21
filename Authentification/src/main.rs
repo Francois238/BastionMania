@@ -1,8 +1,6 @@
-#[macro_use]
-extern crate log;
-
 use dotenvy::dotenv;
 use actix_web::{ App, HttpServer};
+use simple_logger::SimpleLogger;
 
 mod tools;
 mod schema;
@@ -13,7 +11,8 @@ mod user;
 async fn main() -> std::io::Result<()> {
 
     dotenv().ok();
-    env_logger::init();
+
+    SimpleLogger::new().env().init().unwrap();
 
 
     HttpServer::new(|| {
