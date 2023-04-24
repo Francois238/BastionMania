@@ -1,32 +1,19 @@
-#[macro_use]
-extern crate log;
-
+use actix_web::{App, HttpServer};
 use dotenvy::dotenv;
-use actix_session::{SessionMiddleware, storage::CookieSessionStore};
-use actix_web::{ App, HttpServer, cookie::Key};
+use simple_logger::SimpleLogger;
 
-mod api_error;
-mod db;
 mod schema;
+mod tools;
 mod user;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
     dotenv().ok();
-    env_logger::init();
 
-    HttpServer::new(|| {
-        App::new()
-            .wrap(
-                // create cookie based session middleware
-                SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
-                    .cookie_secure(false)
-                    .build()
-            )
-            .configure(user::routes_user_utilisation)
-    })
-    .bind(("0.0.0.0", 8082))?
-    .run()
-    .await
+    SimpleLogger::new().env().init().unwrap();
+
+    HttpServer::new(|| App::new().configure(user::routes_user_utilisation))
+        .bind(("0.0.0.0", 8082))?
+        .run()
+        .await
 }
