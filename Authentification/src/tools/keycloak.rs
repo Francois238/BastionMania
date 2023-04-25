@@ -10,7 +10,7 @@ pub struct Keycloak {
 }
 
 impl Keycloak {
-    pub fn get_token(req: HttpRequest) -> Result<String, ApiError> {
+    pub fn get_token(req: &HttpRequest) -> Result<String, ApiError> {
         //I want to read the header X-Userinfo decoded and return it as a string
 
         let header = req.headers().get("X-Userinfo");

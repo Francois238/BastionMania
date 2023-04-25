@@ -79,7 +79,7 @@ async fn double_authentication(
 
 #[post("/login/extern")]
 async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
-    let mail = Keycloak::get_token(req)?;
+    let mail = Keycloak::get_token(&req)?;
 
     let user = User::find_by_mail(mail)?;
 
@@ -99,12 +99,24 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
 
 #[patch("/login/extern")]
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
+    let _mail = Keycloak::get_token(&req)?;
 
-    let claims = Claims::verify_user_session_first(req)?; //verifie legitimite admin
+    let claims = Claims::verify_user_session_first(req)?; //verifie legitimite user
 
-    let _user = User::enable_extern(claims.mail)?;
+    let user = User::enable_extern(claims.mail)?;
 
-    Ok(HttpResponse::Ok().finish())
+    let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
+
+    let my_claims = Claims::new_user(&user,None, true); //Creation du corps du token, true car 2FA etablie
+
+    let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
+
+    let tok = "Bearer ".to_string() + &token;
+
+    Ok(HttpResponse::Ok()
+        .insert_header(("Authorization", tok))
+        .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+        .json(user))
 }
 
 
