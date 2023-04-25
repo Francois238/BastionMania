@@ -16,7 +16,6 @@ pub struct Claims {
     pub last_name: String,
     pub mail: String,
     pub admin: bool,
-    pub method: i32, //Methode d'authentification, 1 keycloack, 0 authenf classique
     pub otp: Option<bool>,
     pub complete_authentication: bool, //Si par keycloack forcement ok sinon verifier mfa + changement mdp
     #[serde(with = "jwt_numeric_date")]
@@ -81,8 +80,8 @@ impl Claims {
         )
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        if !token_message.claims.admin && token_message.claims.method == 0 {
-            //Si c est un user et que la methode d authentification est classique
+        if !token_message.claims.admin {
+            //Si c est un user 
             return Ok(token_message.claims);
         }
 
