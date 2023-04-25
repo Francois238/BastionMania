@@ -37,7 +37,7 @@ pub async fn sign_in_basic(
     if is_valid {
         let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-        let my_claims = Claims::new_user(&user, 0,Some(false), false); //Creation du corps du token ici authenf classique
+        let my_claims = Claims::new_user(&user,Some(false), false); //Creation du corps du token ici authenf classique
 
         let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -65,7 +65,7 @@ async fn double_authentication(
 
     let change = user.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_user(&user, 0,Some(true), change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_user(&user,Some(true), change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -85,7 +85,7 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
 
     let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-    let my_claims = Claims::new_user(&user, 1,None, true); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_user(&user,None, true); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -133,7 +133,7 @@ async fn patch_user(
 
     let claims: Claims = Claims::verify_user_session_ext(&cred.claims)?; //verifie legitimite du user
 
-    if claims.id == id && claims.method == 0 {
+    if claims.id == id && claims.otp == Some(true) {
         //c'est bien le user lui meme qui veut changer ses creds et que 2FA est active
 
         User::update_password(id, cred)?;
@@ -156,7 +156,7 @@ async fn create_otp_user(
 
     let claims: Claims = Claims::verify_user_session_ext(&cred.claims)?; //verifie legitimite user
 
-    if claims.id == id && claims.method == 0 {
+    if claims.id == id {
         //c'est bien l'admin lui meme qui veut activer la mfa
 
         User::create_otp(id, cred.password)?;

@@ -36,7 +36,7 @@ pub async fn sign_in(
     if is_valid {
         let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
-        let my_claims = Claims::new_admin(&admin, 0, Some(false), false); //Creation du corps du token ici authenf classique
+        let my_claims = Claims::new_admin(&admin, Some(false), false); //Creation du corps du token ici authenf classique
 
         let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -64,7 +64,7 @@ async fn double_authentication(
 
     let change = admin.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_admin(&admin, 0, Some(true),change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_admin(&admin, Some(true),change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -84,7 +84,7 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
 
     let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
-    let my_claims = Claims::new_admin(&admin, 1, None, true); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_admin(&admin, None, true); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -132,7 +132,7 @@ async fn patch_admin(
 
     let claims: Claims = Claims::verify_admin_session_ext(&cred.claims)?; //verifie legitimite admin
 
-    if claims.id == id && claims.method == 0 && claims.otp == Some(true) {
+    if claims.id == id && claims.otp == Some(true) {
         //c'est bien l'admin lui meme qui veut changer ses creds
 
         Admin::update_password(id, cred)?;
@@ -156,7 +156,7 @@ async fn create_otp_admin(
 
     let claims: Claims = Claims::verify_admin_session_ext(&cred.claims)?; //verifie legitimite admin
 
-    if claims.id == id && claims.method == 0 {
+    if claims.id == id {
         //c'est bien l'admin lui meme qui veut activer la mfa
 
         Admin::create_otp(id, cred.password)?;
