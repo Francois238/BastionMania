@@ -22,12 +22,28 @@ CREATE TABLE "ressource"
     id           INT PRIMARY KEY,
     id_bastion   INT NOT NULL,
     name         TEXT NOT NULL,
-    type         TEXT NOT NULL,
-    id_wireguard TEXT NOT NULL,
-    id_ssh       TEXT NOT NULL,
-    id_k8s       TEXT NOT NULL
+    rtype         TEXT NOT NULL,
+    id_wireguard INT ,
+    id_ssh       INT ,
+    id_k8s       INT
 );
 
+CREATE TABLE wireguardressource(
+    id INT PRIMARY KEY,
+    name TEXT NOT NULL,
+    subnet_cidr TEXT NOT NULL
+);
 
+CREATE TABLE sshressource(
+    id INT PRIMARY KEY,
+    name TEXT NOT NULL,
+    ip_machine TEXT NOT NULL
+);
+
+CREATE TABLE k8sressource(
+    id INT PRIMARY KEY,
+    name TEXT NOT NULL,
+    ip_cluster TEXT NOT NULL
+);
 
 

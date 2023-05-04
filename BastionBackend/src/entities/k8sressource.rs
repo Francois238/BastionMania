@@ -1,17 +1,18 @@
-use diesel::{Queryable, AsChangeset, Insertable};
-use serde::{Serialize, Deserialize};
 use crate::schema::k8sressource;
+use diesel::{AsChangeset, Insertable, Queryable};
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable; Serialize)]
-pub struct K8sRessource{
-    pub name: string,
-    pub ip_cluster: string,
-
+pub struct K8sRessource {
+    pub id: i32,
+    pub name: String,
+    pub ip_cluster: String,
 }
 
 #[derive(Serialize, Deserialize, AsChangeset, Insertable)]
-#[table_name="k8sressource"]
-pub struct K8sRessourceInsertable{
-    pub name: string,
-    pub ip_cluster: string,
+#[table_name = "k8sressource"]
+pub struct K8sRessourceInsertable {
+    pub id: i32,
+    pub name: String,
+    pub ip_cluster: String,
 }

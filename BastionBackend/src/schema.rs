@@ -13,7 +13,8 @@ diesel::table! {
 }
 
 diesel::table! {
-    k8sSession (name) {
+    k8sressource (id) {
+        id -> Int4,
         name -> Text,
         ip_cluster -> Text,
     }
@@ -21,36 +22,21 @@ diesel::table! {
 
 diesel::table! {
     ressource (id) {
-        id -> Text,
-        id_bastion -> Text,
+        id -> Int4,
+        id_bastion -> Int4,
         name -> Text,
-        #[sql_name = "type"]
-        type_ -> Text,
-        id_wireguard -> Text,
-        id_ssh -> Text,
-        id_k8s -> Text,
+        rtype -> Text,
+        id_wireguard -> Nullable<Int4>,
+        id_ssh -> Nullable<Int4>,
+        id_k8s -> Nullable<Int4>,
     }
 }
 
 diesel::table! {
-    session (id) {
-        id -> Text,
-        id_ressource -> Text,
-        id_user -> Text,
-        temps_fin -> Int4,
-    }
-}
-
-diesel::table! {
-    sshSession (name) {
+    sshressource (id) {
+        id -> Int4,
         name -> Text,
         ip_machine -> Text,
-    }
-}
-
-diesel::table! {
-    user (id) {
-        id -> Int4,
     }
 }
 
@@ -65,19 +51,18 @@ diesel::table! {
 }
 
 diesel::table! {
-    wireguardSession (name) {
+    wireguardressource (id) {
+        id -> Int4,
         name -> Text,
-        target_cidr -> Text,
+        subnet_cidr -> Text,
     }
 }
 
 diesel::allow_tables_to_appear_in_same_query!(
     bastion,
-    k8sSession,
+    k8sressource,
     ressource,
-    session,
-    sshSession,
-    user,
+    sshressource,
     users,
-    wireguardSession,
+    wireguardressource,
 );

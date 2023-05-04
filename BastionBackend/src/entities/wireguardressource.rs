@@ -1,17 +1,18 @@
-use diesel::{Queryable, AsChangeset, Insertable};
-use serde::{Serialize, Deserialize};
 use crate::schema::wireguardressource;
+use diesel::{AsChangeset, Insertable, Queryable};
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable; Serialize)]
-pub struct WireguardRessource{
-    pub name: string,
-    pub target_cidr: string,
-
+pub struct WireguardRessource {
+    pub id: i32,
+    pub name: String,
+    pub target_cidr: String,
 }
 
 #[derive(Serialize, Deserialize, AsChangeset, Insertable)]
-#[table_name="wireguardressource"]
-pub struct WireguardRessourceInsertable{
-    pub name: string,
-    pub target_cidr: string,
+#[table_name = "wireguardressource"]
+pub struct WireguardRessourceInsertable {
+    pub id: i32,
+    pub name: String,
+    pub target_cidr: String,
 }

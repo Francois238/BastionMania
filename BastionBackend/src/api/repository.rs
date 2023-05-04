@@ -1,114 +1,106 @@
-
 use std::env;
 
 //use crate::schema::to_user_config::publikey;
-use crate::{api_error::ApiError};
+use crate::api_error::ApiError;
 use crate::db;
-use crate::schema::{bastion, users, ressource};
+use crate::entities::{Bastion, BastionInsertable, Ressource, RessourceInsertable, Users, UsersModification};
 use crate::model::{BastionModification, Claims, UsersInstanceCreate};
-use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
-use diesel::query_dsl::RunQueryDsl;
-use wireguard_keys;
+use crate::schema::users::wireguard;
+use crate::schema::{bastion, ressource, users};
 use actix_session::Session;
 use actix_web::Result;
 use diesel::associations::HasTable;
 use diesel::dsl::Update;
 use diesel::prelude::*;
+use diesel::query_dsl::RunQueryDsl;
 use diesel::row::NamedRow;
+use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
-use time::{OffsetDateTime};
-use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
-use crate::schema::users::wireguard;
+use time::OffsetDateTime;
+use wireguard_keys;
 
-
-impl Claims{
-    pub fn verifier_session_admin(session : &Session) -> Option<Claims> { //Fct pour verifier valider du JWT
-
-        let session = session.get::<String>("claim");
-
-        let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
-
-        match session {
-
-            Ok(data_session) => {
-
-                match data_session {
-
-                    Some(data) =>{
-                        let token_message = decode::<Claims>(&data, &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256));
-
-                        match token_message{
-                            Ok(claim) => {
-                                let my_claims = claim.claims;
-
-                                if my_claims.admin ==true && my_claims.change_password == true &&  my_claims.complete_authentication==true{
-                                    Some(my_claims)
-                                }
-                                else{
-                                    None
-                                }
-                            },
-                            _=> None
-                        }
-
-                    },
-                    _ => None
-                }
-
-
-            },
-            _ => None
-        }
-    }
-
-    pub fn verifier_session_user(session : &Session) -> Option<Claims> { //Fct pour verifier valider du JWT
+impl Claims {
+    pub fn verifier_session_admin(session: &Session) -> Option<Claims> {
+        //Fct pour verifier valider du JWT
 
         let session = session.get::<String>("claim");
 
         let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
 
         match session {
+            Ok(data_session) => match data_session {
+                Some(data) => {
+                    let token_message = decode::<Claims>(
+                        &data,
+                        &DecodingKey::from_secret(secret.as_ref()),
+                        &Validation::new(Algorithm::HS256),
+                    );
 
-            Ok(data_session) => {
+                    match token_message {
+                        Ok(claim) => {
+                            let my_claims = claim.claims;
 
-                match data_session {
-
-                    Some(data) =>{
-                        let token_message = decode::<Claims>(&data, &DecodingKey::from_secret(secret.as_ref()), &Validation::new(Algorithm::HS256));
-
-                        match token_message{
-                            Ok(claim) => {
-                                let my_claims = claim.claims;
-
-                                if my_claims.admin ==false && my_claims.change_password == true &&  my_claims.complete_authentication==true{
-                                    Some(my_claims)
-                                }
-                                else{
-                                    None
-                                }
-                            },
-                            _=> None
+                            if my_claims.admin == true
+                                && my_claims.change_password == true
+                                && my_claims.complete_authentication == true
+                            {
+                                Some(my_claims)
+                            } else {
+                                None
+                            }
                         }
-
-                    },
-                    _ => None
+                        _ => None,
+                    }
                 }
-
-
+                _ => None,
             },
-            _ => None
+            _ => None,
         }
     }
 
+    pub fn verifier_session_user(session: &Session) -> Option<Claims> {
+        //Fct pour verifier valider du JWT
 
+        let session = session.get::<String>("claim");
+
+        let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
+
+        match session {
+            Ok(data_session) => match data_session {
+                Some(data) => {
+                    let token_message = decode::<Claims>(
+                        &data,
+                        &DecodingKey::from_secret(secret.as_ref()),
+                        &Validation::new(Algorithm::HS256),
+                    );
+
+                    match token_message {
+                        Ok(claim) => {
+                            let my_claims = claim.claims;
+
+                            if my_claims.admin == false
+                                && my_claims.change_password == true
+                                && my_claims.complete_authentication == true
+                            {
+                                Some(my_claims)
+                            } else {
+                                None
+                            }
+                        }
+                        _ => None,
+                    }
+                }
+                _ => None,
+            },
+            _ => None,
+        }
+    }
 }
-
 
 impl Bastion {
     pub fn find_all() -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
-        let un_bastion = bastion::table
-            .load::<Bastion>(&mut conn)?;
+        let un_bastion = bastion::table.load::<Bastion>(&mut conn)?;
         Ok(un_bastion)
     }
 
@@ -120,20 +112,20 @@ impl Bastion {
         Ok(newbastion)
     }
 
-
-// /bastion/{bastion_id} endpoint =================================================================
+    // /bastion/{bastion_id} endpoint =================================================================
 
     pub fn find_un_bastion(id: i32) -> Result<Bastion, ApiError> {
         let mut conn = db::connection()?;
 
-        let bastion = bastion::table
-            .filter(bastion::id.eq(id))
-            .first(&mut conn)?;
+        let bastion = bastion::table.filter(bastion::id.eq(id)).first(&mut conn)?;
 
         Ok(bastion)
     }
 
-    pub fn update_un_bastion(id: i32, modifications: BastionModification) -> Result<Bastion, ApiError> {
+    pub fn update_un_bastion(
+        id: i32,
+        modifications: BastionModification,
+    ) -> Result<Bastion, ApiError> {
         let mut conn = db::connection()?;
 
         let name = modifications.name;
@@ -142,9 +134,11 @@ impl Bastion {
 
         let bastion = diesel::update(bastion::table)
             .filter(bastion::id.eq(id))
-            .set((bastion::name.eq(name),
-                  bastion::subnet_cidr.eq(subnet_cidr),
-                  bastion::agent_endpoint.eq(agent_endpoint)))
+            .set((
+                bastion::name.eq(name),
+                bastion::subnet_cidr.eq(subnet_cidr),
+                bastion::agent_endpoint.eq(agent_endpoint),
+            ))
             .get_result(&mut conn)?;
 
         Ok(bastion)
@@ -153,29 +147,24 @@ impl Bastion {
     pub fn delete_un_bastion(id: i32) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
-        let bastion = diesel::delete(
-            bastion::table
-                .filter(bastion::id.eq(id))
-        )
-            .execute(&mut conn)?;
+        let bastion =
+            diesel::delete(bastion::table.filter(bastion::id.eq(id))).execute(&mut conn)?;
 
         Ok(bastion)
     }
 
     pub fn verification_appartenance(user_id: i32, bastion_id: i32) -> Result<bool, ApiError> {
-
         let mut conn = db::connection()?;
 
         let users: Vec<Users> = users::table
-                .filter(users::user_id.eq(user_id))
-                .filter(users::bastion_id.eq(bastion_id))
-                .load::<Users>(&mut conn)?;
+            .filter(users::user_id.eq(user_id))
+            .filter(users::bastion_id.eq(bastion_id))
+            .load::<Users>(&mut conn)?;
 
         Ok(!users.is_empty())
     }
 
     pub fn bastion_user(user_id: i32) -> Result<Vec<Users>, ApiError> {
-
         let mut conn = db::connection()?;
 
         let users: Vec<Users> = users::table
@@ -188,14 +177,13 @@ impl Bastion {
 
 // /bastion/{bastion_id}/users
 
-impl Users{
+impl Users {
     pub fn find_users_bastion(_bastion_id: i32) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_users = users::table
             .filter(users::bastion_id.eq(_bastion_id))
             .load::<Users>(&mut conn)?;
         Ok(des_users)
-
     }
 
     pub fn create_users(users: UsersModification) -> Result<Users, ApiError> {
@@ -222,40 +210,36 @@ impl Users{
     pub fn delete_all_users(bastion_id: i32) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
-        let user = diesel::delete(
-            users::table
-                .filter(users::bastion_id.eq(bastion_id))
-        )
+        let user = diesel::delete(users::table.filter(users::bastion_id.eq(bastion_id)))
             .execute(&mut conn)?;
 
         Ok(user)
     }
 
-    pub fn delete_un_user(bastion_id: i32, user_id:i32) -> Result<usize, ApiError> {
+    pub fn delete_un_user(bastion_id: i32, user_id: i32) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
         let user = diesel::delete(
             users::table
                 .filter(users::user_id.eq(user_id))
-                .filter(users::bastion_id.eq(bastion_id))
+                .filter(users::bastion_id.eq(bastion_id)),
         )
-            .execute(&mut conn)?;
+        .execute(&mut conn)?;
 
         Ok(user)
     }
-
 }
 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard
 
-pub fn build_client_address(bastion_id:i32, user_id: i32) -> Result<String, ApiError> {
+pub fn build_client_address(bastion_id: i32, user_id: i32) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
-    let bastion:Bastion = bastion::table
+    let bastion: Bastion = bastion::table
         .filter(bastion::id.eq(bastion_id))
         .first(&mut conn)?;
 
-    let user:Users = users::table
+    let user: Users = users::table
         .filter(users::user_id.eq(user_id))
         .filter(users::bastion_id.eq(bastion_id))
         .first(&mut conn)?;
@@ -271,7 +255,7 @@ pub fn build_client_address(bastion_id:i32, user_id: i32) -> Result<String, ApiE
 pub fn build_endpoint_user(bastion_ip: String, bastion_id: i32) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
-    let bastion:Bastion = bastion::table
+    let bastion: Bastion = bastion::table
         .filter(bastion::id.eq(bastion_id))
         .first(&mut conn)?;
 
@@ -285,7 +269,7 @@ pub fn build_endpoint_user(bastion_ip: String, bastion_id: i32) -> Result<String
 pub fn get_bastion_public_key(bastion_id: i32) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
-    let bastion:Bastion = bastion::table
+    let bastion: Bastion = bastion::table
         .filter(bastion::id.eq(bastion_id))
         .first(&mut conn)?;
 
@@ -295,7 +279,7 @@ pub fn get_bastion_public_key(bastion_id: i32) -> Result<String, ApiError> {
 pub fn get_bastion_subnet_cidr(bastion_id: i32) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
-    let bastion:Bastion = bastion::table
+    let bastion: Bastion = bastion::table
         .filter(bastion::id.eq(bastion_id))
         .first(&mut conn)?;
 
@@ -315,23 +299,40 @@ pub fn update_un_user(user_id: i32, bool: bool) -> Result<Users, ApiError> {
 
 // /bastion/{bastion_id}/ressources        ===================================================================
 
-impl Ressources{
-    pub fn find_all_ressources() -> Result<Vec<Self>, ApiError> {
+impl Ressource {
+    pub fn find_all_ressources(id_bastion: i32) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_ressources = ressource::table
-            .load::<Ressources>(&mut conn)?;
+            .filter(ressource::id_bastion.eq(id_bastion))
+            .load::<Ressource>(&mut conn)?;
         Ok(des_ressources)
     }
 
-    pub fn find_a_ressource(id: i32, id_bastion: i32) ->Result<Vec<Self>, ApiError>{
+    pub fn create_ressources(ressource: RessourceInsertable) -> Result<Ressource, ApiError> {
+        let mut conn = db::connection()?;
+        let newressource: Ressource = diesel::insert_into(ressource::table)
+            .values(ressource)
+            .get_result(&mut conn)?;
+        Ok(newressource)
+    }
+
+    pub fn find_a_ressource(id: i32, id_bastion: i32) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let une_ressource = ressource::table
+            .filter(ressource::id_bastion.eq(id_bastion))
             .filter(ressource::id.eq(id))
-            .filter(ressource::bastion_id.eq(id_bastion))
-            .load::<Ressources>(&mut conn)?;
+            .load::<Ressource>(&mut conn)?;
         Ok(une_ressource)
     }
+
+    pub fn delete_a_ressource(id: i32, id_bastion: i32) -> Result<usize, ApiError> {
+        let mut conn = db::connection()?;
+        let ressource = diesel::delete(
+            ressource::table
+                .filter(ressource::id_bastion.eq(id_bastion))
+                .filter(ressource::id.eq(id)),
+        )
+        .execute(&mut conn)?;
+        Ok(ressource)
+    }
 }
-
-
-
