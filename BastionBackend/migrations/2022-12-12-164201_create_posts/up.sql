@@ -19,8 +19,8 @@ CREATE TABLE "users"(
 
 CREATE TABLE "ressource"
 (
-    id           TEXT PRIMARY KEY,
-    id_bastion   TEXT NOT NULL,
+    id           INT PRIMARY KEY,
+    id_bastion   INT NOT NULL,
     name         TEXT NOT NULL,
     type         TEXT NOT NULL,
     id_wireguard TEXT NOT NULL,
@@ -28,29 +28,6 @@ CREATE TABLE "ressource"
     id_k8s       TEXT NOT NULL
 );
 
-CREATE TABLE "session"
-(
-    id           TEXT PRIMARY KEY,
-    id_ressource TEXT NOT NULL,
-    id_user      TEXT NOT NULL,
-    temps_fin    INT  NOT NULL
-);
 
-CREATE TABLE "wireguardSession"
-(
-    name        TEXT PRIMARY KEY,
-    target_cidr TEXT NOT NULL
-);
 
-CREATE TABLE "sshSession"
-(
-    name       TEXT PRIMARY KEY,
-    ip_machine TEXT NOT NULL
-);
-
-CREATE TABLE "k8sSession"
-(
-    name       TEXT PRIMARY KEY,
-    ip_cluster TEXT NOT NULL
-);
 

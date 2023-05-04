@@ -434,6 +434,142 @@
           }
         ]
       }
+    },
+    "/bastions/{bastion_id}/ressources": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ressource"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "operationId": "get-bastions-bastion_id-ressources",
+        "description": "affiches l'ensemble des ressources accessible par le bastion"
+      },
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ressource"
+                }
+              }
+            }
+          }
+        },
+        "description": "crée une nouvelle ressource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            },
+            "text/html": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "description": ""
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/{ressource_id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "supprimé"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "operationId": "get-bastions-bastion_id-ressources-ressource_id",
+        "description": "affiche une ressource"
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastions-bastion_id-ressources-ressource_id",
+        "responses": {
+          "200": {
+            "description": "supprimé"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "description": "enlève la ressource en bdd"
+      }
     }
   },
   "components": {
@@ -602,6 +738,102 @@
             "type": "string"
           },
           "subnet_cidr": {
+            "type": "string"
+          }
+        }
+      },
+      "Ressource": {
+        "title": "Ressource",
+        "x-stoplight": {
+          "id": "d0bmhpfa1r0ur"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "id_bastion": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "id_wireguard": {
+            "type": "string"
+          },
+          "id_ssh": {
+            "type": "string"
+          },
+          "id_k8s": {
+            "type": "string"
+          }
+        }
+      },
+      "Session": {
+        "title": "Session",
+        "x-stoplight": {
+          "id": "lzh3o37p0313i"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "id_ressource": {
+            "type": "string"
+          },
+          "id_user": {
+            "type": "string"
+          },
+          "temps_fin": {
+            "type": "integer"
+          }
+        }
+      },
+      "WireguardRessource": {
+        "title": "WireguardSession",
+        "x-stoplight": {
+          "id": "zje9fgakvkvo6"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "target_cidr": {
+            "type": "string"
+          }
+        }
+      },
+      "SSHRessource": {
+        "title": "SSHSession",
+        "x-stoplight": {
+          "id": "iv8pont40w0et"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ip_machine": {
+            "type": "string"
+          }
+        }
+      },
+      "K8SRessource": {
+        "title": "K8SRessource",
+        "x-stoplight": {
+          "id": "2lxax15vi5fyu"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "ip_cluster": {
             "type": "string"
           }
         }

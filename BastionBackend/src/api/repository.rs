@@ -4,7 +4,7 @@ use std::env;
 //use crate::schema::to_user_config::publikey;
 use crate::{api_error::ApiError};
 use crate::db;
-use crate::schema::{bastion, users};
+use crate::schema::{bastion, users, ressource};
 use crate::model::{BastionModification, Claims, UsersInstanceCreate};
 use crate::entities::{Bastion, BastionInsertable, Users, UsersModification};
 use diesel::query_dsl::RunQueryDsl;
@@ -315,7 +315,23 @@ pub fn update_un_user(user_id: i32, bool: bool) -> Result<Users, ApiError> {
 
 // /bastion/{bastion_id}/ressources        ===================================================================
 
+impl Ressources{
+    pub fn find_all_ressources() -> Result<Vec<Self>, ApiError> {
+        let mut conn = db::connection()?;
+        let des_ressources = ressource::table
+            .load::<Ressources>(&mut conn)?;
+        Ok(des_ressources)
+    }
 
+    pub fn find_a_ressource(id: i32, id_bastion: i32) ->Result<Vec<Self>, ApiError>{
+        let mut conn = db::connection()?;
+        let une_ressource = ressource::table
+            .filter(ressource::id.eq(id))
+            .filter(ressource::bastion_id.eq(id_bastion))
+            .load::<Ressources>(&mut conn)?;
+        Ok(une_ressource)
+    }
+}
 
 
 
