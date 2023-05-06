@@ -97,14 +97,12 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
         .json(user))
 }
 
-#[patch("/login/extern")] //activer authentification externe
+#[patch("/login/enable_extern")] //activer authentification externe
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
 
     let claims = Claims::verify_user_session_first(req)?; //verifie legitimite user
 
-    let user = User::enable_extern(claims.mail)?;
-
-    let _user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
+    let _user = User::enable_extern(claims.mail)?;
 
     Ok(HttpResponse::Ok()
         .finish())

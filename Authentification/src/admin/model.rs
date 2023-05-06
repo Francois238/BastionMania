@@ -225,8 +225,8 @@ impl Admin {
             .filter(admins::mail.eq(mail.clone()))
             .first(&mut conn)?;
 
-        if admin_verif.password.is_none()  || admin_verif.otpactive.is_none() {
-            //Si l admin utilise deja Keyckoak
+        if admin_verif.password.is_none()  || admin_verif.otpactive.is_none() || admin_verif.otpactive == Some(true) {
+            //Si l admin utilise deja Keyckoak ou qu'il utilise deja entierement l authenf classique
             return Err(ApiError::new(403, "Interdit".to_string()));
         }
 

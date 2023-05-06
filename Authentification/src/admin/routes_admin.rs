@@ -3,7 +3,7 @@ use crate::{admin::*, tools::password_management::verify_password};
 
 use crate::tools::claims::Claims;
 use crate::tools::keycloak::Keycloak;
-use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse};
+use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, get};
 use uuid::Uuid;
 
 //Pour s'enregistrer en tant qu'admin
@@ -76,7 +76,7 @@ async fn double_authentication(
         .json(admin))
 }
 
-#[post("/login/admin/extern")]
+#[get("/login/admin/extern")]
 async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
     let mail = Keycloak::get_token(&req)?;
 
@@ -96,27 +96,16 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
         .json(admin))
 }
 
-#[patch("/login/admin/extern")]
+#[patch("/login/admin/enable_extern")]
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
 
-    let _mail = Keycloak::get_token(&req)?;
 
     let claims = Claims::verify_admin_session_first(req)?; //verifie legitimite admin
 
-    let admin = Admin::enable_extern(claims.mail)?;
-
-    let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
-
-    let my_claims = Claims::new_admin(&admin, None, true); //Creation du corps du token, true car 2FA etablie
-
-    let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
-
-    let tok = "Bearer ".to_string() + &token;
+    let _admin = Admin::enable_extern(claims.mail)?;
 
     Ok(HttpResponse::Ok()
-        .insert_header(("Authorization", tok))
-        .insert_header(("Access-Control-Expose-Headers", "Authorization"))
-        .json(admin))
+        .finish())
 
 }
 

@@ -204,7 +204,7 @@ impl User {
             .filter(users::mail.eq(mail.clone()))
             .first(&mut conn)?;
 
-        if user_verif.password.is_none()  || user_verif.otpactive.is_none() {
+        if user_verif.password.is_none()  || user_verif.otpactive.is_none() || user_verif.otpactive == Some(true) {
             //Si le user utilise deja Keyckoak
             return Err(ApiError::new(403, "Interdit".to_string()));
         }
