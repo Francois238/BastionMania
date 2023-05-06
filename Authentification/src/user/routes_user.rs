@@ -4,7 +4,7 @@ use crate::user::*;
 
 use crate::tools::claims::Claims;
 use crate::tools::password_management::verify_password;
-use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse};
+use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, get};
 use uuid::Uuid;
 
 //Pour s'enregistrer en tant que user
@@ -77,11 +77,11 @@ async fn double_authentication(
         .json(user))
 }
 
-#[post("/login/extern")]
+#[get("/login/extern")]
 async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
     let mail = Keycloak::get_token(&req)?;
 
-    let user = User::find_by_mail(mail)?;
+    let user = User::find_extern(mail)?;
 
     let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
@@ -97,26 +97,17 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
         .json(user))
 }
 
-#[patch("/login/extern")]
+#[patch("/login/extern")] //activer authentification externe
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
-    let _mail = Keycloak::get_token(&req)?;
 
     let claims = Claims::verify_user_session_first(req)?; //verifie legitimite user
 
     let user = User::enable_extern(claims.mail)?;
 
-    let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
-
-    let my_claims = Claims::new_user(&user,None, true); //Creation du corps du token, true car 2FA etablie
-
-    let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
-
-    let tok = "Bearer ".to_string() + &token;
+    let _user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
     Ok(HttpResponse::Ok()
-        .insert_header(("Authorization", tok))
-        .insert_header(("Access-Control-Expose-Headers", "Authorization"))
-        .json(user))
+        .finish())
 }
 
 

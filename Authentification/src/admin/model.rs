@@ -200,6 +200,22 @@ impl Admin {
         }
     }
 
+    pub fn find_extern(mail : String) -> Result<Self, ApiError> {
+
+        let mut conn = db::connection()?;
+
+        let admin_verif: Admin = admins::table
+            .filter(admins::mail.eq(mail.clone()))
+            .first(&mut conn)?;
+
+        if !admin_verif.password.is_none()  || !admin_verif.otpactive.is_none() {
+            //Si l admin utilise pas Keyckoak
+            return Err(ApiError::new(403, "Interdit".to_string()));
+        }
+
+        Ok(admin_verif)
+    } 
+
 
     pub fn enable_extern(mail : String) -> Result<Self, ApiError> {
 

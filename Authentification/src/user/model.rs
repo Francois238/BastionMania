@@ -218,6 +218,23 @@ impl User {
         Ok(admin)
     }
 
+
+    pub fn find_extern(mail : String) -> Result<Self, ApiError> {
+
+        let mut conn = db::connection()?;
+
+        let user_verif: User = users::table
+            .filter(users::mail.eq(mail.clone()))
+            .first(&mut conn)?;
+
+        if !user_verif.password.is_none()  || !user_verif.otpactive.is_none() {
+            //Si l admin utilise pas Keyckoak
+            return Err(ApiError::new(403, "Interdit".to_string()));
+        }
+
+        Ok(user_verif)
+    } 
+
     pub fn delete(id: Uuid) -> Result<usize, ApiError> {
         //Supprimer un user de la BDD
         let mut conn = db::connection()?;

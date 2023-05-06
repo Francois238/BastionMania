@@ -80,7 +80,7 @@ async fn double_authentication(
 async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
     let mail = Keycloak::get_token(&req)?;
 
-    let admin = Admin::find_by_mail(mail)?;
+    let admin = Admin::find_extern(mail)?;
 
     let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
