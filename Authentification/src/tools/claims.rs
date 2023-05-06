@@ -12,8 +12,6 @@ use uuid::Uuid;
 pub struct Claims {
     //Struture composant le JWT
     pub id: Uuid,
-    pub name: String,
-    pub last_name: String,
     pub mail: String,
     pub admin: bool,
     pub otp: Option<bool>, //Si l'otp est actif
@@ -81,8 +79,6 @@ impl Claims {
 
         Claims {
             id: user.id,
-            name: user.name.clone(),
-            last_name: user.last_name.clone(),
             mail: user.mail.clone(),
             admin: false,
             otp,
@@ -100,8 +96,6 @@ impl Claims {
 
         Claims {
             id: admin.id,
-            name: admin.name.clone(),
-            last_name: admin.last_name.clone(),
             mail: admin.mail.clone(),
             admin: true,
             otp,
