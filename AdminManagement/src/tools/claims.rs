@@ -12,8 +12,6 @@ use super::ApiError;
 pub struct Claims {
     //Struture composant le JWT
     pub id: Uuid,
-    pub name: String,
-    pub last_name: String,
     pub mail: String,
     pub admin: bool,
     pub otp: Option<bool>,
