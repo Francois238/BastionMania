@@ -8,15 +8,22 @@ RUN cargo build --release
 
 FROM ubuntu:23.04
 
-COPY --from=build /app/target/release/admin_management /admin_management
-
 RUN  apt-get update \
   && apt-get install -y libpq-dev openssl wget\
     && wget http://nz2.archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
     && dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
-  && rm -rf /var/lib/apt/lists/*
+    && apt-get remove -y wget \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m runner 
 
+COPY --from=build /app/target/release/admin_management /home/runner/app/admin_management
+
+RUN chown -R runner:runner /home/runner/app/
 
 EXPOSE 8081
 
-CMD ["/admin_management"]
+USER runner
+
+WORKDIR /home/runner/app/
+
+ENTRYPOINT ["./admin_management"]
