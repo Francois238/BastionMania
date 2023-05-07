@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 //Pour s'enregistrer en tant qu'admin
 
-#[post("/login/admin")]
+#[post("/api/login/admin")]
 pub async fn sign_in(
     credentials: web::Json<AdminAuthentication>,
 ) -> Result<HttpResponse, ApiError> {
@@ -51,7 +51,7 @@ pub async fn sign_in(
     }
 }
 
-#[post("/login/admin/otp")]
+#[post("/api/login/admin/otp")]
 async fn double_authentication(
     req: HttpRequest,
     credentials: web::Json<CodeOtp>,
@@ -76,7 +76,7 @@ async fn double_authentication(
         .json(admin))
 }
 
-#[get("/login/admin/extern")]
+#[get("/api/login/admin/extern")]
 async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
     let mail = Keycloak::get_token(&req)?;
 
@@ -96,7 +96,7 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
         .json(admin))
 }
 
-#[patch("/login/admin/enable_extern")]
+#[patch("/api/login/admin/enable_extern")]
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
 
 

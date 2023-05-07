@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 //Pour s'enregistrer en tant que user
 
-#[post("/login")]
+#[post("/api/login")]
 pub async fn sign_in_basic(
     credentials: web::Json<UserAuthentication>,
 ) -> Result<HttpResponse, ApiError> {
@@ -52,7 +52,7 @@ pub async fn sign_in_basic(
     }
 }
 
-#[post("/login/otp")]
+#[post("/api/login/otp")]
 async fn double_authentication(
     req: HttpRequest,
     credentials: web::Json<CodeOtp>,
@@ -77,7 +77,7 @@ async fn double_authentication(
         .json(user))
 }
 
-#[get("/login/extern")]
+#[get("/api/login/extern")]
 async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
     let mail = Keycloak::get_token(&req)?;
 
@@ -97,7 +97,7 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
         .json(user))
 }
 
-#[patch("/login/enable_extern")] //activer authentification externe
+#[patch("/api/login/enable_extern")] //activer authentification externe
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
 
     let claims = Claims::verify_user_session_first(req)?; //verifie legitimite user
