@@ -3,11 +3,10 @@ pub mod ssh;
 pub mod wireguard;
 
 pub mod bastionconfig;
-pub mod model;
-pub mod persistance;
-pub mod startup;
-pub mod wgconfigure;
 pub mod consts;
+pub mod startup;
+pub mod init;
+pub mod database;
 
-pub use model::*;
 pub use bastionconfig::BastionConfig;
+pub use wireguard::model::*;
