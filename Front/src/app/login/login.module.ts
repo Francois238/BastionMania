@@ -6,15 +6,18 @@ import {LoginComponent} from './login.component';
 import {MatIconModule} from "@angular/material/icon";
 import {MatListModule} from "@angular/material/list";
 import {MatButtonModule} from "@angular/material/button";
-import {PageOTPComponent} from '../page-otp/page-otp.component';
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatRippleModule} from "@angular/material/core";
+import { AdminComponent } from './admin/admin.component';
+import { UserComponent } from './user/user.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
   declarations: [
     LoginComponent,
-    PageOTPComponent,
+    AdminComponent,
+    UserComponent,
   ],
   imports: [
     CommonModule,
@@ -23,7 +26,8 @@ import {MatRippleModule} from "@angular/material/core";
     MatListModule,
     MatButtonModule,
     MatToolbarModule,
-    MatRippleModule
+    MatRippleModule,
+    ReactiveFormsModule
   ]
 })
 export class LoginModule { }
