@@ -5,14 +5,17 @@ use std::process::Command;
 use serde::{Deserialize, Serialize};
 
 use crate::consts::*;
+use crate::database::BastionDatabase;
 use crate::ssh::authorized_keys::{AuthorizedKey, AuthorizedKeys};
 use crate::ssh::user::SSHUser;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SSHRessource {
+    pub id: String,
     pub name: String,
     pub ip: String,
     pub port: u16,
+    pub users: Vec<SSHUser>,
 }
 
 fn add_system_user(name: &str) -> Result<(), String> {
@@ -21,9 +24,12 @@ fn add_system_user(name: &str) -> Result<(), String> {
         .arg(name)
         .output()
         .map_err(|e| format!("Error adding user: {}", e))?;
-    output.status.success()
-        .then(|| ())
-        .ok_or_else(|| format!("Error adding user: {}", String::from_utf8_lossy(&output.stderr)))?;
+    output.status.success().then(|| ()).ok_or_else(|| {
+        format!(
+            "Error adding user: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )
+    })?;
     Ok(())
 }
 
@@ -33,9 +39,12 @@ fn unlock_system_user(name: &str) -> Result<(), String> {
         .arg(name)
         .output()
         .map_err(|e| format!("Error unlocking user: {}", e))?;
-    output.status.success()
-        .then(|| ())
-        .ok_or_else(|| format!("Error unlocking user: {}", String::from_utf8_lossy(&output.stderr)))?;
+    output.status.success().then(|| ()).ok_or_else(|| {
+        format!(
+            "Error unlocking user: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )
+    })?;
     Ok(())
 }
 
@@ -52,9 +61,10 @@ fn create_authorized_keys_file(name: &str) -> Result<(), String> {
 }
 
 fn save_ressource(ressource: &SSHRessource) -> Result<(), String> {
-    let ressource_json = serde_json::to_string(&ressource)
-        .map_err(|e| format!("Error serializing ressource: {}", e))?;
-    fs::write(format!("/home/{}/.ressource", ressource.name), ressource_json)
+    let mut database =
+        BastionDatabase::get().map_err(|e| format!("Error loading database: {}", e))?;
+    database
+        .add_ssh(ressource.clone())
         .map_err(|e| format!("Error saving ressource: {}", e))?;
     Ok(())
 }
@@ -69,10 +79,12 @@ impl SSHRessource {
         Ok(())
     }
     pub fn from_name(name: &str) -> Result<SSHRessource, String> {
-        let ressource_json = fs::read_to_string(format!("/home/{}/.ressource", name))
-            .map_err(|e| format!("Error loading ressource: {}", e))?;
-        serde_json::from_str(&ressource_json)
-            .map_err(|e| format!("Error deserializing ressource: {}", e))
+        let database =
+            BastionDatabase::get().map_err(|e| format!("Error loading database: {}", e))?;
+        let ressource = database
+            .get_ssh_by_name(name)
+            .ok_or_else(|| format!("Ressource {} not found", name))?;
+        Ok(ressource.clone())
     }
 
     pub fn add_user(&self, user: &SSHUser) -> Result<(), String> {

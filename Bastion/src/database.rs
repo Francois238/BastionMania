@@ -1,3 +1,4 @@
+use crate::WireguardRessource;
 use crate::ssh::ressource::SSHRessource;
 use serde::{Deserialize, Serialize};
 use std::io;
@@ -6,25 +7,15 @@ use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BastionDatabase {
-    resources: Vec<Resource>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Resource {
-    pub id: String,
-    pub protocol: Protocol,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Protocol {
-    SSH(SSHRessource),
-    Wireguard,
+    ssh: Vec<SSHRessource>,
+    wireguard: Vec<WireguardRessource>,
 }
 
 impl BastionDatabase {
     fn new() -> Self {
         BastionDatabase {
-            resources: Vec::new(),
+            ssh: Vec::new(),
+            wireguard: Vec::new(),
         }
     }
 
@@ -49,48 +40,18 @@ impl BastionDatabase {
 }
 
 impl BastionDatabase {
-    pub fn add_resource(&mut self, resource: Resource) -> io::Result<()> {
-        self.resources.push(resource);
+    pub fn add_ssh(&mut self, ressource: SSHRessource) -> io::Result<()> {
+        self.ssh.push(ressource);
+        self.save()
+    }
+    
+    pub fn remove_ssh(&mut self, id: &str) -> io::Result<()> {
+        self.ssh.retain(|r| r.id != id);
         self.save()
     }
 
-    pub fn remove_resource(&mut self, resource_id: &str) -> io::Result<()> {
-        self.resources.retain(|r| r.id != resource_id);
-        self.save()
+    pub fn get_ssh_by_name(&self, name: &str) -> Option<&SSHRessource> {
+        self.ssh.iter().find(|r| r.name == name)
     }
 
-    pub fn get_resource(&self, resource_id: &str) -> Option<&Resource> {
-        self.resources.iter().find(|r| r.id == resource_id)
-    }
-
-    pub fn get_resources(&self) -> &Vec<Resource> {
-        &self.resources
-    }
-
-    pub fn get_resources_ssh(&self) -> Vec<&Resource>
-     {
-        self.resources
-            .iter()
-            .filter(|r| {
-                if let Protocol::SSH(_) = r.protocol {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect()
-    }
-
-    pub fn get_resources_wireguard(&self) -> Vec<&Resource> {
-        self.resources
-            .iter()
-            .filter(|r| {
-                if let Protocol::Wireguard = r.protocol {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect()
-    }
 }

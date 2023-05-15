@@ -21,5 +21,3 @@ impl PublicKey {
         format!("{} {}", self.algo, self.key)
     }
 }
-
-
