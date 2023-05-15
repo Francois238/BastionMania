@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
+actix-session = { version = "0.7.2", features = ["cookie-session"] }
 dotenvy = "0.15"
 diesel = { version = "2.0.0", features = ["postgres", "uuid"] }
 log = "0.4"

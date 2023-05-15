@@ -7,6 +7,8 @@ use super::ApiError;
 #[derive(Serialize, Deserialize)]
 pub struct Keycloak {
     pub email: String,
+    //pub given_name: String,
+    //pub family_name: String,
 }
 
 impl Keycloak {
@@ -30,10 +32,10 @@ impl Keycloak {
         let header = String::from_utf8(header)
             .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        let admin = serde_json::from_str::<Keycloak>(&header);
+        let claim = serde_json::from_str::<Keycloak>(&header);
 
-        let admin = admin.map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
+        let claim = claim.map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        Ok(admin.email)
+        Ok(claim.email)
     }
 }

@@ -1,4 +1,4 @@
-use crate::schema::users;
+use crate::{schema::users};
 use crate::tools::api_error::ApiError;
 use crate::tools::db;
 
@@ -228,7 +228,7 @@ impl User {
             .first(&mut conn)?;
 
         if !user_verif.password.is_none()  || !user_verif.otpactive.is_none() {
-            //Si l admin utilise pas Keyckoak
+            //Si l utilisateur utilise pas Keyckoak
             return Err(ApiError::new(403, "Interdit".to_string()));
         }
 

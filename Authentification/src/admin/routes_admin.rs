@@ -1,14 +1,17 @@
+use std::env;
+
 use crate::tools::api_error::ApiError;
 use crate::{admin::*, tools::password_management::verify_password};
 
 use crate::tools::claims::Claims;
 use crate::tools::keycloak::Keycloak;
+use actix_session::Session;
 use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, get};
 use uuid::Uuid;
 
 //Pour s'enregistrer en tant qu'admin
 
-#[post("/api/login/admin")]
+#[post("/api/authentication/login/admin")]
 pub async fn sign_in(
     credentials: web::Json<AdminAuthentication>,
 ) -> Result<HttpResponse, ApiError> {
@@ -51,7 +54,7 @@ pub async fn sign_in(
     }
 }
 
-#[post("/api/login/admin/otp")]
+#[post("/api/authentication/login/admin/otp")]
 async fn double_authentication(
     req: HttpRequest,
     credentials: web::Json<CodeOtp>,
@@ -76,8 +79,8 @@ async fn double_authentication(
         .json(admin))
 }
 
-#[get("/api/login/admin/extern")]
-async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
+#[get("/api/authentication/login/admin/extern")]
+async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpResponse, ApiError> {
     let mail = Keycloak::get_token(&req)?;
 
     let admin = Admin::find_extern(mail)?;
@@ -88,15 +91,44 @@ async fn authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> 
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
-    let tok = "Bearer ".to_string() + &token;
+    session.insert("id", token).unwrap();
 
-    Ok(HttpResponse::Ok()
-        .insert_header(("Authorization", tok))
-        .insert_header(("Access-Control-Expose-Headers", "Authorization"))
-        .json(admin))
+    //HttpResponse::Ok().finish()
+
+    let redirection = env::var("REDIRECT_URL_ADMIN").map_err(|_| ApiError::new(500, "Env error REDIRECT_URL".to_string()))?;
+
+    Ok(HttpResponse::Found()  // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
+        .append_header(("Location", redirection))
+        .finish())
 }
 
-#[patch("/api/login/admin/enable_extern")]
+#[get("/api/authentication/login/admin/extern/next")]
+async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiError> {
+    
+    if let Some(token) = session.get::<String>("id").map_err(|_| ApiError::new(500, "Session error".to_string()))? {
+        println!("SESSION value: {}", token);
+        // modify the session state
+       
+       let claims = Claims::verify_admin_session_complete(&token)?;
+
+       let admin = Admin::find_extern(claims.mail)?;
+
+       let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure   
+
+       let tok = "Bearer ".to_string() + &token;
+
+       Ok(HttpResponse::Ok()
+           .insert_header(("Authorization", tok))
+           .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+           .json(admin))
+    }
+
+    else {
+        Ok(HttpResponse::Ok().finish())
+    }
+}
+
+#[patch("/api/authentication/login/admin/enable_extern")]
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
 
 
@@ -203,6 +235,7 @@ pub fn routes_admin(cfg: &mut web::ServiceConfig) {
     cfg.service(create_admin);
     cfg.service(double_authentication);
     cfg.service(authentication_ext);
+    cfg.service(authentication_ext_next);
     cfg.service(enable_authentication_ext);
     cfg.service(create_otp_admin);
     cfg.service(patch_admin);
