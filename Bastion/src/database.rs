@@ -57,6 +57,10 @@ impl BastionDatabase {
         self.ssh.iter().find(|r| r.name == name)
     }
 
+    pub fn get_ssh_mut_by_name(&mut self, name: &str) -> Option<&mut SSHRessource> {
+        self.ssh.iter_mut().find(|r| r.name == name)
+    }
+
     pub fn get_ssh_ressources(&self) -> &Vec<SSHRessource> {
         &self.ssh
     }

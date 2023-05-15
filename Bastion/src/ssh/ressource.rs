@@ -1,6 +1,7 @@
 use std::fmt::format;
 use std::fs;
 use std::process::Command;
+use log::debug;
 
 use serde::{Deserialize, Serialize};
 
@@ -60,22 +61,22 @@ fn create_authorized_keys_file(name: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn save_ressource(ressource: &SSHRessource) -> Result<(), String> {
-    let mut database =
-        BastionDatabase::get().map_err(|e| format!("Error loading database: {}", e))?;
-    database
-        .add_ssh(ressource.clone())
-        .map_err(|e| format!("Error saving ressource: {}", e))?;
-    Ok(())
-}
 
 impl SSHRessource {
     pub fn save(&self) -> Result<(), String> {
+        let mut database =
+            BastionDatabase::get().map_err(|e| format!("Error loading database: {}", e))?;
+        database
+            .add_ssh(self.clone())
+            .map_err(|e| format!("Error saving ressource: {}", e))?;
+        Ok(())
+    }
+
+    pub fn realise(&self) -> Result<(), String> {
         add_system_user(&self.name)?;
         unlock_system_user(&self.name)?;
         create_ssh_dir(&self.name)?;
         create_authorized_keys_file(&self.name)?;
-        save_ressource(self)?;
         Ok(())
     }
     pub fn from_name(name: &str) -> Result<SSHRessource, String> {
@@ -87,12 +88,21 @@ impl SSHRessource {
         Ok(ressource.clone())
     }
 
+    /// Add the user to the authorized_keys file and save it to database
     pub fn add_user(&self, user: &SSHUser) -> Result<(), String> {
+        let mut database =
+            BastionDatabase::get().map_err(|e| format!("Error loading database: {}", e))?;
         let path = self.authorized_keys_path();
         let mut authorized_keys = AuthorizedKeys::from_path(path.as_str())?;
         let authorized_key = AuthorizedKey::new(self, user)?;
         authorized_keys.add_key(authorized_key);
+        debug!("authorized_keys: {:?}", authorized_keys);
         authorized_keys.save(path.as_str())?;
+
+        let mut _self = database.get_ssh_mut_by_name(self.name.as_str())
+            .ok_or(format!("Ressource {} not found", self.name))?;
+        _self.users.push(user.clone());
+        database.save().map_err(|e| format!("Error saving database: {}", e))?;
         Ok(())
     }
 
@@ -100,6 +110,7 @@ impl SSHRessource {
         let path = self.authorized_keys_path();
         let mut authorized_keys = AuthorizedKeys::from_path(path.as_str())?;
         authorized_keys.remove_key_by_id(&user.id);
+        debug!("authorized_keys: {:?}", authorized_keys);
         authorized_keys.save(path.as_str())?;
         Ok(())
     }
@@ -111,6 +122,7 @@ impl SSHRessource {
             let authorized_key = AuthorizedKey::new(self, user)?;
             authorized_keys.add_key(authorized_key);
         }
+        debug!("authorized_keys after: {:?}", authorized_keys);
         authorized_keys.save(path.as_str())?;
         Ok(())
     }

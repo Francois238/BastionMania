@@ -1,4 +1,5 @@
 use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::error::HttpError;
 
 use crate::ssh::ressource::SSHRessource;
 use crate::ssh::user::SSHUser;
@@ -40,15 +41,20 @@ async fn del_user(user_config: web::Json<WGPeerPublicKey>) -> impl Responder {
 }
 
 #[post("/ssh/ressources")]
-async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> impl Responder {
+async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> HttpResponse {
     let ressource = ressource.into_inner();
     //TODO Validate input
-    let res = ressource.save();
+
+    let res = ressource.realise().map_err(|e| HttpResponse::InternalServerError().body(e));
     if let Err(e) = res {
-        return e.to_string();
+        return e;
+    }
+    let res = ressource.save().map_err(|e| HttpResponse::InternalServerError().body(e));
+    if let Err(e) = res {
+        return e;
     }
 
-    "success".to_string()
+    HttpResponse::Ok().body("success")
 }
 
 #[post("/ssh/ressources/{ressource_id}/users")]

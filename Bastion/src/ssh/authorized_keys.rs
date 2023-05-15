@@ -1,12 +1,14 @@
 use std::fs;
+use log::debug;
 
 use crate::ssh::ressource::SSHRessource;
 use crate::ssh::user::SSHUser;
 
+#[derive(Debug)]
 pub struct AuthorizedKeys {
     keys: Vec<AuthorizedKey>,
 }
-
+#[derive(Debug)]
 pub struct AuthorizedKey {
     pub command: String,
     pub key: String,
@@ -30,18 +32,25 @@ impl AuthorizedKey {
     }
 
     /// Parse une ligne de fichier authorized_keys
+    ///
+    /// Exemple de ligne:
+    /// `command="ssh -p 22 user@ressource.local" ssh-ed25519 AAAAC3NzaC1 user-id`
+    /// # Example
+    /// ```rust
+    /// use bastion_mania_bastion::ssh::authorized_keys::AuthorizedKey;
+    /// let line = "command=\"ssh -p 22 user@ressource\" ssh-ed25519 AAAAC3NzaC1 user-id";
+    /// let authorized_key = AuthorizedKey::from_line(line).unwrap();
+    /// assert_eq!(authorized_key.command, "command=\"ssh -p 22 user@ressource\"");
+    /// assert_eq!(authorized_key.key, "ssh-ed25519 AAAAC3NzaC1");
+    /// assert_eq!(authorized_key.comment, "user-id");
+    /// ```
     pub fn from_line(line: &str) -> Result<AuthorizedKey, String> {
-        static START_COMMAND_KEY: &str = "command=\"";
-        static START_COMMAND_KEY_SIZE: usize = 9;
+        let start_command = line.find("\"").ok_or("No command")?;
+        let end_command = line[start_command + 1..].find("\"").ok_or("No end command")?;
 
-        let start_command = line.find(START_COMMAND_KEY).ok_or("No command")?;
-        let end_command = START_COMMAND_KEY_SIZE
-            + line[start_command + START_COMMAND_KEY_SIZE..]
-                .find("\"")
-                .ok_or("No end command")?;
-        let command = line[start_command..start_command + 1].to_string();
+        let command = line[..start_command + end_command + 2].to_string();
 
-        let after_command = line[end_command + 1..].trim();
+        let after_command = line[start_command + end_command + 2..].trim();
         let mut parts = after_command.split(' ');
         let algo = parts.next().ok_or("No algo")?;
         let key = parts.next().ok_or("No key")?;
