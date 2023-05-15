@@ -1,7 +1,7 @@
 use std::fs;
 use std::io::Result;
-use std::process::Command;
 use std::path::Path;
+use std::process::Command;
 
 static COMMAND_WIREGUARD: &str = "/usr/bin/wireguard-go";
 static COMMAND_MKNOD: &str = "/bin/mknod";
@@ -16,11 +16,7 @@ fn init_routing() {
     print!("IPv4 routing : ");
     // Check the status of ipv4 forwarding
     let active = get_ipv4_forward_status().expect("Can't read ipv4 forward status");
-    let status = if active {
-        "OK"
-    } else {
-        "FAIL"
-    };
+    let status = if active { "OK" } else { "FAIL" };
     println!("{}", status);
     if !active {
         panic!("IPv4 routing must be enable");
@@ -36,7 +32,10 @@ fn create_tun_device() {
     }
     // create tun interface
     let output = Command::new(COMMAND_MKNOD)
-        .arg("/dev/net/tun").arg("c").arg("10").arg("200")
+        .arg("/dev/net/tun")
+        .arg("c")
+        .arg("10")
+        .arg("200")
         .output()
         .expect("Failed to create /dev/net/tun");
     if !output.status.success() {
@@ -58,10 +57,14 @@ fn add_wg_interface(name: &str) {
 // iptables -t nat -I POSTROUTING -o eth0 -j MASQUERADE
 fn iptables_masquerade() {
     let output = Command::new(COMMAND_IPTABLES)
-        .arg("-t").arg("nat")
-        .arg("-I").arg("POSTROUTING")
-        .arg("-o").arg("wg-agent")
-        .arg("-j").arg("MASQUERADE")
+        .arg("-t")
+        .arg("nat")
+        .arg("-I")
+        .arg("POSTROUTING")
+        .arg("-o")
+        .arg("wg-agent")
+        .arg("-j")
+        .arg("MASQUERADE")
         .output()
         .expect("Failed to execute MASQUERADE");
     if !output.status.success() {

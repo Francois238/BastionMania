@@ -16,7 +16,10 @@ pub struct AuthorizedKey {
 impl AuthorizedKey {
     pub fn new(ressource: &SSHRessource, user: &SSHUser) -> Result<AuthorizedKey, String> {
         Ok(AuthorizedKey {
-            command: format!("command=\"ssh -p {} {}@{}\"", ressource.port, user.name, ressource.ip),
+            command: format!(
+                "command=\"ssh -p {} {}@{}\"",
+                ressource.port, user.name, ressource.ip
+            ),
             key: user.public_key.to_string(),
             comment: user.id.to_string(),
         })
@@ -26,14 +29,16 @@ impl AuthorizedKey {
         format!("{} {} {}", self.command, self.key, self.comment)
     }
 
-
     /// Parse une ligne de fichier authorized_keys
     pub fn from_line(line: &str) -> Result<AuthorizedKey, String> {
         static START_COMMAND_KEY: &str = "command=\"";
         static START_COMMAND_KEY_SIZE: usize = 9;
 
         let start_command = line.find(START_COMMAND_KEY).ok_or("No command")?;
-        let end_command = START_COMMAND_KEY_SIZE + line[start_command + START_COMMAND_KEY_SIZE..].find("\"").ok_or("No end command")?;
+        let end_command = START_COMMAND_KEY_SIZE
+            + line[start_command + START_COMMAND_KEY_SIZE..]
+                .find("\"")
+                .ok_or("No end command")?;
         let command = line[start_command..start_command + 1].to_string();
 
         let after_command = line[end_command + 1..].trim();
@@ -52,9 +57,7 @@ impl AuthorizedKey {
 
 impl AuthorizedKeys {
     pub fn new() -> AuthorizedKeys {
-        AuthorizedKeys {
-            keys: Vec::new(),
-        }
+        AuthorizedKeys { keys: Vec::new() }
     }
 
     pub fn add_key(&mut self, key: AuthorizedKey) {
@@ -79,8 +82,8 @@ impl AuthorizedKeys {
         for key in &self.keys {
             content.push_str(format!("{}\n", key.to_string()).as_str());
         }
-        fs::write(path, content).map_err(|e| format!("Error saving authorized_keys file: {}", e))?;
+        fs::write(path, content)
+            .map_err(|e| format!("Error saving authorized_keys file: {}", e))?;
         Ok(())
     }
 }
-

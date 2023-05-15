@@ -7,3 +7,6 @@ Le bastion de Bastion Mania.
 
 ### Capabilities
 - NET_ADMIN : for /dev/tun access
+
+### Volumes
+- /data : Bastion data
