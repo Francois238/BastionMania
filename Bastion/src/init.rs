@@ -1,5 +1,5 @@
 use crate::consts::CMD_SSHKEYGEN;
-use crate::database::{self, BastionDatabase};
+use crate::database::{BastionDatabase};
 use crate::wireguard::{wgconfigure, self};
 use crate::{BastionConfig, WGToAgent, WGToClient};
 use std::fs;

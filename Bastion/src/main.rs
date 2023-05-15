@@ -1,8 +1,8 @@
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
 
-use bastion_mania_bastion::wireguard::{persistance, wgconfigure};
-use bastion_mania_bastion::{api, BastionConfig, WGToAgent, WGToClient, init};
+use bastion_mania_bastion::wireguard::{persistance};
+use bastion_mania_bastion::{api, init};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

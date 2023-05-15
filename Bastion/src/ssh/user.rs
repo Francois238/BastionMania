@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ssh::model::PublicKey;
-use crate::ssh::ressource::SSHRessource;
+
 
 /// Représente un utilisateur d'une ressource
 #[derive(Debug, Clone, Serialize, Deserialize)]
