@@ -14,11 +14,11 @@ async fn add_user(user_config: web::Json<WGPeerConfig>) -> impl Responder {
     //TODO Validate input
     let res = wgconfigure::add_peer(WG_INT, &user_config);
     if let Err(e) = res {
-        return e.to_string();
+        return e;
     }
     let res = persistance::add_peer(&user_config);
     if let Err(e) = res {
-        return e.to_string();
+        return e;
     }
 
     "success".to_string()
@@ -30,11 +30,11 @@ async fn del_user(user_config: web::Json<WGPeerPublicKey>) -> impl Responder {
     //TODO Validate input
     let res = wgconfigure::remove_peer(WG_INT, &public_key);
     if let Err(e) = res {
-        return e.to_string();
+        return e;
     }
     let res = persistance::remove_peer(public_key);
     if let Err(e) = res {
-        return e.to_string();
+        return e;
     }
 
     "success".to_string()

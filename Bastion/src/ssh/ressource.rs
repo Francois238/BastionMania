@@ -25,7 +25,7 @@ fn add_system_user(name: &str) -> Result<(), String> {
         .arg(name)
         .output()
         .map_err(|e| format!("Error adding user: {}", e))?;
-    output.status.success().then(|| ()).ok_or_else(|| {
+    output.status.success().then_some(()).ok_or_else(|| {
         format!(
             "Error adding user: {}",
             String::from_utf8_lossy(&output.stderr)
@@ -40,7 +40,7 @@ fn unlock_system_user(name: &str) -> Result<(), String> {
         .arg(name)
         .output()
         .map_err(|e| format!("Error unlocking user: {}", e))?;
-    output.status.success().then(|| ()).ok_or_else(|| {
+    output.status.success().then_some(()).ok_or_else(|| {
         format!(
             "Error unlocking user: {}",
             String::from_utf8_lossy(&output.stderr)
