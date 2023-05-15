@@ -12,10 +12,10 @@ RUN rustup target add x86_64-unknown-linux-musl \
 WORKDIR /usr/src/bastion-mania-bastion
 
 COPY Cargo.toml Cargo.lock ./
-RUN cargo build --release
+RUN cargo build --release --target x86_64-unknown-linux-musl
 
 COPY src ./src
-RUN cargo install --target x86_64-unknown-linux-musl --path .
+RUN cargo build --release --target x86_64-unknown-linux-musl
 
 
 FROM alpine:3.17
@@ -30,5 +30,5 @@ EXPOSE 22/tcp
 
 COPY ./ssh_files/sshd_config /etc/ssh/sshd_config
 
-COPY --from=builder /usr/local/cargo/bin/bastion-mania-bastion /app/bastion-mania-bastion
+COPY --from=builder /usr/src/bastion-mania-bastion/target/x86_64-unknown-linux-musl/release/bastion-mania-bastion /app/bastion-mania-bastion
 CMD ["/app/bastion-mania-bastion"]
