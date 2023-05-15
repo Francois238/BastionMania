@@ -19,7 +19,7 @@ impl BastionDatabase {
         }
     }
 
-    fn save(&self) -> io::Result<()> {
+    pub fn save(&self) -> io::Result<()> {
         let ressource_json = serde_json::to_string(&self)?;
         fs::write("/data/db.json", ressource_json)?;
         Ok(())
@@ -36,6 +36,9 @@ impl BastionDatabase {
             return Ok(BastionDatabase::new());
         }
         BastionDatabase::load()
+    }
+    pub fn exists() -> bool {
+        Path::new("/data/db.json").exists()
     }
 }
 
@@ -54,4 +57,23 @@ impl BastionDatabase {
         self.ssh.iter().find(|r| r.name == name)
     }
 
+    pub fn get_ssh_ressources(&self) -> &Vec<SSHRessource> {
+        &self.ssh
+    }
+}
+
+impl BastionDatabase{
+    pub fn add_wireguard(&mut self, ressource: WireguardRessource) -> io::Result<()> {
+        self.wireguard.push(ressource);
+        self.save()
+    }
+
+    pub fn remove_wireguard(&mut self, id: &str) -> io::Result<()> {
+        self.wireguard.retain(|r| r.id != id);
+        self.save()
+    }
+
+    pub fn get_wireguard_ressources(&self) -> &Vec<WireguardRessource> {
+        &self.wireguard
+    }
 }
