@@ -51,18 +51,18 @@ impl BastionConfig {
 
         let endpoint_match = re_ipv4_port
             .captures(&agent_endpoint)
-            .expect(format!("Invalid endpoint : {}", agent_endpoint).as_str());
+            .unwrap_or_else(|| panic!("Invalid endpoint : {}", agent_endpoint));
         let port = endpoint_match.get(4).unwrap().as_str();
         let port: u16 = port
             .parse()
-            .expect(format!("Invalid endpoint port : {}", port).as_str());
+            .unwrap_or_else(|_| panic!("Invalid endpoint port : {}", port));
         if port < 1024 {
             panic!("Invalid endpoint port : {}", port);
         }
 
         let net_id: u8 = net_id
             .parse()
-            .expect(format!("Invalid net id : {}", net_id).as_str());
+            .unwrap_or_else(|_| panic!("Invalid net id : {}", net_id));
 
         BastionConfig {
             bastion_private_key,
