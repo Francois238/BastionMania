@@ -66,7 +66,7 @@ fn recreate_init() {
     let database = BastionDatabase::get().expect("Can't load database");
     let ssh_ressources = database.get_ssh_ressources();
     for ressource in ssh_ressources {
-        ressource.save().expect("Can't save ressource");
+        ressource.realise().expect("Can't realise ressource");
         ressource.add_all_users().expect("Can't add all users");
     }
 }
