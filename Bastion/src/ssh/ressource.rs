@@ -1,4 +1,4 @@
-use std::fmt::format;
+
 use std::fs;
 use std::process::Command;
 use log::debug;
