@@ -1,7 +1,7 @@
 
 ARG PORT=60244
 
-FROM rust:1.66-slim AS builder
+FROM rust:1.69-slim AS builder
 
 WORKDIR /usr/src
 RUN rustup target add x86_64-unknown-linux-musl \
@@ -18,7 +18,7 @@ COPY src ./src
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
 
-FROM alpine:3.17
+FROM alpine:3.18.0
 
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing wireguard-go \
     && apk add --no-cache wireguard-tools \
