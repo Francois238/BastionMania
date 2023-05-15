@@ -10,6 +10,17 @@ use log::info;
 
 const WG_PRIVATE_KEY_PATH: &str = "/data/wg_private_key";
 
+const SSH_HOST_KEYS_FILES: [&str; 6] = [
+    "ssh_host_ecdsa_key",
+    "ssh_host_ecdsa_key.pub",
+    "ssh_host_ed25519_key",
+    "ssh_host_ed25519_key.pub",
+    "ssh_host_rsa_key",
+    "ssh_host_rsa_key.pub",
+];
+const SSH_HOST_KEYS_PATH: &str = "/etc/ssh";
+const SSH_HOST_KEYS_PATH_DATA: &str = "/data/ssh_keys";
+
 /// Initialize the bastion when launch for the first time
 ///
 /// This create ssh host keys and wireguard private key
@@ -25,11 +36,7 @@ fn first_init() {
     // copy keys to /data in case of container recreate
     info!("Copying ssh host keys to /data");
     fs::create_dir("/data/ssh_keys").expect("Failed to create /data/ssh_keys");
-    Command::new("cp")
-        .arg("/etc/ssh/ssh_host_*")
-        .arg("/data/ssh_keys/")
-        .output()
-        .expect("Failed to copy ssh host keys");
+    save_host_keys();
 
     // Generate wireguard key
     info!("Generating wireguard keys");
@@ -53,11 +60,7 @@ fn recreate_init() {
     info!("Recreate init");
     // copy key from /data
     info!("Copying ssh host keys from /data");
-    Command::new("cp")
-        .arg("/data/ssh_keys/ssh_host_*")
-        .arg("/etc/ssh/")
-        .output()
-        .expect("Failed to copy ssh host keys");
+    restore_host_keys();
 
     info!("Restoring ssh resssources");
     let database = BastionDatabase::get().expect("Can't load database");
@@ -96,6 +99,24 @@ pub fn startup() {
     }
 
     restart_init();
+}
+
+fn save_host_keys(){
+    copy_list(SSH_HOST_KEYS_PATH, SSH_HOST_KEYS_PATH_DATA, &SSH_HOST_KEYS_FILES)
+}
+
+fn restore_host_keys(){
+    copy_list(SSH_HOST_KEYS_PATH_DATA, SSH_HOST_KEYS_PATH, &SSH_HOST_KEYS_FILES)
+}
+
+fn copy_list(src: &str, dst: &str, list: &[&str]){
+    for item in list {
+        let src_path = format!("{}/{}", src, item);
+        let dst_path = format!("{}/{}", dst, item);
+        if Path::new(&src_path).exists() {
+            fs::copy(src_path, dst_path).expect("Failed to copy ssh host keys");
+        }
+    }
 }
 
 fn init_proof_make() {
