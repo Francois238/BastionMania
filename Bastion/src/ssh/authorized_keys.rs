@@ -64,6 +64,10 @@ impl AuthorizedKeys {
         self.keys.push(key);
     }
 
+    pub fn remove_key_by_id(&mut self, id: &str) {
+        self.keys.retain(|k| k.comment != id);
+    }
+
     /// Retourne la liste des clés autorisées pour une ressource
     pub fn from_path(path: &str) -> Result<AuthorizedKeys, String> {
         let mut authorized_keys = AuthorizedKeys::new();

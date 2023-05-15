@@ -31,6 +31,7 @@ pub struct WGPeerPublicKey {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WireguardRessource{
+    pub id: String,
     pub public_key: String,
     pub client_ip: String,
     pub target_ip: String,

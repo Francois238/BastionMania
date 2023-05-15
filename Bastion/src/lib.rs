@@ -4,7 +4,6 @@ pub mod wireguard;
 
 pub mod bastionconfig;
 pub mod consts;
-pub mod startup;
 pub mod init;
 pub mod database;
 

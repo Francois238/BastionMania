@@ -95,6 +95,25 @@ impl SSHRessource {
         authorized_keys.save(path.as_str())?;
         Ok(())
     }
+
+    pub fn remove_user(&self, user: &SSHUser) -> Result<(), String> {
+        let path = self.authorized_keys_path();
+        let mut authorized_keys = AuthorizedKeys::from_path(path.as_str())?;
+        authorized_keys.remove_key_by_id(&user.id);
+        authorized_keys.save(path.as_str())?;
+        Ok(())
+    }
+
+    pub fn add_all_users(&self) -> Result<(), String> {
+        let path = self.authorized_keys_path();
+        let mut authorized_keys = AuthorizedKeys::from_path(path.as_str())?;
+        for user in &self.users {
+            let authorized_key = AuthorizedKey::new(self, user)?;
+            authorized_keys.add_key(authorized_key);
+        }
+        authorized_keys.save(path.as_str())?;
+        Ok(())
+    }
 }
 
 impl SSHRessource {

@@ -73,7 +73,7 @@ fn iptables_masquerade() {
     }
 }
 
-pub fn startup() {
+pub fn init() {
     init_routing();
     create_tun_device();
     add_wg_interface("wg-agent");
