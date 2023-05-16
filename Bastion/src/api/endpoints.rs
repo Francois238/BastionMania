@@ -6,7 +6,7 @@ use crate::ssh::user::SSHUser;
 use crate::wireguard::{persistance, wgconfigure};
 use crate::{WGPeerConfig, WGPeerPublicKey};
 
-use log::error;
+use log::{error, info};
 
 static WG_INT: &str = "wg-client";
 
@@ -68,8 +68,8 @@ async fn add_ssh_user(ressource_id: web::Path<String>, user: web::Json<SSHUser>)
     let ressource_id = ressource_id.into_inner();
     let user = user.into_inner();
 
-    println!("Adding user to ressource: {}", ressource_id);
-    println!("{:?}", user);
+    info!("Adding user to ressource: {}", ressource_id);
+    info!("{:?}", user);
     //TODO Validate input
 
     let ressource = SSHRessource::from_name(&ressource_id);
@@ -89,8 +89,7 @@ async fn add_ssh_user(ressource_id: web::Path<String>, user: web::Json<SSHUser>)
 async fn remove_ssh_user(path: web::Path<(String, String)>) -> impl Responder {
     let (ressource_id, user_id) = path.into_inner();
 
-    println!("Removing user from ressource: {}", ressource_id);
-    println!("User id: {}", user_id);
+    info!("Removing user : {} from ressource: {}",user_id, ressource_id);
     //TODO Validate input
 
     let database = BastionDatabase::get();
@@ -126,10 +125,60 @@ async fn remove_ssh_user(path: web::Path<(String, String)>) -> impl Responder {
     HttpResponse::Ok().body("success")
 }
 
+/// Remove a ressource
+/// 
+/// This will remove the ressource from the database and delete the user from the system
+#[delete("/ssh/ressources/{ressource_id}")]
+async fn remove_ssh_ressource(ressource_id: web::Path<String>) -> impl Responder {
+    let ressource_id = ressource_id.into_inner();
+
+    info!("Removing ressource: {}", ressource_id);
+    //TODO Validate input
+
+    let database = BastionDatabase::get();
+    let mut database = match database {
+        Ok(d) => d,
+        Err(_) => {
+            error!("Error loading database");
+            return HttpResponse::InternalServerError().body("Error loading database");
+        }
+    };
+
+    let ressource = database.get_ssh_by_name(&ressource_id);
+    let ressource = match ressource {
+        Some(r) => r,
+        None => {
+            error!("Ressource not found : {}", ressource_id);
+            return HttpResponse::NotFound().body("Ressource not found");
+        }
+    };
+
+    let res = ressource.delete();
+    if let Err(e) = res {
+        error!("Error deleting ressource: {}", e);
+        return HttpResponse::InternalServerError().body("Error deleting ressource");
+    }
+
+    let res = database.remove_ssh_by_name(&ressource_id);
+    if let Err(e) = res {
+        error!("Error removing ressource: {}", e);
+        return HttpResponse::InternalServerError().body("Error removing ressource");
+    }
+
+    let res = database.save();
+    if let Err(e) = res {
+        error!("Error saving database: {}", e);
+        return HttpResponse::InternalServerError().body("Error saving database");
+    }
+
+    HttpResponse::Ok().body("success")
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(add_user)
         .service(del_user)
         .service(add_ssh_ressource)
         .service(add_ssh_user)
-        .service(remove_ssh_user);
+        .service(remove_ssh_user)
+        .service(remove_ssh_ressource);
 }
