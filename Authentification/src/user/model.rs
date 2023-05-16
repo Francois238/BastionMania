@@ -207,7 +207,7 @@ impl User {
         if user_verif.password.is_none() || user_verif.otpactive.is_none() {
             //Si le user utilise deja Keyckoak
             let user_verif: User = users::table.filter(users::mail.eq(mail)).first(&mut conn)?;
-            return Ok(user_verif);
+            Ok(user_verif)
         }
         //si l utilisateur se connecte entierement avec la 2FA classique, il ne peut pas
         else if user_verif.otpactive == Some(true) || user_verif.otpactive == Some(true) {
@@ -248,7 +248,7 @@ impl User {
             user.mail.clone(),
         );
 
-        let _result = Sent::sent(user_envoye).await?;
+        Sent::sent(user_envoye).await?;
 
         Ok(user)
     }
@@ -276,7 +276,7 @@ impl User {
             .filter(users::mail.eq(mail.clone()))
             .first(&mut conn)?;
 
-        if !user_verif.password.is_none() || !user_verif.otpactive.is_none() {
+        if user_verif.password.is_some() || user_verif.otpactive.is_some() {
             //Si l utilisateur utilise pas Keyckoak
             return Err(ApiError::new(403, "Interdit".to_string()));
         }

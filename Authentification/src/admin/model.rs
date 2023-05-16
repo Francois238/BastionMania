@@ -204,10 +204,10 @@ impl Admin {
         let mut conn = db::connection()?;
 
         let admin_verif: Admin = admins::table
-            .filter(admins::mail.eq(mail.clone()))
+            .filter(admins::mail.eq(mail))
             .first(&mut conn)?;
 
-        if !admin_verif.password.is_none() || !admin_verif.otpactive.is_none() {
+        if admin_verif.password.is_some() || admin_verif.otpactive.is_some() {
             //Si l admin utilise pas Keyckoak
             return Err(ApiError::new(403, "Interdit".to_string()));
         }
@@ -219,7 +219,7 @@ impl Admin {
         let mut conn = db::connection()?;
 
         let admin_verif: Admin = admins::table
-            .filter(admins::mail.eq(mail.clone()))
+            .filter(admins::mail.eq(mail))
             .first(&mut conn)?;
 
         if admin_verif.password.is_none()

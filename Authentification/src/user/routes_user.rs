@@ -86,7 +86,7 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
 
     let user = User::find_extern(user).await?;
 
-    let user = User::enable_extern(user.mail.clone())?; //verifie si l'authentification externe est activee
+    let user = User::enable_extern(user.mail)?; //verifie si l'authentification externe est activee
 
     let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
