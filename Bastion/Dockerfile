@@ -23,7 +23,7 @@ FROM alpine:3.18.0
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing wireguard-go \
     && apk add --no-cache wireguard-tools \
     && apk add --no-cache openssh \
-    && ssh-keygen -A
+    && apk add --no-cache rsyslog
 
 EXPOSE ${PORT}
 EXPOSE 22/tcp
