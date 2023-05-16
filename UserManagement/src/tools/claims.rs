@@ -79,7 +79,7 @@ impl Claims {
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
         if !token_message.claims.admin {
-            //Si c est un user 
+            //Si c est un user
             return Ok(token_message.claims);
         }
 
@@ -106,9 +106,7 @@ impl Claims {
         Err(ApiError::new(403, "Unauthorized".to_string()))
     }
 
-
     pub fn verify_session_add_from_authentication(token: String) -> Result<Claims, ApiError> {
-
         let secret = Self::get_jwt_key()?;
 
         let token_message = decode::<Claims>(
@@ -118,9 +116,8 @@ impl Claims {
         )
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-            //Si c est un admin et que la authentification complete
+        //Si c est un admin et que la authentification complete
         return Ok(token_message.claims);
-
     }
 }
 

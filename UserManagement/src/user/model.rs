@@ -19,7 +19,7 @@ pub struct CodeOtp {
 
 //Structure gestion des users
 
-#[derive( Deserialize)]
+#[derive(Deserialize)]
 pub struct UserReceived {
     //Structure recue dans le JSON pour ajouter un user
     pub name: String,
@@ -62,7 +62,6 @@ pub struct UserChangeCred {
     //Structure envoye dans le JSON pour changer password
     pub password: String,
 }
-
 
 #[derive(Serialize, Deserialize)]
 pub struct UserSentAuthentication {
@@ -160,8 +159,7 @@ impl User {
         Ok(users)
     }
 
-    pub fn add_user_extern(user : UserSentAuthentication) -> Result<User, ApiError> {
-
+    pub fn add_user_extern(user: UserSentAuthentication) -> Result<User, ApiError> {
         let mut conn = db::connection()?;
 
         let user = UserInserable::from_user_sent(UserSent {
