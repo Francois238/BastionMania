@@ -9,6 +9,7 @@ use crate::consts::*;
 use crate::database::BastionDatabase;
 use crate::ssh::authorized_keys::{AuthorizedKey, AuthorizedKeys};
 use crate::ssh::user::SSHUser;
+use crate::ssh::utils::kill_all_sessions;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SSHRessource {
@@ -106,12 +107,22 @@ impl SSHRessource {
         Ok(())
     }
 
-    pub fn remove_user(&self, user: &SSHUser) -> Result<(), String> {
+    pub fn remove_user(&mut self, user_id: &str) -> Result<(), String> {
+        let user = self.users.iter().find(|u| u.id == user_id).ok_or_else(|| {
+            format!("User {} not found in ressource {}",user_id, self.name)
+        })?;
+        // Remove authorized key
         let path = self.authorized_keys_path();
         let mut authorized_keys = AuthorizedKeys::from_path(path.as_str())?;
         authorized_keys.remove_key_by_id(&user.id);
         debug!("authorized_keys: {:?}", authorized_keys);
         authorized_keys.save(path.as_str())?;
+
+        // Kill active sessions
+        kill_all_sessions(&self.name, &user.public_key.key)?;
+
+        // Remove user from database
+        self.users.retain(|u| u.id != user_id);
         Ok(())
     }
 
