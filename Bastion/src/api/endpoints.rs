@@ -1,10 +1,14 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use std::error;
 
+use actix_web::{delete, post, web, HttpResponse, Responder};
 
+use crate::database::BastionDatabase;
 use crate::ssh::ressource::SSHRessource;
 use crate::ssh::user::SSHUser;
 use crate::wireguard::{persistance, wgconfigure};
 use crate::{WGPeerConfig, WGPeerPublicKey};
+
+use log::error;
 
 static WG_INT: &str = "wg-client";
 
@@ -45,11 +49,15 @@ async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> HttpResponse {
     let ressource = ressource.into_inner();
     //TODO Validate input
 
-    let res = ressource.realise().map_err(|e| HttpResponse::InternalServerError().body(e));
+    let res = ressource
+        .realise()
+        .map_err(|e| HttpResponse::InternalServerError().body(e));
     if let Err(e) = res {
         return e;
     }
-    let res = ressource.save().map_err(|e| HttpResponse::InternalServerError().body(e));
+    let res = ressource
+        .save()
+        .map_err(|e| HttpResponse::InternalServerError().body(e));
     if let Err(e) = res {
         return e;
     }
@@ -58,10 +66,7 @@ async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> HttpResponse {
 }
 
 #[post("/ssh/ressources/{ressource_id}/users")]
-async fn add_ssh_user(
-    ressource_id: web::Path<String>,
-    user: web::Json<SSHUser>,
-) -> impl Responder {
+async fn add_ssh_user(ressource_id: web::Path<String>, user: web::Json<SSHUser>) -> impl Responder {
     let ressource_id = ressource_id.into_inner();
     let user = user.into_inner();
 
@@ -82,9 +87,53 @@ async fn add_ssh_user(
     HttpResponse::Ok().body("success")
 }
 
+#[delete("/ssh/ressources/{ressource_id}/users/{user_id}")]
+async fn remove_ssh_user(
+    path: web::Path<(String, String)>,
+) -> impl Responder {
+    let (ressource_id, user_id) = path.into_inner();
+
+    println!("Removing user from ressource: {}", ressource_id);
+    println!("User id: {}", user_id);
+    //TODO Validate input
+
+    let database = BastionDatabase::get();
+    let mut database = match database {
+        Ok(d) => d,
+        Err(_) => {
+            error!("Error loading database");
+            return HttpResponse::InternalServerError().body("Error loading database");
+        }
+    };
+
+    let ressource = database.get_ssh_mut_by_name(&ressource_id);
+    let ressource = match ressource {
+        Some(r) => r,
+        None => {
+            error!("Ressource not found : {}", ressource_id);
+            return HttpResponse::NotFound().body("Ressource not found")
+        },
+    };
+
+    let res = ressource.remove_user(&user_id);
+    if let Err(e) = res {
+        error!("Error removing user: {}", e);
+        return HttpResponse::InternalServerError().body("Error removing user");
+    }
+
+    let res = database.save();
+    if let Err(e) = res {
+        error!("Error saving database: {}", e);
+        return HttpResponse::InternalServerError().body("Error saving database");
+    }
+
+    HttpResponse::Ok().body("success")
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(add_user)
         .service(del_user)
         .service(add_ssh_ressource)
-        .service(add_ssh_user);
+        .service(add_ssh_user)
+        .service(remove_ssh_user);
 }
