@@ -117,7 +117,7 @@ impl Claims {
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
         //Si c est un admin et que la authentification complete
-        return Ok(token_message.claims);
+        Ok(token_message.claims)
     }
 }
 
