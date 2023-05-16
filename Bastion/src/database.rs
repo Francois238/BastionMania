@@ -1,8 +1,8 @@
-use crate::WireguardRessource;
 use crate::ssh::ressource::SSHRessource;
+use crate::WireguardRessource;
 use serde::{Deserialize, Serialize};
-use std::io;
 use std::fs;
+use std::io;
 use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,7 +47,7 @@ impl BastionDatabase {
         self.ssh.push(ressource);
         self.save()
     }
-    
+
     pub fn remove_ssh(&mut self, id: &str) -> io::Result<()> {
         self.ssh.retain(|r| r.id != id);
         self.save()
@@ -66,7 +66,7 @@ impl BastionDatabase {
     }
 }
 
-impl BastionDatabase{
+impl BastionDatabase {
     pub fn add_wireguard(&mut self, ressource: WireguardRessource) -> io::Result<()> {
         self.wireguard.push(ressource);
         self.save()

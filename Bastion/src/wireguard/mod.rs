@@ -1,7 +1,7 @@
 pub mod agent;
-pub mod wgconfigure;
+mod init;
 pub mod model;
 pub mod persistance;
-mod init;
+pub mod wgconfigure;
 
 pub use init::init;
