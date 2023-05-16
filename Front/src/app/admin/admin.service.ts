@@ -6,13 +6,17 @@ import { AdminInfo } from './admin-info';
 import { Observable, map } from 'rxjs';
 import { NewAdmin } from './new-admin';
 import { Password } from './password';
+import { UserInfo } from './user-info';
+import { NewUser } from './new-user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminService {
 
-  baseUrl = 'https://bastionmania.intra/api/admin-management/';
+  baseUrlAdmin = 'https://bastionmania.intra/api/admin-management/';
+
+  baseUrlUser = 'https://bastionmania.intra/api/user-management/';
 
   constructor(private http: HttpClient) { }
 
@@ -41,7 +45,7 @@ export class AdminService {
 
     const headers = {'Authorization': 'Bearer ' + token};
 
-    const url = this.baseUrl +`admins`;
+    const url = this.baseUrlAdmin +`admins`;
     return this.http.get<AdminInfo[]>(url, {headers})
 
   }
@@ -56,7 +60,7 @@ export class AdminService {
     const body=JSON.stringify(admin);
 
 
-    const url = this.baseUrl + 'admins';
+    const url = this.baseUrlAdmin + 'admins';
     return this.http.post<AdminInfo>(url, body ,{headers})
 
   }
@@ -68,7 +72,7 @@ export class AdminService {
 
     const headers = { 'Authorization': 'Bearer ' + token};
 
-    const url = this.baseUrl + 'admins/' + id;
+    const url = this.baseUrlAdmin + 'admins/' + id;
     return this.http.delete<any>(url, {headers})
 
   }
@@ -84,7 +88,7 @@ export class AdminService {
     'Authorization': 'Bearer ' + token}
     const body=JSON.stringify(password);
 
-    const url = `${this.baseUrl}admins/${id}`;
+    const url = `${this.baseUrlAdmin}admins/${id}`;
     return this.http.patch<any>(url, body ,{headers, observe: 'response'})
     .pipe(
       map(response => {
@@ -104,5 +108,45 @@ export class AdminService {
     );
     }
 
+    /*******Gestion utilisateurs**********/
+
+
+    public get_list_user() : Observable<UserInfo[]>{
+
+      const token = this.get_token();
+  
+      const headers = {'Authorization': 'Bearer ' + token};
+  
+      const url = this.baseUrlUser +`users`;
+      return this.http.get<UserInfo[]>(url, {headers})
+  
+    }
+  
+    public add_user(admin : NewUser) : Observable<UserInfo>{
+  
+      const token = this.get_token();
+  
+      const headers = { 'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token};
+  
+      const body=JSON.stringify(admin);
+  
+  
+      const url = this.baseUrlUser + 'users';
+      return this.http.post<UserInfo>(url, body ,{headers})
+  
+    }
+
+
+    public delete_user(id : string) : Observable<any>{
+
+      const token = this.get_token();
+  
+      const headers = { 'Authorization': 'Bearer ' + token};
+  
+      const url = this.baseUrlUser + 'users/' + id;
+      return this.http.delete<any>(url, {headers})
+  
+    }
 
 }

@@ -9,6 +9,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AdminDetailComponent } from './admin-detail/admin-detail.component';
 import { ProfilComponent } from './profil/profil.component';
 import { HeaderComponent } from './header/header.component';
+import { ListUserComponent } from './list-user/list-user.component';
+import { UserDetailComponent } from './user-detail/user-detail.component';
 
 
 @NgModule({
@@ -18,7 +20,9 @@ import { HeaderComponent } from './header/header.component';
     ListAdminComponent,
     AdminDetailComponent,
     ProfilComponent,
-    HeaderComponent
+    HeaderComponent,
+    ListUserComponent,
+    UserDetailComponent
   ],
   imports: [
     CommonModule,
