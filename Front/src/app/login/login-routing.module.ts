@@ -3,10 +3,19 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './login.component';
 import { AdminComponent } from './admin/admin.component';
 import { UserComponent } from './user/user.component';
+import { AdminExtNextComponent } from './admin-ext-next/admin-ext-next.component';
+import { AdminSendOtpComponent } from './admin-send-otp/admin-send-otp.component';
+import { AdminChoiceComponent } from './admin-choice/admin-choice.component';
+import { AdminActivateOtpComponent } from './admin-activate-otp/admin-activate-otp.component';
 
 const routes: Routes = [
   { path: '', component: UserComponent },
-  { path: 'admin', component: AdminComponent }
+  { path: 'admin', component: AdminComponent },
+  { path: 'admin/extern/next', component: AdminExtNextComponent },
+  { path: 'admin/otp', component: AdminSendOtpComponent },
+  { path: 'admin/activate_otp', component: AdminActivateOtpComponent },
+  { path: 'admin/choice', component: AdminChoiceComponent }
+ 
 ];
 
 @NgModule({

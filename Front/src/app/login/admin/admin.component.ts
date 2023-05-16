@@ -3,6 +3,7 @@ import { UntypedFormGroup, FormControl,FormGroup, FormBuilder } from '@angular/f
 import { InfoLogin } from '../info-login';
 import { Router } from '@angular/router';
 import { Credentials } from '../credentials';
+import { AuthenticationService } from '../authentication.service';
 
 @Component({
   selector: 'app-admin',
@@ -19,7 +20,7 @@ export class AdminComponent {
   public infoLogin! : InfoLogin
   public loginForm: FormGroup;
 
-  constructor(private fb: FormBuilder, protected router: Router) {
+  constructor(private fb: FormBuilder, protected router: Router, protected serviceAuthentication: AuthenticationService) {
     this.loginForm = this.fb.group({
       mail: [''],
       password: ['']
@@ -45,8 +46,42 @@ export class AdminComponent {
     else{
       this.credentials = { mail : this.mail, password : this.password}
 
-      console.log("Appuie sur le bouton envoie otp: " + this.credentials.mail + " " + this.credentials.password)
+      this.serviceAuthentication.login_admin(this.credentials).subscribe({
+        next: (data: InfoLogin)=> {
+  
+          this.serviceAuthentication.set_info_login(data);
+
+          console.log(data.otpactive)
+
+          if (!data.otpactive) { //1ere connexion
+            this.router.navigate(['/login/admin/choice']);
+          }
+
+          else{
+            this.router.navigate(['/login/admin/otp']);
+          }
+  
+        },
+  
+        error: err => {
+  
+          if(err.status <500){
+            this.message = err.error.message;
+          }
+  
+          else{
+            this.message = 'Erreur interne';
+          }
+        }
+      })
 
     }
+  }
+
+
+  loginExtern() {
+
+    this.serviceAuthentication.admin_authentication_extern()
+      
   }
 }
