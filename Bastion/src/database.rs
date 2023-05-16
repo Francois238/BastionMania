@@ -48,8 +48,8 @@ impl BastionDatabase {
         self.save()
     }
 
-    pub fn remove_ssh(&mut self, id: &str) -> io::Result<()> {
-        self.ssh.retain(|r| r.id != id);
+    pub fn remove_ssh_by_name(&mut self, name: &str) -> io::Result<()> {
+        self.ssh.retain(|r| r.name != name);
         self.save()
     }
 

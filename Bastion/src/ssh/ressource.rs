@@ -34,6 +34,23 @@ fn add_system_user(name: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn remove_system_user(name: &str) -> Result<(), String> {
+    let output = Command::new(CMD_USERDEL)
+        .arg(name)
+        .arg("--remove-home")
+        .output()
+        .map_err(|e| format!("Error removing user: {}", e))?;
+    debug!("output: {:?}", output.status.code());
+    if output.status.code() != Some(0){
+        Err(format!(
+            "Error removing user: {}",
+            String::from_utf8_lossy(&output.stderr)
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 fn unlock_system_user(name: &str) -> Result<(), String> {
     let output = Command::new(CMD_PASSWD)
         .arg("-u")
@@ -105,6 +122,14 @@ impl SSHRessource {
         database
             .save()
             .map_err(|e| format!("Error saving database: {}", e))?;
+        Ok(())
+    }
+
+    pub fn delete(&self) -> Result<(), String> {
+        for user in &self.users {
+            kill_all_sessions(&self.name, &user.public_key.key)?;
+        }
+        remove_system_user(&self.name)?;
         Ok(())
     }
 
