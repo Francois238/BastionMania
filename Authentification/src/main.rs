@@ -1,5 +1,8 @@
-use actix_session::{SessionMiddleware, storage::CookieSessionStore};
-use actix_web::{App, HttpServer, cookie::{Key, SameSite}};
+use actix_session::{storage::CookieSessionStore, SessionMiddleware};
+use actix_web::{
+    cookie::{Key, SameSite},
+    App, HttpServer,
+};
 use dotenvy::dotenv;
 use simple_logger::SimpleLogger;
 
@@ -16,13 +19,13 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-        .wrap(
-            // create cookie based session middleware
-            SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
-                .cookie_secure(true)
-                .cookie_same_site(SameSite::None)
-                .build()
-        )
+            .wrap(
+                // create cookie based session middleware
+                SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
+                    .cookie_secure(true)
+                    .cookie_same_site(SameSite::None)
+                    .build(),
+            )
             .configure(admin::routes_admin)
             .configure(user::routes_user)
     })

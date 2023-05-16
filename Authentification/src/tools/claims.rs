@@ -14,7 +14,7 @@ pub struct Claims {
     pub id: Uuid,
     pub mail: String,
     pub admin: bool,
-    pub otp: Option<bool>, //Si l'otp est actif
+    pub otp: Option<bool>,             //Si l'otp est actif
     pub complete_authentication: bool, //Si par keycloack forcement ok sinon verifier mfa + changement mdp
     #[serde(with = "jwt_numeric_date")]
     pub iat: OffsetDateTime,
@@ -71,7 +71,7 @@ impl Claims {
         Ok(jwt)
     }
 
-    pub fn new_user(user: &UserEnvoye, otp : Option<bool>, verif: bool) -> Claims {
+    pub fn new_user(user: &UserEnvoye, otp: Option<bool>, verif: bool) -> Claims {
         //Creation du JWT a partir des infos recuperees en BDD
 
         let iat = Hours::new().iat;
@@ -88,7 +88,7 @@ impl Claims {
         }
     }
 
-    pub fn new_admin(admin: &AdminEnvoye,  otp : Option<bool>,  verif: bool) -> Claims {
+    pub fn new_admin(admin: &AdminEnvoye, otp: Option<bool>, verif: bool) -> Claims {
         //Creation du JWT a partir des infos recuperees en BDD
 
         let iat = Hours::new().iat;
@@ -139,7 +139,7 @@ impl Claims {
         )
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        if token_message.claims.admin  {
+        if token_message.claims.admin {
             //Si c est un admin et que la methode d authentification est classique
             return Ok(token_message.claims);
         }
@@ -159,7 +159,7 @@ impl Claims {
         )
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        if !token_message.claims.admin{
+        if !token_message.claims.admin {
             //Si c est un user et que la methode d authentification est classique
             return Ok(token_message.claims);
         }
@@ -179,7 +179,7 @@ impl Claims {
         )
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        if token_message.claims.admin  {
+        if token_message.claims.admin {
             //Si c est un admin et que la methode d authentification est classique
             return Ok(token_message.claims);
         }
@@ -197,7 +197,7 @@ impl Claims {
         )
         .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        if !token_message.claims.admin{
+        if !token_message.claims.admin {
             //Si c est un user et que la methode d authentification est classique
             return Ok(token_message.claims);
         }

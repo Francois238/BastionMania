@@ -200,41 +200,44 @@ impl Admin {
         }
     }
 
-    pub fn find_extern(mail : String) -> Result<Self, ApiError> {
-
+    pub fn find_extern(mail: String) -> Result<Self, ApiError> {
         let mut conn = db::connection()?;
 
         let admin_verif: Admin = admins::table
             .filter(admins::mail.eq(mail.clone()))
             .first(&mut conn)?;
 
-        if !admin_verif.password.is_none()  || !admin_verif.otpactive.is_none() {
+        if !admin_verif.password.is_none() || !admin_verif.otpactive.is_none() {
             //Si l admin utilise pas Keyckoak
             return Err(ApiError::new(403, "Interdit".to_string()));
         }
 
         Ok(admin_verif)
-    } 
+    }
 
-
-    pub fn enable_extern(mail : String) -> Result<Self, ApiError> {
-
+    pub fn enable_extern(mail: String) -> Result<Self, ApiError> {
         let mut conn = db::connection()?;
 
         let admin_verif: Admin = admins::table
             .filter(admins::mail.eq(mail.clone()))
             .first(&mut conn)?;
 
-        if admin_verif.password.is_none()  || admin_verif.otpactive.is_none() || admin_verif.otpactive == Some(true) {
+        if admin_verif.password.is_none()
+            || admin_verif.otpactive.is_none()
+            || admin_verif.otpactive == Some(true)
+        {
             //Si l admin utilise deja Keyckoak ou qu'il utilise deja entierement l authenf classique
             return Err(ApiError::new(403, "Interdit".to_string()));
         }
 
         let admin = diesel::update(admins::table)
             .filter(admins::id.eq(admin_verif.id))
-            .set((admins::password.eq(None::<Vec<u8>>), admins::change.eq(None::<bool>) ,admins::otpactive.eq(None::<bool>))) 
+            .set((
+                admins::password.eq(None::<Vec<u8>>),
+                admins::change.eq(None::<bool>),
+                admins::otpactive.eq(None::<bool>),
+            ))
             .get_result(&mut conn)?;
-
 
         Ok(admin)
     }

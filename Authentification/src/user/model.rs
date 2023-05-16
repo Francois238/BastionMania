@@ -1,4 +1,4 @@
-use crate::{schema::users};
+use crate::schema::users;
 use crate::tools::api_error::ApiError;
 use crate::tools::{db, Keycloak};
 
@@ -197,44 +197,37 @@ impl User {
         }
     }
 
-
-    pub fn enable_extern(mail : String) -> Result<Self, ApiError> {
-
+    pub fn enable_extern(mail: String) -> Result<Self, ApiError> {
         let mut conn = db::connection()?;
 
         let user_verif: User = users::table
             .filter(users::mail.eq(mail.clone()))
             .first(&mut conn)?;
 
-        if user_verif.password.is_none()  || user_verif.otpactive.is_none() {
+        if user_verif.password.is_none() || user_verif.otpactive.is_none() {
             //Si le user utilise deja Keyckoak
-            let user_verif: User= users::table
-            .filter(users::mail.eq(mail))
-            .first(&mut conn)?;
+            let user_verif: User = users::table.filter(users::mail.eq(mail)).first(&mut conn)?;
             return Ok(user_verif);
         }
-
         //si l utilisateur se connecte entierement avec la 2FA classique, il ne peut pas
-
         else if user_verif.otpactive == Some(true) || user_verif.otpactive == Some(true) {
             return Err(ApiError::new(403, "Interdit".to_string()));
-        }
-
-        else{ //on active le fait qu il puisse se connecter avec Keycloak
+        } else {
+            //on active le fait qu il puisse se connecter avec Keycloak
             let admin = diesel::update(users::table)
-            .filter(users::id.eq(user_verif.id))
-            .set((users::password.eq(None::<Vec<u8>>), users::change.eq(None::<bool>) ,users::otpactive.eq(None::<bool>)))
-            .get_result(&mut conn)?;
+                .filter(users::id.eq(user_verif.id))
+                .set((
+                    users::password.eq(None::<Vec<u8>>),
+                    users::change.eq(None::<bool>),
+                    users::otpactive.eq(None::<bool>),
+                ))
+                .get_result(&mut conn)?;
 
-
-        Ok(admin)
-
+            Ok(admin)
         }
-  
     }
 
-    pub async fn add_user_extern(user : Keycloak) -> Result<Self, ApiError> {
-
+    pub async fn add_user_extern(user: Keycloak) -> Result<Self, ApiError> {
         let id = Uuid::new_v4();
 
         let user = User {
@@ -248,17 +241,19 @@ impl User {
             otpactive: None,
         };
 
-        let user_envoye = Sent::new(id, user.name.clone(), user.last_name.clone(), user.mail.clone());
+        let user_envoye = Sent::new(
+            id,
+            user.name.clone(),
+            user.last_name.clone(),
+            user.mail.clone(),
+        );
 
         let _result = Sent::sent(user_envoye).await?;
 
         Ok(user)
-    
-
     }
 
-    pub async fn find_extern(user : Keycloak) -> Result<Self, ApiError> {
-
+    pub async fn find_extern(user: Keycloak) -> Result<Self, ApiError> {
         let mut conn = db::connection()?;
 
         let mail = user.email.clone();
@@ -267,7 +262,8 @@ impl User {
             .filter(users::mail.eq(mail.clone()))
             .load(&mut conn)?;
 
-        if user_verif.is_empty(){ //le user n existe pas on va le creer
+        if user_verif.is_empty() {
+            //le user n existe pas on va le creer
 
             let user = User::add_user_extern(user).await?;
 
@@ -276,17 +272,17 @@ impl User {
                 .get_result(&mut conn)?;
         }
 
-        let user_verif: User= users::table
-        .filter(users::mail.eq(mail.clone()))
-        .first(&mut conn)?;
+        let user_verif: User = users::table
+            .filter(users::mail.eq(mail.clone()))
+            .first(&mut conn)?;
 
-        if !user_verif.password.is_none()  || !user_verif.otpactive.is_none() {
+        if !user_verif.password.is_none() || !user_verif.otpactive.is_none() {
             //Si l utilisateur utilise pas Keyckoak
             return Err(ApiError::new(403, "Interdit".to_string()));
         }
 
         Ok(user_verif)
-    } 
+    }
 
     pub fn delete(id: Uuid) -> Result<usize, ApiError> {
         //Supprimer un user de la BDD

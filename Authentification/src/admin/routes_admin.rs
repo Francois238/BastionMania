@@ -6,7 +6,7 @@ use crate::{admin::*, tools::password_management::verify_password};
 use crate::tools::claims::Claims;
 use crate::tools::keycloak::Keycloak;
 use actix_session::Session;
-use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, get};
+use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse};
 use uuid::Uuid;
 
 //Pour s'enregistrer en tant qu'admin
@@ -67,7 +67,7 @@ async fn double_authentication(
 
     let change = admin.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_admin(&admin, Some(true),change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_admin(&admin, Some(true), change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -95,61 +95,50 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
 
     //HttpResponse::Ok().finish()
 
-    let redirection = env::var("REDIRECT_URL_ADMIN").map_err(|_| ApiError::new(500, "Env error REDIRECT_URL".to_string()))?;
+    let redirection = env::var("REDIRECT_URL_ADMIN")
+        .map_err(|_| ApiError::new(500, "Env error REDIRECT_URL".to_string()))?;
 
-    Ok(HttpResponse::Found()  // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
-        .append_header(("Location", redirection))
-        .finish())
+    Ok(
+        HttpResponse::Found() // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
+            .append_header(("Location", redirection))
+            .finish(),
+    )
 }
 
 #[get("/api/authentication/login/admin/extern/next")]
 async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiError> {
-    
     if let Ok(cookie) = session.get::<String>("id") {
         //println!("SESSION value: {}", token);
         // modify the session state
         if let Some(token) = cookie {
-
             let claims = Claims::verify_admin_session_complete(&token)?;
 
             let admin = Admin::find_extern(claims.mail)?;
-     
-            let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure   
-     
+
+            let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
+
             let tok = "Bearer ".to_string() + &token;
-     
+
             Ok(HttpResponse::Ok()
                 .insert_header(("Authorization", tok))
                 .insert_header(("Access-Control-Expose-Headers", "Authorization"))
                 .json(admin))
-            
-        }
-
-        else{
+        } else {
             Err(ApiError::new(401, "Credentials not valid!".to_string()))
         }
-       
-
-    }
-
-    else {
+    } else {
         Err(ApiError::new(401, "Credentials not valid!".to_string()))
     }
 }
 
 #[patch("/api/authentication/login/admin/enable_extern")]
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
-
-
     let claims = Claims::verify_admin_session_first(req)?; //verifie legitimite admin
 
     let _admin = Admin::enable_extern(claims.mail)?;
 
-    Ok(HttpResponse::Ok()
-        .finish())
-
+    Ok(HttpResponse::Ok().finish())
 }
-
 
 #[post("/admins")]
 async fn create_admin(admin: web::Json<AdminRecu>) -> Result<HttpResponse, ApiError> {

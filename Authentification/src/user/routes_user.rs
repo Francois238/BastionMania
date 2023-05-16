@@ -7,7 +7,7 @@ use crate::user::*;
 use crate::tools::claims::Claims;
 use crate::tools::password_management::verify_password;
 use actix_session::Session;
-use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, get};
+use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse};
 use uuid::Uuid;
 
 //Pour s'enregistrer en tant que user
@@ -40,7 +40,7 @@ pub async fn sign_in_basic(
     if is_valid {
         let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-        let my_claims = Claims::new_user(&user,Some(false), false); //Creation du corps du token ici authenf classique
+        let my_claims = Claims::new_user(&user, Some(false), false); //Creation du corps du token ici authenf classique
 
         let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -68,7 +68,7 @@ async fn double_authentication(
 
     let change = user.change; //recupere le changement de mdp
 
-    let my_claims = Claims::new_user(&user,Some(true), change.unwrap()); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_user(&user, Some(true), change.unwrap()); //Creation du corps du token, true car 2FA etablie
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -98,50 +98,50 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
 
     //HttpResponse::Ok().finish()
 
-    let redirection = env::var("REDIRECT_URL_USER").map_err(|_| ApiError::new(500, "Env error REDIRECT_URL".to_string()))?;
+    let redirection = env::var("REDIRECT_URL_USER")
+        .map_err(|_| ApiError::new(500, "Env error REDIRECT_URL".to_string()))?;
 
-    Ok(HttpResponse::Found()  // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
-        .append_header(("Location", redirection))
-        .finish())
+    Ok(
+        HttpResponse::Found() // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
+            .append_header(("Location", redirection))
+            .finish(),
+    )
 }
 
 #[get("/api/authentication/login/extern/next")]
 async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiError> {
-    
-    if let Some(token) = session.get::<String>("id").map_err(|_| ApiError::new(500, "Session error".to_string()))? {
+    if let Some(token) = session
+        .get::<String>("id")
+        .map_err(|_| ApiError::new(500, "Session error".to_string()))?
+    {
         println!("SESSION value: {}", token);
         // modify the session state
-       
-       let claims = Claims::verify_admin_session_complete(&token)?;
 
-       let user = User::find_by_mail(claims.mail)?;
+        let claims = Claims::verify_admin_session_complete(&token)?;
 
-       let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure   
+        let user = User::find_by_mail(claims.mail)?;
 
-       let tok = "Bearer ".to_string() + &token;
+        let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-       Ok(HttpResponse::Ok()
-           .insert_header(("Authorization", tok))
-           .insert_header(("Access-Control-Expose-Headers", "Authorization"))
-           .json(user))
-    }
+        let tok = "Bearer ".to_string() + &token;
 
-    else {
+        Ok(HttpResponse::Ok()
+            .insert_header(("Authorization", tok))
+            .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+            .json(user))
+    } else {
         Ok(HttpResponse::Ok().finish())
     }
 }
 
 #[patch("/api/authentication/login/enable_extern")] //activer authentification externe
 async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
-
     let claims = Claims::verify_user_session_first(req)?; //verifie legitimite user
 
     let _user = User::enable_extern(claims.mail)?;
 
-    Ok(HttpResponse::Ok()
-        .finish())
+    Ok(HttpResponse::Ok().finish())
 }
-
 
 #[post("/users")]
 async fn create_user(user: web::Json<UserRecu>) -> Result<HttpResponse, ApiError> {

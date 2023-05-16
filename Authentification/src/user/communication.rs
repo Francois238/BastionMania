@@ -1,12 +1,10 @@
-use std::env;
 use reqwest::Response;
+use std::env;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::tools::{Claims, Hours, ApiError};
-
-
+use crate::tools::{ApiError, Claims, Hours};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Sent {
@@ -20,7 +18,6 @@ pub struct Sent {
 
 impl Sent {
     pub fn new(id: Uuid, name: String, last_name: String, mail: String) -> Self {
-
         let iat = Hours::new().iat;
         let exp = Hours::new().exp;
 
@@ -45,30 +42,24 @@ impl Sent {
         }
     }
 
-    pub async fn sent(user : Sent) -> Result<(), ApiError> {
-
+    pub async fn sent(user: Sent) -> Result<(), ApiError> {
         let url = env::var("URL_USER_MANAGEMENT").map_err(|_| {
             ApiError::new(
                 500,
                 "Impossible to communicate with authentication".to_string(),
             )
         })?;
-        
+
         let client = reqwest::Client::new(); //Envoie une requete au micro service user mangement pour ajouter le user dans sa BDD
-        let response = client
-            .post(url)
-            .json(&user)
-            .send()
-            .await
-            .map_err(|_| {
-                ApiError::new(
-                    500,
-                    "Impossible to communicate with authentication".to_string(),
-                )
-            })?;
-    
+        let response = client.post(url).json(&user).send().await.map_err(|_| {
+            ApiError::new(
+                500,
+                "Impossible to communicate with authentication".to_string(),
+            )
+        })?;
+
         response_error(response)?;
-    
+
         Ok(())
     }
 }
