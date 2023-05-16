@@ -30,16 +30,16 @@ pub struct WGPeerPublicKey {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct WireguardRessource{
+pub struct WireguardRessource {
     pub id: String,
     pub public_key: String,
     pub client_ip: String,
     pub target_ip: String,
 }
 
-impl WireguardRessource{
-    pub fn to_wg_peer_config(&self) -> WGPeerConfig{
-        WGPeerConfig{
+impl WireguardRessource {
+    pub fn to_wg_peer_config(&self) -> WGPeerConfig {
+        WGPeerConfig {
             public_key: self.public_key.clone(),
             endpoint: None,
             allowed_ips: self.client_ip.clone(),

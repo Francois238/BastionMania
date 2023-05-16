@@ -1,6 +1,6 @@
 use crate::consts::CMD_SSHKEYGEN;
-use crate::database::{BastionDatabase};
-use crate::wireguard::{wgconfigure, self};
+use crate::database::BastionDatabase;
+use crate::wireguard::{self, wgconfigure};
 use crate::{BastionConfig, WGToAgent, WGToClient};
 use std::fs;
 use std::path::Path;
@@ -101,15 +101,23 @@ pub fn startup() {
     restart_init();
 }
 
-fn save_host_keys(){
-    copy_list(SSH_HOST_KEYS_PATH, SSH_HOST_KEYS_PATH_DATA, &SSH_HOST_KEYS_FILES)
+fn save_host_keys() {
+    copy_list(
+        SSH_HOST_KEYS_PATH,
+        SSH_HOST_KEYS_PATH_DATA,
+        &SSH_HOST_KEYS_FILES,
+    )
 }
 
-fn restore_host_keys(){
-    copy_list(SSH_HOST_KEYS_PATH_DATA, SSH_HOST_KEYS_PATH, &SSH_HOST_KEYS_FILES)
+fn restore_host_keys() {
+    copy_list(
+        SSH_HOST_KEYS_PATH_DATA,
+        SSH_HOST_KEYS_PATH,
+        &SSH_HOST_KEYS_FILES,
+    )
 }
 
-fn copy_list(src: &str, dst: &str, list: &[&str]){
+fn copy_list(src: &str, dst: &str, list: &[&str]) {
     for item in list {
         let src_path = format!("{}/{}", src, item);
         let dst_path = format!("{}/{}", dst, item);
@@ -132,7 +140,7 @@ fn start_sshd() {
     Command::new("/usr/sbin/rsyslogd")
         .output()
         .expect("Failed to start rsyslogd");
-    
+
     Command::new("/usr/sbin/sshd")
         .output()
         .expect("Failed to start sshd");

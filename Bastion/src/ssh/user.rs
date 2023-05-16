@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::ssh::model::PublicKey;
 
-
 /// Représente un utilisateur d'une ressource
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SSHUser {

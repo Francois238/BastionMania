@@ -1,6 +1,5 @@
 use std::fs;
 
-
 use crate::ssh::ressource::SSHRessource;
 use crate::ssh::user::SSHUser;
 
@@ -46,7 +45,9 @@ impl AuthorizedKey {
     /// ```
     pub fn from_line(line: &str) -> Result<AuthorizedKey, String> {
         let start_command = line.find('\"').ok_or("No command")?;
-        let end_command = line[start_command + 1..].find('\"').ok_or("No end command")?;
+        let end_command = line[start_command + 1..]
+            .find('\"')
+            .ok_or("No end command")?;
 
         let command = line[..start_command + end_command + 2].to_string();
 

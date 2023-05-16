@@ -1,5 +1,3 @@
-use std::error;
-
 use actix_web::{delete, post, web, HttpResponse, Responder};
 
 use crate::database::BastionDatabase;
@@ -88,9 +86,7 @@ async fn add_ssh_user(ressource_id: web::Path<String>, user: web::Json<SSHUser>)
 }
 
 #[delete("/ssh/ressources/{ressource_id}/users/{user_id}")]
-async fn remove_ssh_user(
-    path: web::Path<(String, String)>,
-) -> impl Responder {
+async fn remove_ssh_user(path: web::Path<(String, String)>) -> impl Responder {
     let (ressource_id, user_id) = path.into_inner();
 
     println!("Removing user from ressource: {}", ressource_id);
@@ -111,8 +107,8 @@ async fn remove_ssh_user(
         Some(r) => r,
         None => {
             error!("Ressource not found : {}", ressource_id);
-            return HttpResponse::NotFound().body("Ressource not found")
-        },
+            return HttpResponse::NotFound().body("Ressource not found");
+        }
     };
 
     let res = ressource.remove_user(&user_id);

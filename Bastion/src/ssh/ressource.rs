@@ -1,7 +1,6 @@
-
+use log::debug;
 use std::fs;
 use std::process::Command;
-use log::debug;
 
 use serde::{Deserialize, Serialize};
 
@@ -62,7 +61,6 @@ fn create_authorized_keys_file(name: &str) -> Result<(), String> {
     Ok(())
 }
 
-
 impl SSHRessource {
     pub fn save(&self) -> Result<(), String> {
         let mut database =
@@ -100,17 +98,22 @@ impl SSHRessource {
         debug!("authorized_keys: {:?}", authorized_keys);
         authorized_keys.save(path.as_str())?;
 
-        let mut _self = database.get_ssh_mut_by_name(self.name.as_str())
+        let mut _self = database
+            .get_ssh_mut_by_name(self.name.as_str())
             .ok_or(format!("Ressource {} not found", self.name))?;
         _self.users.push(user.clone());
-        database.save().map_err(|e| format!("Error saving database: {}", e))?;
+        database
+            .save()
+            .map_err(|e| format!("Error saving database: {}", e))?;
         Ok(())
     }
 
     pub fn remove_user(&mut self, user_id: &str) -> Result<(), String> {
-        let user = self.users.iter().find(|u| u.id == user_id).ok_or_else(|| {
-            format!("User {} not found in ressource {}",user_id, self.name)
-        })?;
+        let user = self
+            .users
+            .iter()
+            .find(|u| u.id == user_id)
+            .ok_or_else(|| format!("User {} not found in ressource {}", user_id, self.name))?;
         // Remove authorized key
         let path = self.authorized_keys_path();
         let mut authorized_keys = AuthorizedKeys::from_path(path.as_str())?;
