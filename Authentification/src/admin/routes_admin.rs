@@ -81,9 +81,9 @@ async fn double_authentication(
 
 #[get("/api/authentication/login/admin/extern")]
 async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpResponse, ApiError> {
-    let mail = Keycloak::get_token(&req)?;
+    let admin: Keycloak = Keycloak::get_token(&req)?;
 
-    let admin = Admin::find_extern(mail)?;
+    let admin = Admin::find_extern(admin.email)?;
 
     let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
@@ -105,26 +105,35 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
 #[get("/api/authentication/login/admin/extern/next")]
 async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiError> {
     
-    if let Some(token) = session.get::<String>("id").map_err(|_| ApiError::new(500, "Session error".to_string()))? {
-        println!("SESSION value: {}", token);
+    if let Ok(cookie) = session.get::<String>("id") {
+        //println!("SESSION value: {}", token);
         // modify the session state
+        if let Some(token) = cookie {
+
+            let claims = Claims::verify_admin_session_complete(&token)?;
+
+            let admin = Admin::find_extern(claims.mail)?;
+     
+            let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure   
+     
+            let tok = "Bearer ".to_string() + &token;
+     
+            Ok(HttpResponse::Ok()
+                .insert_header(("Authorization", tok))
+                .insert_header(("Access-Control-Expose-Headers", "Authorization"))
+                .json(admin))
+            
+        }
+
+        else{
+            Err(ApiError::new(401, "Credentials not valid!".to_string()))
+        }
        
-       let claims = Claims::verify_admin_session_complete(&token)?;
 
-       let admin = Admin::find_extern(claims.mail)?;
-
-       let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure   
-
-       let tok = "Bearer ".to_string() + &token;
-
-       Ok(HttpResponse::Ok()
-           .insert_header(("Authorization", tok))
-           .insert_header(("Access-Control-Expose-Headers", "Authorization"))
-           .json(admin))
     }
 
     else {
-        Ok(HttpResponse::Ok().finish())
+        Err(ApiError::new(401, "Credentials not valid!".to_string()))
     }
 }
 

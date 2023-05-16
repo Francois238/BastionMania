@@ -7,12 +7,12 @@ use super::ApiError;
 #[derive(Serialize, Deserialize)]
 pub struct Keycloak {
     pub email: String,
-    //pub given_name: String,
-    //pub family_name: String,
+    pub given_name: String,
+    pub family_name: String,
 }
 
 impl Keycloak {
-    pub fn get_token(req: &HttpRequest) -> Result<String, ApiError> {
+    pub fn get_token(req: &HttpRequest) -> Result<Self, ApiError> {
         //I want to read the header X-Userinfo decoded and return it as a string
 
         let header = req.headers().get("X-Userinfo");
@@ -36,6 +36,6 @@ impl Keycloak {
 
         let claim = claim.map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
 
-        Ok(claim.email)
+        Ok(claim)
     }
 }

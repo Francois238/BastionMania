@@ -82,13 +82,15 @@ async fn double_authentication(
 
 #[get("/api/authentication/login/extern")]
 async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpResponse, ApiError> {
-    let mail = Keycloak::get_token(&req)?;
+    let user = Keycloak::get_token(&req)?;
 
-    let user = User::find_extern(mail)?;
+    let user = User::find_extern(user).await?;
+
+    let user = User::enable_extern(user.mail.clone())?; //verifie si l'authentification externe est activee
 
     let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
-    let my_claims = Claims::new_user(&user, None, true); //Creation du corps du token, true car 2FA etablie
+    let my_claims = Claims::new_user(&user, None, true); //Creation du corps du token
 
     let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
 
@@ -112,7 +114,7 @@ async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiEr
        
        let claims = Claims::verify_admin_session_complete(&token)?;
 
-       let user = User::find_extern(claims.mail)?;
+       let user = User::find_by_mail(claims.mail)?;
 
        let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure   
 

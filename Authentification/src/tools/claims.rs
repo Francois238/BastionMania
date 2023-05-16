@@ -22,13 +22,13 @@ pub struct Claims {
     pub exp: OffsetDateTime,
 }
 
-struct Hours {
-    iat: OffsetDateTime,
-    exp: OffsetDateTime,
+pub struct Hours {
+    pub iat: OffsetDateTime,
+    pub exp: OffsetDateTime,
 }
 
 impl Hours {
-    fn new() -> Hours {
+    pub fn new() -> Hours {
         let iat1 = OffsetDateTime::now_utc();
         let exp1 = iat1 + Duration::hours(10);
 
