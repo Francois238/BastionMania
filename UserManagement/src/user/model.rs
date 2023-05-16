@@ -5,7 +5,13 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
+pub struct MailUser {
+    //Structure recue dans le JSON pour trouver des utilisateurs
+    pub mail: Option<String>,
+}
+
+#[derive(Serialize)]
 pub struct CodeOtp {
     //Structure envoye dans le JSON
     pub url: String,
@@ -13,7 +19,7 @@ pub struct CodeOtp {
 
 //Structure gestion des users
 
-#[derive(Serialize, Deserialize)]
+#[derive( Deserialize)]
 pub struct UserReceived {
     //Structure recue dans le JSON pour ajouter un user
     pub name: String,
@@ -22,7 +28,7 @@ pub struct UserReceived {
     pub password: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct UserSent {
     //structure envoyee vers authentication
     pub id: Uuid,
@@ -32,7 +38,7 @@ pub struct UserSent {
     pub password: String,
 }
 
-#[derive(AsChangeset, Insertable)]
+#[derive(Insertable)]
 #[diesel(table_name = users)]
 pub struct UserInserable {
     //Structure inseree en BDD pour ajouter un user
@@ -51,10 +57,21 @@ pub struct User {
     pub mail: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct UserChangeCred {
     //Structure envoye dans le JSON pour changer password
     pub password: String,
+}
+
+
+#[derive(Serialize, Deserialize)]
+pub struct UserSentAuthentication {
+    //structure envoyee vers authentication
+    pub id: Uuid,
+    pub name: String,
+    pub last_name: String,
+    pub mail: String,
+    pub claims: String,
 }
 
 impl UserSent {
@@ -128,5 +145,37 @@ impl User {
         let res = diesel::delete(users::table.filter(users::id.eq(id))).execute(&mut conn)?;
 
         Ok(res)
+    }
+
+    pub fn find_by_mail_pattern(mail: String) -> Result<Vec<Self>, ApiError> {
+        //Fct pour récuperer tous les users de la BDD
+        let mut conn = db::connection()?;
+
+        let mail = format!("%{}%", mail);
+
+        let users = users::table
+            .filter(users::mail.ilike(mail))
+            .load::<User>(&mut conn)?; //On recupere la liste des noms
+
+        Ok(users)
+    }
+
+    pub fn add_user_extern(user : UserSentAuthentication) -> Result<User, ApiError> {
+
+        let mut conn = db::connection()?;
+
+        let user = UserInserable::from_user_sent(UserSent {
+            id: user.id,
+            name: user.name,
+            last_name: user.last_name,
+            mail: user.mail,
+            password: "".to_string(),
+        });
+
+        let user = diesel::insert_into(users::table)
+            .values(user)
+            .get_result(&mut conn)?;
+
+        Ok(user)
     }
 }

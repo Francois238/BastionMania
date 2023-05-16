@@ -5,13 +5,17 @@ use crate::user::*;
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse};
 use google_authenticator::{ErrorCorrectionLevel, GoogleAuthenticator};
 use uuid::Uuid;
-//Pour s'enregistrer en tant qu'admin
 
 #[get("/users")]
-async fn find_all_users(req: HttpRequest) -> Result<HttpResponse, ApiError> {
+async fn find_all_users(req: HttpRequest, mail: web::Query<MailUser>) -> Result<HttpResponse, ApiError> {
     //Recupere la liste des users
 
     let _claims = Claims::verify_admin_session_complete(req)?;
+
+    if let Some(mail) = &mail.mail {
+        let users = User::find_by_mail_pattern(mail.to_string())?;
+        return Ok(HttpResponse::Ok().json(users)); //Retourne la liste
+    }
 
     let users = User::find_all()?;
 
@@ -133,6 +137,20 @@ async fn delete_user(req: HttpRequest, id: web::Path<Uuid>) -> Result<HttpRespon
     Ok(HttpResponse::Ok().finish())
 }
 
+
+#[post("extern/users")]
+async fn add_user_extern(user: web::Json<UserSentAuthentication>) ->  Result<HttpResponse, ApiError> {
+
+    let user = user.into_inner();
+
+    let _ok = Claims::verify_session_add_from_authentication(user.claims.clone())?;
+
+    let user = User::add_user_extern(user)?;
+
+    Ok(HttpResponse::Ok().json(user))
+
+}
+
 pub fn routes_user_utilisation(cfg: &mut web::ServiceConfig) {
     cfg.service(find_all_users);
     cfg.service(find_user);
@@ -140,4 +158,5 @@ pub fn routes_user_utilisation(cfg: &mut web::ServiceConfig) {
     cfg.service(ajout_2fa);
     cfg.service(update);
     cfg.service(delete_user);
+    cfg.service(add_user_extern);
 }
