@@ -127,7 +127,12 @@ fn init_proof_exists() -> bool {
     Path::new("/bastion_init").exists()
 }
 
+/// Start sshd and rsyslogd
 fn start_sshd() {
+    Command::new("/usr/sbin/rsyslogd")
+        .output()
+        .expect("Failed to start rsyslogd");
+    
     Command::new("/usr/sbin/sshd")
         .output()
         .expect("Failed to start sshd");
