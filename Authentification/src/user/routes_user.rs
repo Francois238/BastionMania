@@ -86,7 +86,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     //Si existe pas on faire la redirection vers la page front REDIRECT_URL_USER
 
     if user.is_err() {
-        communication::redirection_err();
+        let result = communication::redirection_err();
+
+        return Ok(result);
     }
 
     let user = user.unwrap();
@@ -94,7 +96,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let user = User::find_extern(user).await;
 
     if user.is_err() {
-        communication::redirection_err();
+        let result = communication::redirection_err();
+
+        return Ok(result);
     }
 
     let user = user.unwrap();
@@ -102,7 +106,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let user = User::enable_extern(user.mail); //verifie si l'authentification externe est activee
 
     if user.is_err() {
-        communication::redirection_err();
+        let result = communication::redirection_err();
+
+        return Ok(result);
     }
 
     let user = user.unwrap();
@@ -114,9 +120,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let token = Claims::create_jwt(&my_claims); //Creation du jwt
 
     if token.is_err() {
+        let result = communication::redirection_err();
 
-
-        communication::redirection_err();
+        return Ok(result);
     }
 
     let token = token.unwrap();

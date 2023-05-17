@@ -85,7 +85,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let admin = Keycloak::get_token(&req);
 
     if admin.is_err() {
-        communication::redirection_err();
+        let result = communication::redirection_err();
+
+        return Ok(result);
     }
 
     let admin = admin.unwrap();
@@ -93,7 +95,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let admin = Admin::find_extern(admin.email);
 
     if admin.is_err() {
-        communication::redirection_err();
+        let result = communication::redirection_err();
+
+        return Ok(result);
     }
 
     let admin = admin.unwrap();
@@ -101,7 +105,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let admin = Admin::enable_extern(admin.mail);
 
     if admin.is_err() {
-        communication::redirection_err();
+        let result = communication::redirection_err();
+
+        return Ok(result);
     }
 
     let admin = admin.unwrap();
@@ -113,7 +119,9 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let token = Claims::create_jwt(&my_claims); //Creation du jwt
 
     if token.is_err() {
-        communication::redirection_err();
+        let result = communication::redirection_err();
+
+        return Ok(result);
     }
 
     let token = token.unwrap();
