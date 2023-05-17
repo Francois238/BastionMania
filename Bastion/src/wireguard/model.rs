@@ -50,10 +50,12 @@ impl WireguardRessource {
     }
 
     pub fn create(&self) -> Result<(), String> {
-        wgconfigure::add_peer("wg-client", &self.to_wg_peer_config())
+        wgconfigure::add_peer("wg-client", &self.to_wg_peer_config())?;
+        wgconfigure::allow_target_ip(self)
     }
 
     pub fn delete(&self) -> Result<(), String> {
-        wgconfigure::remove_peer("wg-client", &self.public_key)
+        wgconfigure::remove_peer("wg-client", &self.public_key)?;
+        wgconfigure::deny_target_ip(self)
     }
 }

@@ -161,12 +161,11 @@ fn init_wg() {
     };
 
     let database = BastionDatabase::get().expect("Can't load database");
-    let peers = database
-        .get_wireguard_ressources()
-        .iter()
-        .map(|r| r.to_wg_peer_config())
-        .collect();
-
+    let ressources = database.get_wireguard_ressources();
+    for ressource in ressources {
+        ressource.create().expect("Can't create wireguard config");
+    }
+    
     wgconfigure::configure_to_agent(config_to_agent);
-    wgconfigure::configure_to_client(config_to_client, peers);
+    wgconfigure::configure_to_client(config_to_client, vec![]);
 }

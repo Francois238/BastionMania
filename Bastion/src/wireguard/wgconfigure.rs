@@ -1,4 +1,5 @@
-use crate::{WGInterfaceConfig, WGPeerConfig, WGToAgent, WGToClient};
+use crate::consts::CMD_IPTABLES;
+use crate::{WGInterfaceConfig, WGPeerConfig, WGToAgent, WGToClient, WireguardRessource};
 use std::fs;
 use std::path::Path;
 use std::process::{Command, Output};
@@ -177,4 +178,36 @@ pub fn configure_to_client(config: WGToClient, peers: Vec<WGPeerConfig>) {
     };
     configure_wg_interface(interface, interface_config);
     load_peers(interface, peers).unwrap();
+}
+
+
+fn set_target_ip(action: &str, ressource: &WireguardRessource) -> Result<(), String> {
+    let output = Command::new(CMD_IPTABLES)
+        .arg(action).arg("FORWARD")
+        .arg("-i").arg("wg-client")
+        .arg("-o").arg("wg-agent")
+        .arg("-s").arg(&ressource.client_ip)
+        .arg("-d").arg(&ressource.target_ip)
+        .arg("-j").arg("ACCEPT")
+        .output()
+        .map_err(|e| e.to_string())?;
+    if !output.status.success() {
+        println!("{}", String::from_utf8_lossy(&output.stdout));
+        return Err("Can't set target ip".to_string());
+    }
+    Ok(())
+}
+
+/// Allow traffic from wg-client to wg-agent with specific source ip and destination ip
+///
+/// `iptables -A FORWARD -i wg-client -o wg-agent -s <client_ip> -d <target_ip> -j ACCEPT`
+pub fn allow_target_ip(ressource: &WireguardRessource) -> Result<(), String> {
+    set_target_ip("-I", ressource)
+}
+
+/// Deny traffic from wg-client to wg-agent with specific source ip and destination ip
+/// 
+/// `iptables -D FORWARD -i wg-client -o wg-agent -s <client_ip> -d <target_ip> -j ACCEPT`
+pub fn deny_target_ip(ressource: &WireguardRessource) -> Result<(), String> {
+    set_target_ip("-D", ressource)
 }
