@@ -222,6 +222,25 @@ impl Claims {
 
         Err(ApiError::new(403, "Unauthorized".to_string()))
     }
+
+
+    pub fn verify_user_session_complete(jwt: &str) -> Result<Claims, ApiError> {
+        let secret = Self::get_jwt_key()?;
+
+        let token_message = decode::<Claims>(
+            jwt,
+            &DecodingKey::from_secret(secret.as_ref()),
+            &Validation::new(Algorithm::HS256),
+        )
+        .map_err(|_| ApiError::new(403, "Unauthorized".to_string()))?;
+
+        if !token_message.claims.admin && token_message.claims.complete_authentication {
+            //Si c est un admin et que il est completement authentifie
+            return Ok(token_message.claims);
+        }
+
+        Err(ApiError::new(403, "Unauthorized".to_string()))
+    }
 }
 
 mod jwt_numeric_date {

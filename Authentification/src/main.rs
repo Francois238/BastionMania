@@ -10,6 +10,7 @@ mod admin;
 mod schema;
 mod tools;
 mod user;
+mod verification;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -28,6 +29,7 @@ async fn main() -> std::io::Result<()> {
             )
             .configure(admin::routes_admin)
             .configure(user::routes_user)
+            .configure(verification::routes_verification)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
