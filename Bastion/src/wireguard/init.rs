@@ -5,9 +5,7 @@ use std::process::Command;
 
 use log::{error, info, debug};
 
-static COMMAND_WIREGUARD: &str = "/usr/bin/wireguard-go";
-static COMMAND_MKNOD: &str = "/bin/mknod";
-static COMMAND_IPTABLES: &str = "/sbin/iptables";
+use crate::consts::{CMD_MKNOD, CMD_WIREGUARD, CMD_IPTABLES};
 
 fn get_ipv4_forward_status() -> Result<bool> {
     let str_ip4f = fs::read_to_string("/proc/sys/net/ipv4/ip_forward")?;
@@ -33,7 +31,7 @@ fn create_tun_device() {
         fs::create_dir("/dev/net").expect("Can't create /dev/net");
     }
     // create tun interface
-    let output = Command::new(COMMAND_MKNOD)
+    let output = Command::new(CMD_MKNOD)
         .arg("/dev/net/tun")
         .arg("c")
         .arg("10")
@@ -47,7 +45,7 @@ fn create_tun_device() {
 }
 
 fn add_wg_interface(name: &str) {
-    let output = Command::new(COMMAND_WIREGUARD)
+    let output = Command::new(CMD_WIREGUARD)
         .arg(name)
         .output()
         .expect("Failed to execute");
@@ -61,7 +59,7 @@ fn add_wg_interface(name: &str) {
 /// 
 ///  `iptables -t nat -I POSTROUTING -o wg-agent -j MASQUERADE`
 fn iptables_masquerade() {
-    let output = Command::new(COMMAND_IPTABLES)
+    let output = Command::new(CMD_IPTABLES)
         .arg("-t")
         .arg("nat")
         .arg("-I")
@@ -78,10 +76,26 @@ fn iptables_masquerade() {
     }
 }
 
+/// Deny all traffic from wg-client
+fn deny_traffic_client(table: &str){
+    let output = Command::new(CMD_IPTABLES)
+        .arg("-I").arg(table)
+        .arg("-i").arg("wg-client")
+        .arg("-j").arg("DROP")
+        .output()
+        .expect("Failed to deny traffic from wg-client");
+    if !output.status.success() {
+        error!("{}", String::from_utf8_lossy(&output.stdout));
+        panic!("Can't deny traffic from wg-client");
+    }
+}
+
 pub fn init() {
     init_routing();
     create_tun_device();
     add_wg_interface("wg-agent");
     add_wg_interface("wg-client");
     iptables_masquerade();
+    deny_traffic_client("INPUT");
+    deny_traffic_client("FORWARD");
 }
