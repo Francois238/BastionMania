@@ -207,11 +207,6 @@ impl Admin {
             .filter(admins::mail.eq(mail))
             .first(&mut conn)?;
 
-        if admin_verif.password.is_some() || admin_verif.otpactive.is_some() {
-            //Si l admin utilise pas Keyckoak
-            return Err(ApiError::new(403, "Interdit".to_string()));
-        }
-
         Ok(admin_verif)
     }
 
@@ -219,27 +214,29 @@ impl Admin {
         let mut conn = db::connection()?;
 
         let admin_verif: Admin = admins::table
-            .filter(admins::mail.eq(mail))
+            .filter(admins::mail.eq(mail.clone()))
             .first(&mut conn)?;
 
-        if admin_verif.password.is_none()
-            || admin_verif.otpactive.is_none()
-            || admin_verif.otpactive == Some(true)
-        {
-            //Si l admin utilise deja Keyckoak ou qu'il utilise deja entierement l authenf classique
-            return Err(ApiError::new(403, "Interdit".to_string()));
+        if admin_verif.password.is_none() || admin_verif.otpactive.is_none() {
+            //Si l'admin'utilise deja Keyckoak on le retourne c est deja OK
+            Ok(admin_verif)
         }
+        //si l'admin'se connecte deja entierement avec la 2FA classique, il ne peut pas
+        else if admin_verif.otpactive == Some(true) || admin_verif.change == Some(true) {
+            return Err(ApiError::new(403, "Interdit".to_string()));
+        } else {
+            //on active le fait qu il puisse se connecter avec Keycloak
+            let admin = diesel::update(admins::table)
+                .filter(admins::id.eq(admin_verif.id))
+                .set((
+                    admins::password.eq(None::<Vec<u8>>),
+                    admins::change.eq(None::<bool>),
+                    admins::otpactive.eq(None::<bool>),
+                ))
+                .get_result(&mut conn)?;
 
-        let admin = diesel::update(admins::table)
-            .filter(admins::id.eq(admin_verif.id))
-            .set((
-                admins::password.eq(None::<Vec<u8>>),
-                admins::change.eq(None::<bool>),
-                admins::otpactive.eq(None::<bool>),
-            ))
-            .get_result(&mut conn)?;
-
-        Ok(admin)
+            Ok(admin)
+        }
     }
 
     pub fn delete(id: Uuid) -> Result<usize, ApiError> {

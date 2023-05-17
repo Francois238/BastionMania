@@ -205,16 +205,15 @@ impl User {
             .first(&mut conn)?;
 
         if user_verif.password.is_none() || user_verif.otpactive.is_none() {
-            //Si le user utilise deja Keyckoak
-            let user_verif: User = users::table.filter(users::mail.eq(mail)).first(&mut conn)?;
+            //Si le user utilise deja Keyckoak on le retourne c est deja OK
             Ok(user_verif)
         }
-        //si l utilisateur se connecte entierement avec la 2FA classique, il ne peut pas
-        else if user_verif.otpactive == Some(true) || user_verif.otpactive == Some(true) {
+        //si l utilisateur se connecte deja entierement avec la 2FA classique, il ne peut pas
+        else if user_verif.otpactive == Some(true) || user_verif.change == Some(true) {
             return Err(ApiError::new(403, "Interdit".to_string()));
         } else {
             //on active le fait qu il puisse se connecter avec Keycloak
-            let admin = diesel::update(users::table)
+            let user = diesel::update(users::table)
                 .filter(users::id.eq(user_verif.id))
                 .set((
                     users::password.eq(None::<Vec<u8>>),
@@ -223,7 +222,7 @@ impl User {
                 ))
                 .get_result(&mut conn)?;
 
-            Ok(admin)
+            Ok(user)
         }
     }
 
@@ -275,11 +274,6 @@ impl User {
         let user_verif: User = users::table
             .filter(users::mail.eq(mail.clone()))
             .first(&mut conn)?;
-
-        if user_verif.password.is_some() || user_verif.otpactive.is_some() {
-            //Si l utilisateur utilise pas Keyckoak
-            return Err(ApiError::new(403, "Interdit".to_string()));
-        }
 
         Ok(user_verif)
     }

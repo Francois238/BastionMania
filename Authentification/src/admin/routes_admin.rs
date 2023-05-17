@@ -85,6 +85,8 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
 
     let admin = Admin::find_extern(admin.email)?;
 
+    let admin = Admin::enable_extern(admin.mail)?;
+
     let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
     let my_claims = Claims::new_admin(&admin, None, true); //Creation du corps du token, true car 2FA etablie
@@ -129,15 +131,6 @@ async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiEr
     } else {
         Err(ApiError::new(401, "Credentials not valid!".to_string()))
     }
-}
-
-#[patch("/api/authentication/login/admin/enable_extern")]
-async fn enable_authentication_ext(req: HttpRequest) -> Result<HttpResponse, ApiError> {
-    let claims = Claims::verify_admin_session_first(req)?; //verifie legitimite admin
-
-    let _admin = Admin::enable_extern(claims.mail)?;
-
-    Ok(HttpResponse::Ok().finish())
 }
 
 #[post("/admins")]
@@ -234,7 +227,6 @@ pub fn routes_admin(cfg: &mut web::ServiceConfig) {
     cfg.service(double_authentication);
     cfg.service(authentication_ext);
     cfg.service(authentication_ext_next);
-    cfg.service(enable_authentication_ext);
     cfg.service(create_otp_admin);
     cfg.service(patch_admin);
     cfg.service(delete_admin);
