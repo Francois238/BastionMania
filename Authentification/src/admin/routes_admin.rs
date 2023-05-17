@@ -2,6 +2,7 @@ use std::env;
 
 use crate::tools::api_error::ApiError;
 use crate::{admin::*, tools::password_management::verify_password};
+use crate::user::communication;
 
 use crate::tools::claims::Claims;
 use crate::tools::keycloak::Keycloak;
@@ -81,17 +82,41 @@ async fn double_authentication(
 
 #[get("/api/authentication/login/admin/extern")]
 async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpResponse, ApiError> {
-    let admin: Keycloak = Keycloak::get_token(&req)?;
+    let admin = Keycloak::get_token(&req);
 
-    let admin = Admin::find_extern(admin.email)?;
+    if admin.is_err() {
+        communication::redirection_err();
+    }
 
-    let admin = Admin::enable_extern(admin.mail)?;
+    let admin = admin.unwrap();
+
+    let admin = Admin::find_extern(admin.email);
+
+    if admin.is_err() {
+        communication::redirection_err();
+    }
+
+    let admin = admin.unwrap();
+
+    let admin = Admin::enable_extern(admin.mail);
+
+    if admin.is_err() {
+        communication::redirection_err();
+    }
+
+    let admin = admin.unwrap();
 
     let admin = AdminEnvoye::from_admin(admin); //Convertion vers la bonne structure
 
     let my_claims = Claims::new_admin(&admin, None, true); //Creation du corps du token, true car 2FA etablie
 
-    let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
+    let token = Claims::create_jwt(&my_claims); //Creation du jwt
+
+    if token.is_err() {
+        communication::redirection_err();
+    }
+
+    let token = token.unwrap();
 
     session.insert("id", token).unwrap();
 

@@ -82,17 +82,44 @@ async fn double_authentication(
 
 #[get("/api/authentication/login/extern")]
 async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpResponse, ApiError> {
-    let user = Keycloak::get_token(&req)?;
+    let user = Keycloak::get_token(&req);
+    //Si existe pas on faire la redirection vers la page front REDIRECT_URL_USER
 
-    let user = User::find_extern(user).await?;
+    if user.is_err() {
+        communication::redirection_err();
+    }
 
-    let user = User::enable_extern(user.mail)?; //verifie si l'authentification externe est activee
+    let user = user.unwrap();
+
+    let user = User::find_extern(user).await;
+
+    if user.is_err() {
+        communication::redirection_err();
+    }
+
+    let user = user.unwrap();
+
+    let user = User::enable_extern(user.mail); //verifie si l'authentification externe est activee
+
+    if user.is_err() {
+        communication::redirection_err();
+    }
+
+    let user = user.unwrap();
 
     let user = UserEnvoye::from_user(user); //Convertion vers la bonne structure
 
     let my_claims = Claims::new_user(&user, None, true); //Creation du corps du token
 
-    let token = Claims::create_jwt(&my_claims)?; //Creation du jwt
+    let token = Claims::create_jwt(&my_claims); //Creation du jwt
+
+    if token.is_err() {
+
+
+        communication::redirection_err();
+    }
+
+    let token = token.unwrap();
 
     session.insert("id", token).unwrap();
 
@@ -104,7 +131,7 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     Ok(
         HttpResponse::Found() // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
             .append_header(("Location", redirection))
-            .finish(),
+            .finish()
     )
 }
 

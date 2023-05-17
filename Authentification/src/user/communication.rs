@@ -1,3 +1,4 @@
+use actix_web::HttpResponse;
 use reqwest::Response;
 use std::env;
 
@@ -77,4 +78,14 @@ fn response_error(response: Response) -> Result<(), ApiError> {
     }
 
     Ok(())
+}
+
+pub fn redirection_err() ->HttpResponse {
+
+    let redirection = env::var("REDIRECT_URL_USER").unwrap();
+    
+    HttpResponse::Found() // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
+        .append_header(("Location", redirection))
+        .finish()
+    
 }

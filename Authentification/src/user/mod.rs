@@ -1,4 +1,4 @@
-mod communication;
+pub(crate) mod communication;
 mod model;
 mod routes_user;
 
