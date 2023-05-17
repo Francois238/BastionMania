@@ -3,6 +3,8 @@ use std::io::Result;
 use std::path::Path;
 use std::process::Command;
 
+use log::{error, info, debug};
+
 static COMMAND_WIREGUARD: &str = "/usr/bin/wireguard-go";
 static COMMAND_MKNOD: &str = "/bin/mknod";
 static COMMAND_IPTABLES: &str = "/sbin/iptables";
@@ -13,21 +15,21 @@ fn get_ipv4_forward_status() -> Result<bool> {
 }
 
 fn init_routing() {
-    print!("IPv4 routing : ");
     // Check the status of ipv4 forwarding
     let active = get_ipv4_forward_status().expect("Can't read ipv4 forward status");
-    let status = if active { "OK" } else { "FAIL" };
-    println!("{}", status);
-    if !active {
-        panic!("IPv4 routing must be enable");
+    if !active{
+        error!("ipv4 forwarding is not active");
+        panic!("ipv4 forwarding is not active");
     }
+    info!("ipv4 forwarding is active");
+
 }
 
 fn create_tun_device() {
-    // create /dev/net if not exist
+    // create /dev/net if it doesn't exist
     let exist = Path::new("/dev/net").exists();
     if !exist {
-        println!("Creating /dev/net");
+        debug!("Creating /dev/net");
         fs::create_dir("/dev/net").expect("Can't create /dev/net");
     }
     // create tun interface
@@ -39,7 +41,8 @@ fn create_tun_device() {
         .output()
         .expect("Failed to create /dev/net/tun");
     if !output.status.success() {
-        println!("{}", String::from_utf8_lossy(&output.stderr));
+        error!("{}", String::from_utf8_lossy(&output.stderr));
+        panic!("Can't create /dev/net/tun");
     }
 }
 
@@ -49,12 +52,14 @@ fn add_wg_interface(name: &str) {
         .output()
         .expect("Failed to execute");
     if !output.status.success() {
-        println!("{}", String::from_utf8_lossy(&output.stdout));
+        error!("{}", String::from_utf8_lossy(&output.stdout));
         panic!("Can't create wireguard interface");
     }
 }
 
-// iptables -t nat -I POSTROUTING -o eth0 -j MASQUERADE
+/// Create ip masquerading for wireguard
+/// 
+///  `iptables -t nat -I POSTROUTING -o wg-agent -j MASQUERADE`
 fn iptables_masquerade() {
     let output = Command::new(COMMAND_IPTABLES)
         .arg("-t")
@@ -66,9 +71,9 @@ fn iptables_masquerade() {
         .arg("-j")
         .arg("MASQUERADE")
         .output()
-        .expect("Failed to execute MASQUERADE");
+        .expect("Failed to create ip MASQUERADE");
     if !output.status.success() {
-        println!("{}", String::from_utf8_lossy(&output.stdout));
+        error!("{}", String::from_utf8_lossy(&output.stdout));
         panic!("Can't create ip masquerading");
     }
 }

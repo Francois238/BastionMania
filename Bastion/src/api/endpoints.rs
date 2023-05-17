@@ -3,43 +3,78 @@ use actix_web::{delete, post, web, HttpResponse, Responder};
 use crate::database::BastionDatabase;
 use crate::ssh::ressource::SSHRessource;
 use crate::ssh::user::SSHUser;
-use crate::wireguard::{persistance, wgconfigure};
-use crate::{WGPeerConfig, WGPeerPublicKey};
+use crate::WireguardRessource;
 
 use log::{error, info};
 
-static WG_INT: &str = "wg-client";
-
-#[post("/adduser")]
-async fn add_user(user_config: web::Json<WGPeerConfig>) -> impl Responder {
+#[post("/wireguard/configs")]
+async fn add_wireguard_config(user_config: web::Json<WireguardRessource>) -> impl Responder {
     let user_config = user_config.into_inner();
     //TODO Validate input
-    let res = wgconfigure::add_peer(WG_INT, &user_config);
-    if let Err(e) = res {
-        return e;
-    }
-    let res = persistance::add_peer(&user_config);
-    if let Err(e) = res {
-        return e;
+    let database = BastionDatabase::get();
+    let mut database = match database {
+        Ok(d) => d,
+        Err(_) => {
+            error!("Error loading database");
+            return HttpResponse::InternalServerError().body("Error loading database");
+        }
+    };
+
+    if database.wireguard_exists(user_config.clone()) {
+        error!("User already exists : {:?}", user_config);
+        return HttpResponse::BadRequest().body("User already exists");
     }
 
-    "success".to_string()
+    let res = user_config.create();
+    if let Err(e) = res {
+        error!("Error creating config: {}", e);
+        return HttpResponse::InternalServerError().body("Error creating config");
+    }
+
+    let res = database.add_wireguard(user_config);
+    if let Err(e) = res {
+        error!("Error adding config to database: {}", e);
+        return HttpResponse::InternalServerError().body("Error adding config to database");
+    }
+
+    HttpResponse::Ok().body("success")
 }
 
-#[post("/deluser")]
-async fn del_user(user_config: web::Json<WGPeerPublicKey>) -> impl Responder {
-    let public_key = user_config.into_inner().public_key;
+#[delete("/wireguard/configs/{res_id}/{client_id}")]
+async fn remove_wireguard_config(path: web::Path<(String, String)>) -> impl Responder {
+    let (res_id, client_id) = path.into_inner();
     //TODO Validate input
-    let res = wgconfigure::remove_peer(WG_INT, &public_key);
+
+    let database = BastionDatabase::get();
+    let mut database = match database {
+        Ok(d) => d,
+        Err(_) => {
+            error!("Error loading database");
+            return HttpResponse::InternalServerError().body("Error loading database");
+        }
+    };
+
+    let user_config = match database.get_wireguard_ressource(&res_id, &client_id) {
+        Some(r) => r,
+        None => {
+            error!("Config not found : {} {}", res_id, client_id);
+            return HttpResponse::NotFound().body("Config not found");
+        }
+    };
+        
+    let res = user_config.delete();
     if let Err(e) = res {
-        return e;
-    }
-    let res = persistance::remove_peer(public_key);
-    if let Err(e) = res {
-        return e;
+        error!("Error deleting config: {}", e);
+        return HttpResponse::InternalServerError().body("Error deleting config");
     }
 
-    "success".to_string()
+    let res = database.remove_wireguard(&res_id, &client_id);
+    if let Err(e) = res {
+        error!("Error deleting config from database: {}", e);
+        return HttpResponse::InternalServerError().body("Error deleting config from database");
+    }
+
+    HttpResponse::Ok().body("success")
 }
 
 #[post("/ssh/ressources")]
@@ -89,7 +124,10 @@ async fn add_ssh_user(ressource_id: web::Path<String>, user: web::Json<SSHUser>)
 async fn remove_ssh_user(path: web::Path<(String, String)>) -> impl Responder {
     let (ressource_id, user_id) = path.into_inner();
 
-    info!("Removing user : {} from ressource: {}",user_id, ressource_id);
+    info!(
+        "Removing user : {} from ressource: {}",
+        user_id, ressource_id
+    );
     //TODO Validate input
 
     let database = BastionDatabase::get();
@@ -126,7 +164,7 @@ async fn remove_ssh_user(path: web::Path<(String, String)>) -> impl Responder {
 }
 
 /// Remove a ressource
-/// 
+///
 /// This will remove the ressource from the database and delete the user from the system
 #[delete("/ssh/ressources/{ressource_id}")]
 async fn remove_ssh_ressource(ressource_id: web::Path<String>) -> impl Responder {
@@ -175,8 +213,8 @@ async fn remove_ssh_ressource(ressource_id: web::Path<String>) -> impl Responder
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(add_user)
-        .service(del_user)
+    cfg.service(add_wireguard_config)
+        .service(remove_wireguard_config)
         .service(add_ssh_ressource)
         .service(add_ssh_user)
         .service(remove_ssh_user)

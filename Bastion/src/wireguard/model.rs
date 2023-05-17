@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::wgconfigure;
+
 pub struct WGToAgent {
     pub agent_endpoint: String,
     pub agent_public_key: String,
@@ -32,6 +34,7 @@ pub struct WGPeerPublicKey {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WireguardRessource {
     pub id: String,
+    pub client_id: String,
     pub public_key: String,
     pub client_ip: String,
     pub target_ip: String,
@@ -44,5 +47,13 @@ impl WireguardRessource {
             endpoint: None,
             allowed_ips: self.client_ip.clone(),
         }
+    }
+
+    pub fn create(&self) -> Result<(), String> {
+        wgconfigure::add_peer("wg-client", &self.to_wg_peer_config())
+    }
+
+    pub fn delete(&self) -> Result<(), String> {
+        wgconfigure::remove_peer("wg-client", &self.public_key)
     }
 }
