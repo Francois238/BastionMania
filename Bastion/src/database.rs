@@ -72,8 +72,16 @@ impl BastionDatabase {
         self.save()
     }
 
-    pub fn remove_wireguard(&mut self, id: &str) -> io::Result<()> {
-        self.wireguard.retain(|r| r.id != id);
+    pub fn wireguard_exists(&self, ressource: WireguardRessource) -> bool {
+        self.wireguard.iter().any(|r| r.id == ressource.id && r.client_id == ressource.client_id)
+    }
+
+    pub fn get_wireguard_ressource(&self, id: &str, client_id: &str) -> Option<&WireguardRessource> {
+        self.wireguard.iter().find(|r| r.id == id && r.client_id == client_id)
+    }
+
+    pub fn remove_wireguard(&mut self, id: &str, client_id: &str) -> io::Result<()> {
+        self.wireguard.retain(|r| r.id != id && r.client_id != client_id);
         self.save()
     }
 
