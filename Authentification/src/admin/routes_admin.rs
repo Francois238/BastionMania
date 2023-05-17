@@ -2,7 +2,6 @@ use std::env;
 
 use crate::tools::api_error::ApiError;
 use crate::{admin::*, tools::password_management::verify_password};
-use crate::user::communication;
 
 use crate::tools::claims::Claims;
 use crate::tools::keycloak::Keycloak;
@@ -85,7 +84,7 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let admin = Keycloak::get_token(&req);
 
     if admin.is_err() {
-        let result = communication::redirection_err();
+        let result = redirection_err_admin();
 
         return Ok(result);
     }
@@ -95,7 +94,7 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let admin = Admin::find_extern(admin.email);
 
     if admin.is_err() {
-        let result = communication::redirection_err();
+        let result = redirection_err_admin();
 
         return Ok(result);
     }
@@ -105,7 +104,7 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let admin = Admin::enable_extern(admin.mail);
 
     if admin.is_err() {
-        let result = communication::redirection_err();
+        let result = redirection_err_admin();
 
         return Ok(result);
     }
@@ -119,7 +118,7 @@ async fn authentication_ext(session: Session, req: HttpRequest) -> Result<HttpRe
     let token = Claims::create_jwt(&my_claims); //Creation du jwt
 
     if token.is_err() {
-        let result = communication::redirection_err();
+        let result = redirection_err_admin();
 
         return Ok(result);
     }

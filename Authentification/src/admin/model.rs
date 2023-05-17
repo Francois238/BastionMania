@@ -1,7 +1,10 @@
+use std::env;
+
 use crate::schema::admins;
 use crate::tools::api_error::ApiError;
 use crate::tools::db;
 
+use actix_web::HttpResponse;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -270,4 +273,15 @@ pub fn premiere_utilisation_bastion(admin: AdminRecu) -> Result<AdminEnvoye, Api
             message: " ".to_string(),
         })
     }
+}
+
+
+pub fn redirection_err_admin() ->HttpResponse {
+
+    let redirection = env::var("REDIRECT_URL_ADMIN").unwrap();
+    
+    HttpResponse::Found() // Ou HttpResponse::TemporaryRedirect() si vous souhaitez un code 307
+        .append_header(("Location", redirection))
+        .finish()
+    
 }
