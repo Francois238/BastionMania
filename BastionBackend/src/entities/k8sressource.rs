@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Queryable; Serialize)]
 pub struct K8sRessource {
     pub id: i32,
+    pub id_bastion: i32,
     pub name: String,
     pub ip_cluster: String,
 }
@@ -13,6 +14,8 @@ pub struct K8sRessource {
 #[table_name = "k8sressource"]
 pub struct K8sRessourceInsertable {
     pub id: i32,
+    pub id_bastion: i32,
     pub name: String,
     pub ip_cluster: String,
 }
+

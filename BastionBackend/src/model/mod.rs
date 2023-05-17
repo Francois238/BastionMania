@@ -10,6 +10,9 @@ pub mod usersinstancecreate;
 pub mod usersmodification;
 pub mod ressourceinstancecreate;
 pub mod ressourcemodification;
+pub mod wireguardressourcemodification;
+pub mod sshressourcemodification;
+pub mod k8sressourcemodification;
 
 pub use bastioninstancecreate::BastionInstanceCreate;
 pub use bastionmodification::BastionModification;

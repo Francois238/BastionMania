@@ -13,7 +13,7 @@ use crate::api_error::ApiError;
 use crate::db;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport, generate_ressource_freenetid, generate_ressource_k8s_freenetid, generate_ressource_ssh_freenetid, generate_ressource_wireguard_freenetid, generate_user_freenetid};
 //use derive_more::{Display};
-use crate::entities::{Bastion, BastionInsertable, Ressource, RessourceInsertable, Users, UsersModification};
+use crate::entities::{Bastion, BastionInsertable, K8sRessource, K8sRessourceInsertable, Ressource, RessourceInsertable, SshRessource, SshRessourceInsertable, Users, UsersModification, WireguardRessource, WireguardRessourceInsertable};
 use crate::model::{
     BastionInstanceCreate, BastionModification, BastionSuppression, Claims, ConfigAgent,
     ConfigClient, ConfigUser, InstanceClient, RetourAPI, UsersCreation, UsersInstanceCreate,
@@ -27,7 +27,11 @@ use serde::{Deserialize, Serialize};
 use serde::de::Unexpected::Option;
 use serde_json::json;
 use tracing::info;
+use crate::model::k8sressourcemodification::K8sRessourceCreation;
 use crate::model::ressourcemodification::RessourceCreation;
+use crate::model::sshressourcemodification::SshRessourceCreation;
+use crate::model::wireguardressourcemodification::WireguardRessourceCreation;
+use crate::schema::ressource::id_bastion;
 
 // /bastion =======================================================================================
 
@@ -383,7 +387,8 @@ pub async fn get_ressources(
         .ok_or(ApiError::new(404, "Not Found".to_string()))
         .map_err(|e| e)?;
 
-    let ressources = Ressource::find_all_ressources(bastion_id.into_inner())?;
+    let bastion_id = bastion_id.into_inner();
+    let ressources = Ressource::find_all_ressources(bastion_id)?;
     Ok(HttpResponse::Ok().json(ressources))
 }
 #[post("/bastions/{bastion_id}/ressources")]
@@ -391,6 +396,9 @@ pub async fn create_ressources(
     bastion_id: web::Path<i32>,
     nom: web::Json<RessourceCreation>,
     rtype: web::Json<RessourceCreation>,
+    pers_subnet_cidr: web::Json<WireguardRessourceCreation>,
+    ip_machine: web::Json<SshRessourceCreation>,
+    ip_cluster: web::Json<K8sRessourceCreation>,
     session: Session,
 ) -> Result<HttpResponse, ApiError> {
     let _claims = Claims::verifier_session_admin(&session)
@@ -411,6 +419,15 @@ pub async fn create_ressources(
         let sid = None;
         let kid = None;
 
+        let wiregard_insertion = WireguardRessourceInsertable{
+            id: wid.clone(),
+            id_bastion: bastion_id.clone(),
+            name: name.clone(),
+            subnet_cidr: pers_subnet_cidr.into_inner().subnet_cidr,
+
+        };
+        let specressource = WireguardRessource::create_wireguard_ressources(wiregard_insertion)?;
+
         let ressource_insertion = RessourceInsertable {
             id,
             name,
@@ -428,6 +445,14 @@ pub async fn create_ressources(
         let sid = generate_ressource_ssh_freenetid(&sids);
         let wid = None;
         let kid = None;
+
+        let ssh_insertion = SshRessourceInsertable{
+            id: sid.clone(),
+            id_bastion: bastion_id.clone(),
+            name: name.clone(),
+            ip_machine: ip_machine.into_inner().ip_machine
+        };
+        let specressource = SshRessource::create_ssh_ressources(ssh_insertion)?;
 
         let ressource_insertion = RessourceInsertable {
             id,
@@ -447,6 +472,15 @@ pub async fn create_ressources(
         let wid = None;
         let sid = None;
 
+        let k8s_insertion = K8sRessourceInsertable{
+            id: kid.clone(),
+            id_bastion: bastion_id.clone(),
+            name: name.clone(),
+            ip_cluster: ip_cluster.into_inner().ip_cluster,
+        };
+        let specressource = K8sRessource::create_k8s_ressources(k8s_insertion)?;
+
+
         let ressource_insertion = RessourceInsertable {
             id,
             name,
@@ -465,7 +499,7 @@ pub async fn create_ressources(
 // /bastion/{bastion_id}/ressources/{ressource_id}        ===================================================================
 
 #[get("/bastions/{bastion_id}/ressources/{ressource_id}")]
-pub async fn get_ressource(
+pub async fn get_a_ressource(
     bastion_id: web::Path<i32>,
     ressource_id: web::Path<i32>,
     session: Session,
@@ -490,6 +524,20 @@ pub async fn delete_a_ressource(
     let ressource_id = ressource_id.into_inner();
     let bastion_id = bastion_id.into_inner();
     let ressource = Ressource::find_a_ressource(ressource_id,bastion_id)?;
+    let rtype = ressource.rtype;
+
+    if rtype == "wireguard"{
+        let wid = ressource.id_wireguard.ok()?;
+        let _ = WireguardRessource::delete_a_wireguard_ressource(wid, bastion_id)?;
+    }
+    else if rtype == "ssh"{
+        let sid = ressource.id_ssh.ok()?;
+        let _ = SshRessource::delete_a_ssh_ressource(sid, bastion_id)?;
+    }
+    else{
+        let kid = ressource.id_k8s.ok()?;
+        let _ = K8sRessource::delete_a_k8s_ressource(kid, bastion_id)?;
+    }
     let ressource = Ressource::delete_a_ressource(ressource_id,bastion_id)?;
     Ok(HttpResponse::Ok().json(ressource))
 }
@@ -509,6 +557,13 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(delete_a_user);
 
     cfg.service(get_user_wireguard_status);
+
+    cfg.service(get_ressources);
+    cfg.service(create_ressources);
+
+    cfg.service(get_a_ressource);
+    cfg.service(delete_a_ressource);
+
     /*
     cfg.service(find_server_config);
     cfg.service(update_server_config); */

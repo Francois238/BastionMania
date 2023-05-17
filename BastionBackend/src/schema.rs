@@ -15,6 +15,7 @@ diesel::table! {
 diesel::table! {
     k8sressource (id) {
         id -> Int4,
+        id_bastion -> Int4,
         name -> Text,
         ip_cluster -> Text,
     }
@@ -35,6 +36,7 @@ diesel::table! {
 diesel::table! {
     sshressource (id) {
         id -> Int4,
+        id_bastion -> Int4,
         name -> Text,
         ip_machine -> Text,
     }
@@ -53,6 +55,7 @@ diesel::table! {
 diesel::table! {
     wireguardressource (id) {
         id -> Int4,
+        id_bastion -> Int4,
         name -> Text,
         subnet_cidr -> Text,
     }

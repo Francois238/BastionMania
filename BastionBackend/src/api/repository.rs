@@ -3,10 +3,10 @@ use std::env;
 //use crate::schema::to_user_config::publikey;
 use crate::api_error::ApiError;
 use crate::db;
-use crate::entities::{Bastion, BastionInsertable, Ressource, RessourceInsertable, Users, UsersModification};
+use crate::entities::{Bastion, BastionInsertable, K8sRessource, K8sRessourceInsertable, Ressource, RessourceInsertable, SshRessource, SshRessourceInsertable, Users, UsersModification, WireguardRessource, WireguardRessourceInsertable};
 use crate::model::{BastionModification, Claims, UsersInstanceCreate};
 use crate::schema::users::wireguard;
-use crate::schema::{bastion, ressource, users};
+use crate::schema::{bastion, k8sressource, ressource, sshressource, users, wireguardressource};
 use actix_session::Session;
 use actix_web::Result;
 use diesel::associations::HasTable;
@@ -333,6 +333,120 @@ impl Ressource {
                 .filter(ressource::id.eq(id)),
         )
         .execute(&mut conn)?;
+        Ok(ressource)
+    }
+}
+
+impl WireguardRessource {
+    pub fn find_all_wireguard_ressources(bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+        let mut conn = db::connection()?;
+        let des_ressources = wireguardressource::table
+            .filter(wireguardressource::id_bastion.eq(bastion_id))
+            .load::<WireguardRessource>(&mut conn)?;
+        Ok(des_ressources)
+    }
+
+    pub fn find_a_wireguard_ressource(id: i32, bastion_id: i32) -> Result<WireguardRessource, ApiError>{
+        let mut conn = db::connection()?;
+        let une_ressource = wireguardressource::table
+            .filter(wireguardressource::id_bastion.eq(bastion_id))
+            .filter(wireguardressource::id.eq(id))
+            .load::<WireguardRessource>(&mut conn)?;
+        Ok(une_ressource)
+    }
+
+    pub fn create_wireguard_ressources(ressource: WireguardRessourceInsertable) -> Result<WireguardRessource, ApiError> {
+        let mut conn = db::connection()?;
+        let newressource: WireguardRessource = diesel::insert_into(wireguardressource::table)
+            .values(ressource)
+            .get_result(&mut conn)?;
+        Ok(newressource)
+    }
+
+    pub fn delete_a_wireguard_ressource(id: i32, bastion_id: i32) -> Result<usize, ApiError> {
+        let mut conn = db::connection()?;
+        let ressource = diesel::delete(
+            wireguardressource::table
+                .filter(wireguardressource::id_bastion.eq(bastion_id))
+                .filter(wireguardressource::id.eq(id)),
+        )
+            .execute(&mut conn)?;
+        Ok(ressource)
+    }
+}
+
+impl SshRessource{
+    pub fn find_all_ssh_ressources(bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+        let mut conn = db::connection()?;
+        let des_ressources = sshressource::table
+            .filter(sshressource::id_bastion.eq(bastion_id))
+            .load::<SshRessource>(&mut conn)?;
+        Ok(des_ressources)
+    }
+
+    pub fn find_a_ssh_ressource(id: i32, bastion_id: i32) -> Result<SshRessource, ApiError>{
+        let mut conn = db::connection()?;
+        let une_ressource = sshressource::table
+            .filter(sshressource::id_bastion.eq(bastion_id))
+            .filter(sshressource::id.eq(id))
+            .load::<SshRessource>(&mut conn)?;
+        Ok(une_ressource)
+    }
+
+    pub fn create_ssh_ressources(ressource: SshRessourceInsertable) -> Result<SshRessource, ApiError> {
+        let mut conn = db::connection()?;
+        let newressource: SshRessource = diesel::insert_into(sshressource::table)
+            .values(ressource)
+            .get_result(&mut conn)?;
+        Ok(newressource)
+    }
+
+    pub fn delete_a_ssh_ressource(id: i32, bastion_id: i32) -> Result<usize, ApiError> {
+        let mut conn = db::connection()?;
+        let ressource = diesel::delete(
+            sshressource::table
+                .filter(sshressource::id_bastion.eq(bastion_id))
+                .filter(sshressource::id.eq(id)),
+        )
+            .execute(&mut conn)?;
+        Ok(ressource)
+    }
+}
+
+impl K8sRessource{
+    pub fn find_all_k8s_ressources(bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+        let mut conn = db::connection()?;
+        let des_ressources = k8sressource::table
+            .filter(k8sressource::id_bastion.eq(bastion_id))
+            .load::<K8sRessource>(&mut conn)?;
+        Ok(des_ressources)
+    }
+
+    pub fn find_a_k8s_ressource(id: i32, bastion_id: i32) -> Result<K8sRessource, ApiError>{
+        let mut conn = db::connection()?;
+        let une_ressource = k8sressource::table
+            .filter(k8sressource::id_bastion.eq(bastion_id))
+            .filter(k8sressource::id.eq(id))
+            .load::<K8sRessource>(&mut conn)?;
+        Ok(une_ressource)
+    }
+
+    pub fn create_k8s_ressources(ressource: K8sRessourceInsertable) -> Result<K8sRessource, ApiError> {
+        let mut conn = db::connection()?;
+        let newressource: K8sRessource = diesel::insert_into(k8sressource::table)
+            .values(ressource)
+            .get_result(&mut conn)?;
+        Ok(newressource)
+    }
+
+    pub fn delete_a_k8s_ressource(id: i32, bastion_id: i32) -> Result<usize, ApiError> {
+        let mut conn = db::connection()?;
+        let ressource = diesel::delete(
+            k8sressource::table
+                .filter(k8sressource::id_bastion.eq(bastion_id))
+                .filter(k8sressource::id.eq(id)),
+        )
+            .execute(&mut conn)?;
         Ok(ressource)
     }
 }

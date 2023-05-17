@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Queryable; Serialize)]
 pub struct SshRessource {
     pub id: i32,
+    pub id_bastion: i32,
     pub name: String,
     pub ip_machine: String,
 }
@@ -13,6 +14,7 @@ pub struct SshRessource {
 #[table_name = "sshressource"]
 pub struct SshRessourceInsertable {
     pub id: i32,
+    pub id_bastion: i32,
     pub name: String,
     pub ip_machine: String,
 }
