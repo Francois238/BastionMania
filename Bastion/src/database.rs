@@ -1,5 +1,5 @@
 use crate::ssh::ressource::SSHRessource;
-use crate::WireguardRessource;
+use crate::{WireguardAgent, WireguardRessource};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io;
@@ -9,6 +9,7 @@ use std::path::Path;
 pub struct BastionDatabase {
     ssh: Vec<SSHRessource>,
     wireguard: Vec<WireguardRessource>,
+    agent: Option<WireguardAgent>,
 }
 
 impl BastionDatabase {
@@ -16,6 +17,7 @@ impl BastionDatabase {
         BastionDatabase {
             ssh: Vec::new(),
             wireguard: Vec::new(),
+            agent: None,
         }
     }
 
@@ -87,5 +89,21 @@ impl BastionDatabase {
 
     pub fn get_wireguard_ressources(&self) -> &Vec<WireguardRessource> {
         &self.wireguard
+    }
+}
+
+impl BastionDatabase {
+    pub fn set_agent(&mut self, agent: WireguardAgent) -> io::Result<()> {
+        self.agent = Some(agent);
+        self.save()
+    }
+
+    pub fn get_agent(&self) -> Option<&WireguardAgent> {
+        self.agent.as_ref()
+    }
+
+    pub fn remove_agent(&mut self) -> io::Result<()> {
+        self.agent = None;
+        self.save()
     }
 }

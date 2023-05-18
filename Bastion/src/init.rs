@@ -1,14 +1,14 @@
-use crate::consts::CMD_SSHKEYGEN;
-use crate::database::BastionDatabase;
-use crate::wireguard::{self, wgconfigure};
-use crate::{BastionConfig, WGToAgent, WGToClient};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 
 use log::info;
 
-const WG_PRIVATE_KEY_PATH: &str = "/data/wg_private_key";
+use crate::{BastionConfig, WGToAgent, WGToClient};
+use crate::consts::{CMD_SSHKEYGEN, WG_PRIVATE_KEY_PATH};
+use crate::database::BastionDatabase;
+use crate::wireguard::{self, wgconfigure};
+
 
 const SSH_HOST_KEYS_FILES: [&str; 6] = [
     "ssh_host_ecdsa_key",
@@ -147,25 +147,25 @@ fn start_sshd() {
 }
 
 fn init_wg() {
+    let database = BastionDatabase::get().expect("Can't load database");
     let bastion_config = BastionConfig::new();
-    let config_to_agent = WGToAgent {
-        agent_endpoint: bastion_config.agent_endpoint,
-        agent_public_key: bastion_config.agent_public_key,
-        private_key_path: WG_PRIVATE_KEY_PATH.to_string(),
-        net_cidr: bastion_config.net_cidr,
-    };
+
+    if let Some(agent) = database.get_agent() {
+        info!("Starting agent connection");
+        wgconfigure::configure_to_agent(agent).expect("Can't configure agent connexion");
+    }else {
+        info!("No agent configured, skipping");
+    }
 
     let config_to_client = WGToClient {
         private_key_path: WG_PRIVATE_KEY_PATH.to_string(),
         net_id: bastion_config.net_id,
     };
 
-    let database = BastionDatabase::get().expect("Can't load database");
     let ressources = database.get_wireguard_ressources();
     for ressource in ressources {
         ressource.create().expect("Can't create wireguard config");
     }
-    
-    wgconfigure::configure_to_agent(config_to_agent);
+
     wgconfigure::configure_to_client(config_to_client, vec![]);
 }

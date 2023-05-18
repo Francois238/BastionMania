@@ -40,6 +40,13 @@ pub struct WireguardRessource {
     pub target_ip: String,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct WireguardAgent {
+    pub public_key: String,
+    pub endpoint: String,
+    pub target_cidr: String,
+}
+
 impl WireguardRessource {
     pub fn to_wg_peer_config(&self) -> WGPeerConfig {
         WGPeerConfig {

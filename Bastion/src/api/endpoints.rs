@@ -3,9 +3,10 @@ use actix_web::{delete, post, web, HttpResponse, Responder};
 use crate::database::BastionDatabase;
 use crate::ssh::ressource::SSHRessource;
 use crate::ssh::user::SSHUser;
-use crate::WireguardRessource;
+use crate::{WireguardAgent, WireguardRessource};
 
 use log::{error, info};
+use crate::wireguard::wgconfigure;
 
 #[post("/wireguard/configs")]
 async fn add_wireguard_config(user_config: web::Json<WireguardRessource>) -> impl Responder {
@@ -212,11 +213,39 @@ async fn remove_ssh_ressource(ressource_id: web::Path<String>) -> impl Responder
     HttpResponse::Ok().body("success")
 }
 
+#[post("/agent")]
+async fn set_agent(agent: web::Json<WireguardAgent>) -> HttpResponse{
+    let agent = agent.into_inner();
+    let database = BastionDatabase::get();
+    let mut database = match database {
+        Ok(d) => d,
+        Err(_) => {
+            error!("Error loading database");
+            return HttpResponse::InternalServerError().body("Error loading database");
+        }
+    };
+
+    let res = wgconfigure::configure_to_agent(&agent);
+    if let Err(e) = res {
+        error!("Error configuring agent: {}", e);
+        return HttpResponse::InternalServerError().body("Error configuring agent");
+    }
+
+    let res = database.set_agent(agent);
+    if let Err(e) = res {
+        error!("Error saving agent: {}", e);
+        return HttpResponse::InternalServerError().body("Error saving agent");
+    }
+
+    HttpResponse::Ok().body("success")
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(add_wireguard_config)
         .service(remove_wireguard_config)
         .service(add_ssh_ressource)
         .service(add_ssh_user)
         .service(remove_ssh_user)
-        .service(remove_ssh_ressource);
+        .service(remove_ssh_ressource)
+        .service(set_agent);
 }
