@@ -12,9 +12,12 @@ import { AdminComponent } from './admin/admin.component';
 import { UserComponent } from './user/user.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AdminExtNextComponent } from './admin-ext-next/admin-ext-next.component';
-import { AdminChoiceComponent } from './admin-choice/admin-choice.component';
 import { AdminActivateOtpComponent } from './admin-activate-otp/admin-activate-otp.component';
 import { AdminSendOtpComponent } from './admin-send-otp/admin-send-otp.component';
+import { UserActivateOtpComponent } from './user-activate-otp/user-activate-otp.component';
+import { UserSendOtpComponent } from './user-send-otp/user-send-otp.component';
+import { UserExtNextComponent } from './user-ext-next/user-ext-next.component';
+import { InstallationComponent } from './installation/installation.component';
 
 
 @NgModule({
@@ -23,9 +26,12 @@ import { AdminSendOtpComponent } from './admin-send-otp/admin-send-otp.component
     AdminComponent,
     UserComponent,
     AdminExtNextComponent,
-    AdminChoiceComponent,
     AdminActivateOtpComponent,
     AdminSendOtpComponent,
+    UserActivateOtpComponent,
+    UserSendOtpComponent,
+    UserExtNextComponent,
+    InstallationComponent,
   ],
   imports: [
     CommonModule,

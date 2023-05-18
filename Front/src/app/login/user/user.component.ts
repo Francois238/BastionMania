@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Credentials } from '../credentials';
 import { InfoLogin } from '../info-login';
+import { AuthenticationService } from '../authentication.service';
 
 @Component({
   selector: 'app-user',
@@ -18,7 +19,7 @@ export class UserComponent {
   public infoLogin! : InfoLogin
   public loginForm: FormGroup;
 
-  constructor(private fb: FormBuilder, protected router: Router) {
+  constructor(private fb: FormBuilder, protected router: Router, protected serviceAuthentication: AuthenticationService) {
     this.loginForm = this.fb.group({
       mail: [''],
       password: ['']
@@ -42,10 +43,42 @@ export class UserComponent {
     }
 
     else{
-      this.credentials = { mail : this.mail, password : this.password}
+      this.credentials = { mail : this.mail, password : this.serviceAuthentication.get_hash_password(this.password)}
 
-      console.log("Appuie sur le bouton envoie otp: " + this.credentials.mail + " " + this.credentials.password)
+      this.serviceAuthentication.login_user(this.credentials).subscribe({
+        next: (data: InfoLogin)=> {
+  
+          this.serviceAuthentication.set_info_login(data);
+
+          if (!data.otpactive) { //1ere connexion
+            this.router.navigate(['/login/activate_otp']);
+          }
+
+          else{
+            this.router.navigate(['/login/otp']);
+          }
+  
+        },
+  
+        error: err => {
+  
+          if(err.status <500){
+            this.message = err.error.message;
+          }
+  
+          else{
+            this.message = 'Erreur interne';
+          }
+        }
+      })
 
     }
+  }
+
+
+  loginExtern() {
+
+    this.serviceAuthentication.user_authentication_extern()
+      
   }
 }

@@ -4,6 +4,8 @@ import { InfoLogin } from './info-login';
 import { Observable, map } from 'rxjs';
 import { Credentials } from './credentials';
 import { Otp } from './otp';
+import { sha3_512 } from 'js-sha3';
+import { NewAdmin } from '../admin/new-admin';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +16,26 @@ export class AuthenticationService {
 
   urlBaseAdmin = 'https://bastionmania.intra/api/admin-management/';
 
+  urlBaseUser = 'https://bastionmania.intra/api/user-management/';
+
   constructor(private http: HttpClient) { }
+
+  public get_hash_password(password: string): string {
+
+    let salt = 'bastionmania.intra';
+
+    let hash = sha3_512.create();
+
+    let passwordSalt = password + salt;
+
+    hash.update(passwordSalt);
+
+    let newHash= hash.hex();
+
+    return newHash;
+
+
+  }
 
   public set_token(token: string): void {
     sessionStorage.setItem('token', token);
@@ -34,8 +55,19 @@ export class AuthenticationService {
     return JSON.parse(sessionStorage.getItem('infoLogin') || '{}');
   }
 
+/*************************************************************************/
 
-  /*******Appel Api pour Admin *********/
+/********************APPEL API POUR ADMIN ********************************/
+
+
+public first_use(code: NewAdmin): Observable<any> { //envoyer le code au serveur
+
+  const headers = { 'content-type': 'application/json'}
+  const body=JSON.stringify(code);
+
+  const url = this.urlBaseAdmin + 'premiere_utilisation';
+  return this.http.post<any>(url, body ,{headers, observe: 'response'});
+  }
 
   public login_admin(code: Credentials): Observable<any> { //envoyer le code au serveur
 
@@ -52,14 +84,10 @@ export class AuthenticationService {
         if (authHeader) {
           const token = authHeader.split(' ')[1];
 
-          console.log("token " + token);
           // Stocker le token dans le session storage
           this.set_token( token);
         }
 
-        else{
-          console.log("erreur")
-        }
         // Retourner le corps de la réponse
         return response.body;
       })
@@ -71,9 +99,6 @@ export class AuthenticationService {
 
     const url = this.urlBase + 'login/admin/extern';
     document.location=url 
-   // window.open(url, "_blank");
-
-    
     
   }
 
@@ -90,7 +115,6 @@ export class AuthenticationService {
         if (authHeader) {
           const token = authHeader.split(' ')[1];
 
-          console.log("token " + token);
           // Stocker le token dans le session storage
           this.set_token( token);
         }
@@ -115,8 +139,6 @@ export class AuthenticationService {
 
     const url = `${this.urlBaseAdmin}admins/${id}/otp`;
 
-    console.log("url " + url);
-
     return this.http.post<any>(url,null, {headers});
 
   }
@@ -140,7 +162,6 @@ export class AuthenticationService {
         if (authHeader) {
           const token = authHeader.split(' ')[1];
 
-          console.log("token " + token);
           // Stocker le token dans le session storage
           this.set_token( token);
         }
@@ -150,19 +171,114 @@ export class AuthenticationService {
     );
     }
 
-    /******Activation Keycloak *******/
-    public admin_enable_keycloak(): Observable<any> {
+    
+    /************************************************************************/
+
+    /********************APPEL API POUR USER ********************************/
+
+
+
+    public login_user(code: Credentials): Observable<any> { //envoyer le code au serveur
+
+      const headers = { 'content-type': 'application/json'}
+      const body=JSON.stringify(code);
+  
+      const url = this.urlBase + 'login';
+      return this.http.post<any>(url, body ,{headers, observe: 'response'})
+      .pipe(
+        map(response => {
+          // Récupérer le header Authorization
+          const authHeader = response.headers.get('Authorization');
+          // Vérifier que le header est présent et contient un token
+          if (authHeader) {
+            const token = authHeader.split(' ')[1];
+  
+            // Stocker le token dans le session storage
+            this.set_token( token);
+          }
+  
+          // Retourner le corps de la réponse
+          return response.body;
+        })
+      );
+      }
+  
+  
+    public user_authentication_extern(){ //envoyer le code au serveur
+  
+      const url = this.urlBase + 'login/extern';
+      document.location=url  
+      
+    }
+  
+    public login_user_extern_next(): Observable<any> { //envoyer le code au serveur
+  
+  
+      const url = this.urlBase + 'login/extern/next';
+      return this.http.get<any>(url, {observe: 'response'})    
+      .pipe(
+        map(response => {
+          // Récupérer le header Authorization
+          const authHeader = response.headers.get('Authorization');
+          // Vérifier que le header est présent et contient un token
+          if (authHeader) {
+            const token = authHeader.split(' ')[1];
+  
+            // Stocker le token dans le session storage
+            this.set_token( token);
+          }
+          // Retourner le corps de la réponse
+          return response.body;
+        })
+      );
+      
+    }
+  
+  /***Activation OTP*******/
+  
+    public user_activate_otp(): Observable<any> {
+  
+      let info = this.get_info_login();
+  
+      let id = info.id;
+  
       const token = this.get_token();
   
-      console.log("token " + token)
+      const headers = { 'Authorization': 'Bearer ' + token};
   
-      const headers = {'Authorization': 'Bearer ' + token};
+      const url = `${this.urlBaseUser}users/${id}/otp`;
   
-      const url = `${this.urlBase}login/admin/enable_extern`;
-  
-      return this.http.patch<any>(url, {headers});
+      return this.http.post<any>(url,null, {headers});
   
     }
-
+  
+    /*********Envoie OTP *****/
+  
+    public user_send_otp(otp : Otp): Observable<any> {
+  
+      let token = this.get_token();
+      const headers = { 'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token}
+      const body=JSON.stringify(otp);
+  
+      const url = `${this.urlBase}login/otp`;
+      return this.http.post<any>(url, body ,{headers, observe: 'response'})
+      .pipe(
+        map(response => {
+          // Récupérer le header Authorization
+          const authHeader = response.headers.get('Authorization');
+          // Vérifier que le header est présent et contient un token
+          if (authHeader) {
+            const token = authHeader.split(' ')[1];
+  
+            // Stocker le token dans le session storage
+            this.set_token( token);
+          }
+          // Retourner le corps de la réponse
+          return response.body;
+        })
+      );
+      }
+  
 
 }

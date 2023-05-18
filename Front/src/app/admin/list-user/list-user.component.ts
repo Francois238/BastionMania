@@ -3,6 +3,7 @@ import { NewUser } from '../new-user';
 import { FormGroup, FormControl } from '@angular/forms';
 import { UserInfo } from '../user-info';
 import { AdminService } from '../admin.service';
+import { AuthenticationService } from 'src/app/login/authentication.service';
 
 @Component({
   selector: 'app-list-user',
@@ -26,7 +27,9 @@ export class ListUserComponent implements OnInit {
 
   public listUsers : Array<UserInfo> = new Array<UserInfo>();
 
-  constructor(protected adminService : AdminService) { 
+  constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService) { 
+    this.adminService.validate_token();
+
     this.nameCrtl = new FormControl('')
     this.last_nameCrtl = new FormControl('')
     this.mailCrtl = new FormControl('')
@@ -69,7 +72,7 @@ export class ListUserComponent implements OnInit {
       name : this.name,
       last_name : this.last_name,
       mail : this.mail,
-      password : this.password
+      password : this.serviceAuthentication.get_hash_password(this.password)
     }
 
     this.adminService.add_user(this.user).subscribe({
@@ -105,9 +108,6 @@ export class ListUserComponent implements OnInit {
       },
     })
 
-    /*this.listAdmins = [{id:1, name : "bob", last_name:"bastion", mail:"bob.bastion@bastionmania.fr", change:false, otpactive:false},
-                        {id:2, name : "francois", last_name:"benet", mail:"francois.benet@bastionmania.fr", change:false, otpactive:false}
-                      ]*/
   }
 
   refreshList(data : string){

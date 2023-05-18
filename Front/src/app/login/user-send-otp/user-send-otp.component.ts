@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
-import { Otp } from '../otp';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../authentication.service';
+import { Otp } from '../otp';
 import { InfoLogin } from '../info-login';
 
 @Component({
-  selector: 'app-admin-send-otp',
-  templateUrl: './admin-send-otp.component.html',
-  styleUrls: ['./admin-send-otp.component.scss']
+  selector: 'app-user-send-otp',
+  templateUrl: './user-send-otp.component.html',
+  styleUrls: ['./user-send-otp.component.scss']
 })
-export class AdminSendOtpComponent {
+export class UserSendOtpComponent {
 
   public otp: string ='';
   public message : string = ''
@@ -32,19 +32,20 @@ export class AdminSendOtpComponent {
 
     this.otpSent= { code : this.otp}
 
-    this.serviceAuthentication.admin_send_otp(this.otpSent).subscribe({
-      next: (data: InfoLogin)=> {
+    this.serviceAuthentication.user_send_otp(this.otpSent).subscribe({
+        next: (data: InfoLogin)=> {
   
-        this.serviceAuthentication.set_info_login(data);
+          this.serviceAuthentication.set_info_login(data);
 
-        if (data.change == false){
+          if (data.change == false){
 
-          this.router.navigate(['/admin/profil']);
-        }
-        else{
+            this.router.navigate(['/user/profil']);
+          }
+          else{
 
-          this.router.navigate(['/admin/menu']);
-        }
+            this.router.navigate(['/user/menu']);
+          }
+          
   
         },
   
@@ -61,5 +62,4 @@ export class AdminSendOtpComponent {
       })
 
     }
-
 }

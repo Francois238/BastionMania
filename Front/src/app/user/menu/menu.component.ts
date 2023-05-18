@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AdminService } from '../admin.service';
 
 @Component({
   selector: 'app-menu',
@@ -8,9 +7,4 @@ import { AdminService } from '../admin.service';
 })
 export class MenuComponent {
 
-  constructor(private adminService: AdminService) {
-
-    this.adminService.validate_token();
-
-  }
 }

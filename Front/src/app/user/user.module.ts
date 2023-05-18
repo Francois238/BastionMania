@@ -3,11 +3,15 @@ import { CommonModule } from '@angular/common';
 
 import { UserRoutingModule } from './user-routing.module';
 import { UserComponent } from './user.component';
+import { MenuComponent } from './menu/menu.component';
+import { ProfilComponent } from './profil/profil.component';
 
 
 @NgModule({
   declarations: [
-    UserComponent
+    UserComponent,
+    MenuComponent,
+    ProfilComponent
   ],
   imports: [
     CommonModule,

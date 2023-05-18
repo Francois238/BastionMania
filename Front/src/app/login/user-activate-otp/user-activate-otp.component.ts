@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
-import { Url } from '../url';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../authentication.service';
+import { Url } from '../url';
 
 @Component({
-  selector: 'app-admin-activate-otp',
-  templateUrl: './admin-activate-otp.component.html',
-  styleUrls: ['./admin-activate-otp.component.scss']
+  selector: 'app-user-activate-otp',
+  templateUrl: './user-activate-otp.component.html',
+  styleUrls: ['./user-activate-otp.component.scss']
 })
-export class AdminActivateOtpComponent {
+export class UserActivateOtpComponent {
 
   public code : string =''
   public error : string = ''
@@ -18,16 +18,14 @@ export class AdminActivateOtpComponent {
 
   getOtp(){
 
-    this.authenticationService.admin_activate_otp().subscribe({
+    this.authenticationService.user_activate_otp().subscribe({
       next: (data : Url) => {
         
         this.code = data.url
-        console.log("Voici les donnees de l admin : " + this.code)
         
       },
       error: (e) => {
         
-        console.error(e)
         this.error = "Vous avez deja la double authentification activée"
       },
   })
@@ -36,7 +34,7 @@ export class AdminActivateOtpComponent {
 
   nextPage(){
 
-      this.router.navigate(['/login/admin/otp']); // on va venir finir sa connexion
+      this.router.navigate(['/login/otp']); // on va venir finir sa connexion
     }
 
 }

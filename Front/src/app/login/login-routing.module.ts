@@ -5,16 +5,22 @@ import { AdminComponent } from './admin/admin.component';
 import { UserComponent } from './user/user.component';
 import { AdminExtNextComponent } from './admin-ext-next/admin-ext-next.component';
 import { AdminSendOtpComponent } from './admin-send-otp/admin-send-otp.component';
-import { AdminChoiceComponent } from './admin-choice/admin-choice.component';
 import { AdminActivateOtpComponent } from './admin-activate-otp/admin-activate-otp.component';
+import { UserSendOtpComponent } from './user-send-otp/user-send-otp.component';
+import { UserActivateOtpComponent } from './user-activate-otp/user-activate-otp.component';
+import { UserExtNextComponent } from './user-ext-next/user-ext-next.component';
+import { InstallationComponent } from './installation/installation.component';
 
 const routes: Routes = [
-  { path: '', component: UserComponent },
   { path: 'admin', component: AdminComponent },
   { path: 'admin/extern/next', component: AdminExtNextComponent },
   { path: 'admin/otp', component: AdminSendOtpComponent },
   { path: 'admin/activate_otp', component: AdminActivateOtpComponent },
-  { path: 'admin/choice', component: AdminChoiceComponent }
+  { path: 'installation', component: InstallationComponent},
+  { path: '', component: UserComponent},
+  { path: 'extern/next', component: UserExtNextComponent},
+  { path: 'otp', component: UserSendOtpComponent},
+  { path: 'activate_otp', component: UserActivateOtpComponent},
  
 ];
 

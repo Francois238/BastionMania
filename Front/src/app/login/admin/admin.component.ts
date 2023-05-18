@@ -44,17 +44,15 @@ export class AdminComponent {
     }
 
     else{
-      this.credentials = { mail : this.mail, password : this.password}
+      this.credentials = { mail : this.mail, password : this.serviceAuthentication.get_hash_password(this.password)}
 
       this.serviceAuthentication.login_admin(this.credentials).subscribe({
         next: (data: InfoLogin)=> {
   
           this.serviceAuthentication.set_info_login(data);
 
-          console.log(data.otpactive)
-
           if (!data.otpactive) { //1ere connexion
-            this.router.navigate(['/login/admin/choice']);
+            this.router.navigate(['/login/admin/activate_otp']);
           }
 
           else{

@@ -8,6 +8,10 @@ import { NewAdmin } from './new-admin';
 import { Password } from './password';
 import { UserInfo } from './user-info';
 import { NewUser } from './new-user';
+import jwt_decode from "jwt-decode";
+import { Jwt } from '../login/jwt';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../login/authentication.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,30 +22,31 @@ export class AdminService {
 
   baseUrlUser = 'https://bastionmania.intra/api/user-management/';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, protected router: Router, protected authenticationService: AuthenticationService) { }
 
-  public set_token(token: string): void {
-    sessionStorage.setItem('token', token);
+/****gestion du token ********/
+  public validate_token() {
+      
+      let token = this.authenticationService.get_token();
+  
+      if (token == '') {
+        this.router.navigate(['/login']);
+      }
+
+      let data= jwt_decode(token) as Jwt;
+
+      if (data.admin == false || data.complete_authentication == false) {
+        this.router.navigate(['/login']);
+        
+      }  
+  
   }
 
-  public set_info_login(infoLogin: InfoLogin){
-    sessionStorage.setItem('infoLogin', JSON.stringify(infoLogin));
-  }
-
-  public get_token(): string {
-
-    return sessionStorage.getItem('token') || '';
-  }
-
-  public get_info_login(): InfoLogin {
-
-    return JSON.parse(sessionStorage.getItem('infoLogin') || '{}');
-  }
-
+  /********Gestion des Admins*******/
 
   public get_list_admin() : Observable<AdminInfo[]>{
 
-    const token = this.get_token();
+    const token = this.authenticationService.get_token();
 
     const headers = {'Authorization': 'Bearer ' + token};
 
@@ -52,7 +57,7 @@ export class AdminService {
 
   public add_admin(admin : NewAdmin) : Observable<AdminInfo>{
 
-    const token = this.get_token();
+    const token = this.authenticationService.get_token();
 
     const headers = { 'content-type': 'application/json',
     'Authorization': 'Bearer ' + token};
@@ -68,7 +73,7 @@ export class AdminService {
 
   public delete_admin(id : string) : Observable<any>{
 
-    const token = this.get_token();
+    const token = this.authenticationService.get_token();
 
     const headers = { 'Authorization': 'Bearer ' + token};
 
@@ -77,13 +82,16 @@ export class AdminService {
 
   }
 
+
+  /******gestion mot de passe de l admin************/
+
   public change_password(password : Password): Observable<any> {
 
-    let infoLogin = this.get_info_login();
+    let infoLogin = this.authenticationService.get_info_login();
 
     let id = infoLogin.id;
 
-    let token = this.get_token();
+    let token = this.authenticationService.get_token();
     const headers = { 'content-type': 'application/json',
     'Authorization': 'Bearer ' + token}
     const body=JSON.stringify(password);
@@ -100,7 +108,7 @@ export class AdminService {
 
           console.log("token " + token);
           // Stocker le token dans le session storage
-          this.set_token( token);
+          this.authenticationService.set_token( token);
         }
         // Retourner le corps de la réponse
         return response.body;
@@ -113,7 +121,7 @@ export class AdminService {
 
     public get_list_user() : Observable<UserInfo[]>{
 
-      const token = this.get_token();
+      const token = this.authenticationService.get_token();
   
       const headers = {'Authorization': 'Bearer ' + token};
   
@@ -124,7 +132,7 @@ export class AdminService {
   
     public add_user(admin : NewUser) : Observable<UserInfo>{
   
-      const token = this.get_token();
+      const token = this.authenticationService.get_token();
   
       const headers = { 'content-type': 'application/json',
       'Authorization': 'Bearer ' + token};
@@ -140,7 +148,7 @@ export class AdminService {
 
     public delete_user(id : string) : Observable<any>{
 
-      const token = this.get_token();
+      const token = this.authenticationService.get_token();
   
       const headers = { 'Authorization': 'Bearer ' + token};
   

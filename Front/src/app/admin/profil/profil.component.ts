@@ -4,6 +4,7 @@ import { AdminService } from '../admin.service';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Password } from '../password';
 import { InfoLogin } from 'src/app/login/info-login';
+import { AuthenticationService } from 'src/app/login/authentication.service';
 
 @Component({
   selector: 'app-profil',
@@ -20,22 +21,21 @@ export class ProfilComponent implements OnInit {
   public passwordEnvoye! : Password
   public change : boolean = false
   public infoLogin! : InfoLogin
-  public disabled=true
 
-  constructor(protected adminService : AdminService) { 
+  constructor(protected adminService : AdminService, protected authenticationService: AuthenticationService) { 
     this.passwordCrtl = new FormControl('')
     this.passwordForm = new FormGroup({
         password: this.passwordCrtl,
 
     })
 
-    this.infoLogin = this.adminService.get_info_login()
+    this.infoLogin = this.authenticationService.get_info_login()
 
     if (this.infoLogin.change != null){ //si l utilisateur utilise SSO ou pas
-      this.disabled = false
+      this.change = true
     }
     else{
-      this.disabled = true
+      this.change = false
     }
 
   }
@@ -48,9 +48,8 @@ export class ProfilComponent implements OnInit {
 
     })
 
-    this.admin = this.adminService.get_info_login()
+    this.admin = this.authenticationService.get_info_login()
 
-    //this.admin = {id : 1, name : "bob", last_name : "bastion", mail:"bob.bastion", change : false, otpactive : false}
   }
 
   changePwd(){
@@ -59,22 +58,19 @@ export class ProfilComponent implements OnInit {
 
     if(this.password.length >2 ){
 
-      this.passwordEnvoye = { password : this.password}
+      this.passwordEnvoye = { password : this.authenticationService.get_hash_password(this.password)}
       this.adminService.change_password(this.passwordEnvoye).subscribe({
-        next: (data : AdminInfo) => {
+        next: (_data : AdminInfo) => {
   
           this.message = "Votre mot de passe a bien été changé"
           
-          this.admin = data
-          console.log("Voici les donnees de l admin : " + this.admin)
   
           this.passwordCrtl = new FormControl('')
           this.passwordForm = new FormGroup({
               password: this.passwordCrtl,
       
           })
-  
-          this.change = true
+
   
         },
         error: (e) => {

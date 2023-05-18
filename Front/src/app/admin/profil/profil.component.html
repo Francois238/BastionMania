@@ -8,12 +8,14 @@
         <p class=" mt-3 w-100 ">prenom : {{admin.name}}</p><br>
         <p class=" mt-3 w-100 ">mail : {{admin.mail}}</p><br>
 
-        <form (ngSubmit)="changePwd()" [formGroup]="passwordForm">
-            <input type="password" formControlName="password" placeholder="votre nouveau mot de passe"> <br><br>
-            <button type="submit" class="btn btn-primary" [disabled]="disabled">Changer de mot de passe</button>
-        </form>
+        <ng-container *ngIf="change == true">
 
-        <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
+            <form (ngSubmit)="changePwd()" [formGroup]="passwordForm">
+                <input type="password" formControlName="password" placeholder="votre nouveau mot de passe"> <br><br>
+                <button type="submit" class="btn btn-primary">Changer de mot de passe</button>
+            </form>
 
+            <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
+        </ng-container>
     </div>
   </div>
