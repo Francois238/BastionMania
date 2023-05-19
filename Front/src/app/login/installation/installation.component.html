@@ -1,0 +1,31 @@
+<div class="row mt-3 col-12">
+    <div class="col-4 mx-auto">
+
+        <h2 class="mb-5 text-center">Bonjour, bienvenue sur Bastion Mania</h2>
+
+      <h5 class="mb-5 text-center">Saisissez vos identifiants</h5>
+
+        <form (ngSubmit)="add()" [formGroup]="loginForm">
+
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Nom</label>
+                <input formControlName="last_name" class="form-control" id="last_name">
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Prénom</label>
+                <input formControlName="name" class="form-control" id="name">
+            </div>
+            <div class="mb-3">
+            <label for="mail" class="form-label">Mail</label>
+            <input formControlName="mail" class="form-control" id="mail">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" formControlName="password" class="form-control" id="password">
+                </div>
+            <button type="submit" class="btn btn-primary">Créer l'administrateur</button>
+        </form>
+
+        <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
+
+    </div>
