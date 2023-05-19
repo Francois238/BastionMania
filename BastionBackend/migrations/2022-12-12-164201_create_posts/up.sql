@@ -19,7 +19,7 @@ CREATE TABLE "users"(
 
 CREATE TABLE "ressource"
 (
-    id           INT PRIMARY KEY,
+    id           TEXT PRIMARY KEY,
     id_bastion   INT NOT NULL,
     name         TEXT NOT NULL,
     rtype         TEXT NOT NULL,
@@ -48,6 +48,14 @@ CREATE TABLE k8sressource(
                              name TEXT NOT NULL,
                              ip_cluster TEXT NOT NULL
 );
+
+CREATE TABLE "bastion_token"(
+    token TEXT PRIMARY KEY,
+    bastion_id INT NOT NULL
+
+);
+
+
 
 
 

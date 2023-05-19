@@ -316,21 +316,22 @@ impl Ressource {
         Ok(newressource)
     }
 
-    pub fn find_a_ressource(id: i32, id_bastion: i32) -> Result<Vec<Self>, ApiError> {
+    pub fn find_a_ressource(id: String, id_bastion: i32) -> Result<Ressource, ApiError> {
         let mut conn = db::connection()?;
         let une_ressource = ressource::table
-            .filter(ressource::id_bastion.eq(id_bastion))
             .filter(ressource::id.eq(id))
-            .load::<Ressource>(&mut conn)?;
+            .filter(ressource::id_bastion.eq(id_bastion))
+            .first::<Ressource>(&mut conn)?;
         Ok(une_ressource)
     }
 
-    pub fn delete_a_ressource(id: i32, id_bastion: i32) -> Result<usize, ApiError> {
+    pub fn delete_a_ressource(id: String, id_bastion: i32) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
         let ressource = diesel::delete(
             ressource::table
+                .filter(ressource::id.eq(id))
                 .filter(ressource::id_bastion.eq(id_bastion))
-                .filter(ressource::id.eq(id)),
+
         )
         .execute(&mut conn)?;
         Ok(ressource)
@@ -349,9 +350,9 @@ impl WireguardRessource {
     pub fn find_a_wireguard_ressource(id: i32, bastion_id: i32) -> Result<WireguardRessource, ApiError>{
         let mut conn = db::connection()?;
         let une_ressource = wireguardressource::table
-            .filter(wireguardressource::id_bastion.eq(bastion_id))
             .filter(wireguardressource::id.eq(id))
-            .load::<WireguardRessource>(&mut conn)?;
+            .filter(wireguardressource::id_bastion.eq(bastion_id))
+            .first::<WireguardRessource>(&mut conn)?;
         Ok(une_ressource)
     }
 

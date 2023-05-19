@@ -20,6 +20,7 @@ use crate::model::{
 };
 use actix_session::Session;
 use diesel::dsl::Nullable;
+use diesel::sql_types::Uuid;
 use log::error;
 use repository::*;
 use reqwest::Client;
@@ -84,19 +85,14 @@ pub async fn create_bastion(
     let net_ids: Vec<i32> = liste_bastions.into_iter().map(|b| b.net_id).collect();
     let net_id = generate_bastion_freenetid(&net_ids);
 
-    //creation du bastion
-    let bastion_insertion = BastionInsertable {
-        name: bastion.name.clone(),
-        subnet_cidr: bastion.subnet_cidr.clone(),
-        agent_endpoint: bastion.agent_endpoint.clone(),
-        pubkey: bastion_pub.to_base64(),
-        port,
-        net_id,
-    };
-
-    let bastion_insere = Bastion::create(bastion_insertion)?;
+    let token: String = rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(32)
+        .map(char::from)
+        .collect();
 
     let bastion_instance_create = BastionInstanceCreate {
+        token: token.clone(),
         private_key: bastion_priv.to_base64(),
         cidr_protege: bastion.subnet_cidr.clone(),
         agent_public_key: agent_pub.to_base64(),
@@ -122,6 +118,18 @@ pub async fn create_bastion(
         .send()
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+    //creation du bastion
+    let bastion_insertion = BastionInsertable {
+        name: bastion.name.clone(),
+        subnet_cidr: bastion.subnet_cidr.clone(),
+        agent_endpoint: bastion.agent_endpoint.clone(),
+        pubkey: bastion_pub.to_base64(),
+        port,
+        net_id,
+    };
+
+    let bastion_insere = Bastion::create(bastion_insertion)?;
 
     let retour_api = RetourAPI {
         success: true,
@@ -407,8 +415,7 @@ pub async fn create_ressources(
     let bastion_id = bastion_id.into_inner();
     let liste_ressources = Ressource::find_all_ressources(bastion_id)?;
 
-    let ids: Vec<i32> = (&liste_ressources).into_iter().map(|b| b.id).collect();
-    let id = generate_ressource_freenetid(&ids);
+    let uuid= Uuid::new_v4();
 
     let name = nom.into_inner().name;
     let rtype = rtype.into_inner().rtype;
@@ -429,7 +436,7 @@ pub async fn create_ressources(
         let specressource = WireguardRessource::create_wireguard_ressources(wiregard_insertion)?;
 
         let ressource_insertion = RessourceInsertable {
-            id,
+            id: uuid,
             name,
             rtype,
             id_bastion: bastion_id,
@@ -455,7 +462,7 @@ pub async fn create_ressources(
         let specressource = SshRessource::create_ssh_ressources(ssh_insertion)?;
 
         let ressource_insertion = RessourceInsertable {
-            id,
+            id: uuid,
             name,
             rtype,
             id_bastion: bastion_id,
@@ -482,7 +489,7 @@ pub async fn create_ressources(
 
 
         let ressource_insertion = RessourceInsertable {
-            id,
+            id: uuid,
             name,
             rtype,
             id_bastion: bastion_id,
@@ -501,7 +508,7 @@ pub async fn create_ressources(
 #[get("/bastions/{bastion_id}/ressources/{ressource_id}")]
 pub async fn get_a_ressource(
     bastion_id: web::Path<i32>,
-    ressource_id: web::Path<i32>,
+    ressource_id: web::Path<String>,
     session: Session,
 ) -> Result<HttpResponse, ApiError> {
     let _claims = Claims::verifier_session_admin(&session)
@@ -515,7 +522,7 @@ pub async fn get_a_ressource(
 #[delete("/bastions/{bastion_id}/ressources/{ressource_id}")]
 pub async fn delete_a_ressource(
     bastion_id: web::Path<i32>,
-    ressource_id: web::Path<i32>,
+    ressource_id: web::Path<String>,
     session: Session,
 ) -> Result<HttpResponse, ApiError> {
     let _claims = Claims::verifier_session_admin(&session)
@@ -523,23 +530,102 @@ pub async fn delete_a_ressource(
         .map_err(|e| e)?;
     let ressource_id = ressource_id.into_inner();
     let bastion_id = bastion_id.into_inner();
-    let ressource = Ressource::find_a_ressource(ressource_id,bastion_id)?;
+    let ressource = Ressource::find_a_ressource(ressource_id.clone(),bastion_id)?;
     let rtype = ressource.rtype;
 
     if rtype == "wireguard"{
-        let wid = ressource.id_wireguard.ok()?;
+        let wid = ressource.id_wireguard.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
         let _ = WireguardRessource::delete_a_wireguard_ressource(wid, bastion_id)?;
     }
     else if rtype == "ssh"{
-        let sid = ressource.id_ssh.ok()?;
+        let sid = ressource.id_ssh.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
         let _ = SshRessource::delete_a_ssh_ressource(sid, bastion_id)?;
     }
     else{
-        let kid = ressource.id_k8s.ok()?;
+        let kid = ressource.id_k8s.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
         let _ = K8sRessource::delete_a_k8s_ressource(kid, bastion_id)?;
     }
     let ressource = Ressource::delete_a_ressource(ressource_id,bastion_id)?;
     Ok(HttpResponse::Ok().json(ressource))
+}
+
+#[post("/bastions/{bastion_id}/ressources/{ressource_id}")]
+pub async fn generate_access_credentials(
+    session: Session,
+    donnees: web::Path<(i32, String)>,
+) -> Result<HttpResponse, ApiError>{
+
+    info!("request: generation_wireguard");
+    let claims = Claims::verifier_session_user(&session)
+        .ok_or(ApiError::new(404, "Not Found".to_string()))
+        .map_err(|e| e)?;
+    let (bastion_id, user_id) = donnees.into_inner();
+    let authorisation = Bastion::verification_appartenance(claims.id, bastion_id)
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+
+    let ressource = Ressource::find_a_ressource(user_id.clone(),bastion_id)?;
+    let rtype = ressource.rtype;
+
+    if rtype == "wireguard"{
+        let sepcressource = WireguardRessource::find_a_wireguard_ressource(claims.id.clone(),bastion_id)?;
+        let client_priv = wireguard_keys::Privkey::generate();
+        let client_pub = client_priv.pubkey();
+
+        let bastion_ip = env::var("BASTION_IP").expect("BASTION_IP must be set");
+
+        let client_address = build_client_address(bastion_id, claims.id.clone())?;
+        let bastion_endpoint = build_endpoint_user(bastion_ip.to_string(), bastion_id)?;
+
+        let client_public_key = client_pub.to_base64();
+        let client_private_key = client_priv.to_base64();
+
+        let instance_client = InstanceClient {
+            public_key: client_public_key,
+            allowed_ips: client_address.clone(),
+        };
+
+        //instancier le client dans Bastion
+        info!("ajout du peer dans le bastion : {:?}", instance_client);
+        let _client = reqwest::Client::new();
+        let url = format!("http://intern-bastion-{}:9000/adduser", bastion_id);
+        let _response = _client
+            .post(&url)
+            .json(&instance_client)
+            .send()
+            .await
+            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+        info!("Peer ajouté au bastion");
+
+        update_un_user(claims.id, true)?;
+
+        let bastion_public_key = get_bastion_public_key(bastion_id)?;
+        let subnet_cidr = sepcressource.subnet_cidr;
+
+        let retour_api = RetourAPI {
+            success: true,
+            message: "accés client créé".to_string(),
+            data: ConfigClient {
+                client_private_key,
+                client_address,
+                bastion_public_key,
+                bastion_endpoint,
+                subnet_cidr,
+            },
+        };
+
+        Ok(HttpResponse::Ok().json(retour_api));
+    }
+    else if rtype == "ssh" {
+        //TODO
+    }
+    else {
+        //TODO
+    }
+    Ok(HttpResponse::Ok());
 }
 
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {

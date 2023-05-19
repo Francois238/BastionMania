@@ -13,6 +13,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    bastion_token (token) {
+        token -> Text,
+        bastion_id -> Int4,
+    }
+}
+
+diesel::table! {
     k8sressource (id) {
         id -> Int4,
         id_bastion -> Int4,
@@ -23,7 +30,7 @@ diesel::table! {
 
 diesel::table! {
     ressource (id) {
-        id -> Int4,
+        id -> Text,
         id_bastion -> Int4,
         name -> Text,
         rtype -> Text,
@@ -63,6 +70,7 @@ diesel::table! {
 
 diesel::allow_tables_to_appear_in_same_query!(
     bastion,
+    bastion_token,
     k8sressource,
     ressource,
     sshressource,
