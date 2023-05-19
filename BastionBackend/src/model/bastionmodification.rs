@@ -13,5 +13,5 @@ pub struct BastionModification {
 #[derive(Serialize, Deserialize, Insertable)]
 #[table_name = "bastion"]
 pub struct BastionSuppression {
-    pub id: String,
+    pub id: i32,
 }

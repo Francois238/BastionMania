@@ -3,20 +3,12 @@
 diesel::table! {
     bastion (id) {
         id -> Int4,
-        bastion_id -> Text,
         name -> Text,
         subnet_cidr -> Text,
         agent_endpoint -> Text,
         pubkey -> Text,
         port -> Int4,
         net_id -> Int4,
-    }
-}
-
-diesel::table! {
-    bastion_token (token) {
-        token -> Text,
-        bastion_id -> Int4,
     }
 }
 
@@ -31,8 +23,8 @@ diesel::table! {
 
 diesel::table! {
     ressource (id) {
-        id -> Text,
-        id_bastion -> Text,
+        id -> Int4,
+        id_bastion -> Int4,
         name -> Text,
         rtype -> Text,
         id_wireguard -> Nullable<Int4>,
@@ -53,8 +45,8 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Int4,
-        user_id -> Text,
-        bastion_id -> Text,
+        user_id -> Int4,
+        bastion_id -> Int4,
         wireguard -> Bool,
         net_id -> Int4,
     }
@@ -71,7 +63,6 @@ diesel::table! {
 
 diesel::allow_tables_to_appear_in_same_query!(
     bastion,
-    bastion_token,
     k8sressource,
     ressource,
     sshressource,

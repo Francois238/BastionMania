@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Queryable, Serialize)]
 pub struct WireguardRessource {
     pub id: i32,
-    pub id_bastion: String,
+    pub id_bastion: i32,
     pub name: String,
     pub target_cidr: String,
 }
@@ -14,7 +14,7 @@ pub struct WireguardRessource {
 #[table_name = "wireguardressource"]
 pub struct WireguardRessourceInsertable {
     pub id: i32,
-    pub id_bastion: String,
+    pub id_bastion: i32,
     pub name: String,
     pub subnet_cidr: String,
 }

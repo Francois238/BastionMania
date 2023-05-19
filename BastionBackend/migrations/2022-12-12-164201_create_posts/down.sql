@@ -5,5 +5,4 @@ DROP TABLE "ressource";
 DROP TABLE "wireguardressource";
 DROP TABLE "sshressource";
 DROP TABLE "k8sressource";
-DROP TABLE "bastion_token";
 
