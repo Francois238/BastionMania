@@ -3,6 +3,7 @@
 diesel::table! {
     bastion (id) {
         id -> Int4,
+        bastion_id -> Text,
         name -> Text,
         subnet_cidr -> Text,
         agent_endpoint -> Text,
@@ -31,7 +32,7 @@ diesel::table! {
 diesel::table! {
     ressource (id) {
         id -> Text,
-        id_bastion -> Int4,
+        id_bastion -> Text,
         name -> Text,
         rtype -> Text,
         id_wireguard -> Nullable<Int4>,
@@ -52,8 +53,8 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Int4,
-        user_id -> Int4,
-        bastion_id -> Int4,
+        user_id -> Text,
+        bastion_id -> Text,
         wireguard -> Bool,
         net_id -> Int4,
     }

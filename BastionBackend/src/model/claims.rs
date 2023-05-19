@@ -4,7 +4,7 @@ use time::OffsetDateTime;
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     //Structure composant le JWT
-    pub id: i32,
+    pub id: String,
     pub name: String,
     pub last_name: String,
     pub mail: String,

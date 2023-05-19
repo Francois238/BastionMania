@@ -1,5 +1,6 @@
 CREATE TABLE "bastion"(
                           id SERIAL PRIMARY KEY,
+                          bastion_id TEXT NOT NULL,
                           name TEXT NOT NULL,
                           subnet_cidr TEXT NOT NULL,
                           agent_endpoint TEXT NOT NULL,
@@ -10,8 +11,8 @@ CREATE TABLE "bastion"(
 
 CREATE TABLE "users"(
                         id SERIAL PRIMARY KEY,
-                        user_id INT NOT NULL,
-                        bastion_id INT NOT NULL,
+                        user_id TEXT NOT NULL,
+                        bastion_id TEXT NOT NULL,
                         wireguard BOOLEAN NOT NULL,
                         net_id INT NOT NULL
 
@@ -20,7 +21,7 @@ CREATE TABLE "users"(
 CREATE TABLE "ressource"
 (
     id           TEXT PRIMARY KEY,
-    id_bastion   INT NOT NULL,
+    id_bastion   TEXT NOT NULL,
     name         TEXT NOT NULL,
     rtype         TEXT NOT NULL,
     id_wireguard INT ,
