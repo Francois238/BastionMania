@@ -1,4 +1,4 @@
-use actix_web::{delete, post, web, HttpResponse, Responder};
+use actix_web::{delete, post, get, web, HttpResponse, Responder};
 
 use crate::database::BastionDatabase;
 use crate::ssh::ressource::SSHRessource;
@@ -7,6 +7,20 @@ use crate::{WireguardAgent, WireguardRessource};
 
 use log::{error, info};
 use crate::wireguard::wgconfigure;
+
+
+/// Return wireguard public_key
+#[get("/wireguard/public_key")]
+async fn get_wireguard_public_key() -> impl Responder {
+    let res = wgconfigure::get_public_key();
+    match res {
+        Ok(key) => HttpResponse::Ok().body(key),
+        Err(e) => {
+            error!("Error getting public key: {}", e);
+            HttpResponse::InternalServerError().body("Error getting public key")
+        }
+    }
+}
 
 #[post("/wireguard/configs")]
 async fn add_wireguard_config(user_config: web::Json<WireguardRessource>) -> impl Responder {
@@ -240,8 +254,11 @@ async fn set_agent(agent: web::Json<WireguardAgent>) -> HttpResponse{
     HttpResponse::Ok().body("success")
 }
 
+
+
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(add_wireguard_config)
+    cfg.service(get_wireguard_public_key)
+        .service(add_wireguard_config)
         .service(remove_wireguard_config)
         .service(add_ssh_ressource)
         .service(add_ssh_user)

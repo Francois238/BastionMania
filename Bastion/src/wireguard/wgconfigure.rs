@@ -1,7 +1,6 @@
 use crate::consts::{CMD_IPTABLES, WG_PRIVATE_KEY_PATH};
-use crate::{WGInterfaceConfig, WGPeerConfig, WGToAgent, WGToClient, WireguardAgent, WireguardRessource};
+use crate::{WGInterfaceConfig, WGPeerConfig, WGToClient, WireguardAgent, WireguardRessource};
 use std::fs;
-use std::path::Path;
 use std::process::{Command, Output};
 use log::error;
 
@@ -203,4 +202,13 @@ pub fn allow_target_ip(ressource: &WireguardRessource) -> Result<(), String> {
 /// `iptables -D FORWARD -i wg-client -o wg-agent -s <client_ip> -d <target_ip> -j ACCEPT`
 pub fn deny_target_ip(ressource: &WireguardRessource) -> Result<(), String> {
     set_target_ip("-D", ressource)
+}
+
+/// Return the public key of the bastion
+pub fn get_public_key() -> Result<String, String> {
+    let private_key = fs::read_to_string(WG_PRIVATE_KEY_PATH)
+        .map_err(|e| e.to_string())?;
+    wireguard_keys::Privkey::from_base64(&private_key)
+        .map_err(|e| e.to_string())
+        .map(|k| k.pubkey().to_base64())
 }

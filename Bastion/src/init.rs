@@ -4,7 +4,7 @@ use std::process::Command;
 
 use log::info;
 
-use crate::{BastionConfig, WGToAgent, WGToClient};
+use crate::{BastionConfig, WGToClient};
 use crate::consts::{CMD_SSHKEYGEN, WG_PRIVATE_KEY_PATH};
 use crate::database::BastionDatabase;
 use crate::wireguard::{self, wgconfigure};
