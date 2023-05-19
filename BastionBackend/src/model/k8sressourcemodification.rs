@@ -2,6 +2,7 @@ use crate::schema::k8sressource;
 use serde::{Deserialize, Serialize};
 use diesel::Insertable;
 
+
 #[derive(Serialize, Deserialize, Insertable)]
 #[table_name = "k8sressource"]
 pub struct K8sRessourceCreation {
@@ -13,5 +14,5 @@ pub struct K8sRessourceCreation {
 #[table_name = "k8sressource"]
 pub struct K8sRessourceSuppression {
     pub id: i32,
-    pub id_bastion: i32,
+    pub id_bastion: String,
 }

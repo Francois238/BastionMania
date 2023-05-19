@@ -1,101 +1,17 @@
-use std::env;
-
-//use crate::schema::to_user_config::publikey;
+use crate::schema::{bastion, bastion_token, k8sressource, ressource, sshressource, users, wireguardressource};
 use crate::api_error::ApiError;
 use crate::db;
-use crate::entities::{Bastion, BastionInsertable, K8sRessource, K8sRessourceInsertable, Ressource, RessourceInsertable, SshRessource, SshRessourceInsertable, Users, UsersModification, WireguardRessource, WireguardRessourceInsertable};
-use crate::model::{BastionModification, Claims, UsersInstanceCreate};
-use crate::schema::users::wireguard;
-use crate::schema::{bastion, k8sressource, ressource, sshressource, users, wireguardressource};
-use actix_session::Session;
+use crate::entities::{Bastion, BastionInsertable, BastionTokenInsertable, K8sRessource, K8sRessourceInsertable, Ressource, RessourceInsertable, SshRessource, SshRessourceInsertable, Users, UsersModification, WireguardRessource, WireguardRessourceInsertable, BastionToken};
+use crate::model::{BastionModification};
+
+
 use actix_web::Result;
-use diesel::associations::HasTable;
-use diesel::dsl::Update;
+
 use diesel::prelude::*;
 use diesel::query_dsl::RunQueryDsl;
-use diesel::row::NamedRow;
-use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
-use serde::{Deserialize, Serialize};
-use time::OffsetDateTime;
-use wireguard_keys;
 
-impl Claims {
-    pub fn verifier_session_admin(session: &Session) -> Option<Claims> {
-        //Fct pour verifier valider du JWT
 
-        let session = session.get::<String>("claim");
 
-        let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
-
-        match session {
-            Ok(data_session) => match data_session {
-                Some(data) => {
-                    let token_message = decode::<Claims>(
-                        &data,
-                        &DecodingKey::from_secret(secret.as_ref()),
-                        &Validation::new(Algorithm::HS256),
-                    );
-
-                    match token_message {
-                        Ok(claim) => {
-                            let my_claims = claim.claims;
-
-                            if my_claims.admin == true
-                                && my_claims.change_password == true
-                                && my_claims.complete_authentication == true
-                            {
-                                Some(my_claims)
-                            } else {
-                                None
-                            }
-                        }
-                        _ => None,
-                    }
-                }
-                _ => None,
-            },
-            _ => None,
-        }
-    }
-
-    pub fn verifier_session_user(session: &Session) -> Option<Claims> {
-        //Fct pour verifier valider du JWT
-
-        let session = session.get::<String>("claim");
-
-        let secret = env::var("KEY_JWT").expect("erreur chargement cle jwt");
-
-        match session {
-            Ok(data_session) => match data_session {
-                Some(data) => {
-                    let token_message = decode::<Claims>(
-                        &data,
-                        &DecodingKey::from_secret(secret.as_ref()),
-                        &Validation::new(Algorithm::HS256),
-                    );
-
-                    match token_message {
-                        Ok(claim) => {
-                            let my_claims = claim.claims;
-
-                            if my_claims.admin == false
-                                && my_claims.change_password == true
-                                && my_claims.complete_authentication == true
-                            {
-                                Some(my_claims)
-                            } else {
-                                None
-                            }
-                        }
-                        _ => None,
-                    }
-                }
-                _ => None,
-            },
-            _ => None,
-        }
-    }
-}
 
 impl Bastion {
     pub fn find_all() -> Result<Vec<Self>, ApiError> {
@@ -112,18 +28,40 @@ impl Bastion {
         Ok(newbastion)
     }
 
-    // /bastion/{bastion_id} endpoint =================================================================
+    pub fn token_create(bastion_token: BastionTokenInsertable) -> Result<BastionToken, ApiError> {
+        let mut conn = db::connection()?;
+        let newtoken: BastionToken = diesel::insert_into(bastion_token::table)
+            .values(bastion_token)
+            .get_result(&mut conn)?;
+        Ok(newtoken)
+    }
 
-    pub fn find_un_bastion(id: i32) -> Result<Bastion, ApiError> {
+    pub fn token_delete(bastion_token: BastionToken) -> Result<(), ApiError> {
         let mut conn = db::connection()?;
 
-        let bastion = bastion::table.filter(bastion::id.eq(id)).first(&mut conn)?;
+        let bastion_id = bastion_token.bastion_id;
+
+        let token = bastion_token.token;
+
+        let _newtoken: usize = diesel::delete(bastion_token::table
+            .filter(bastion_token::bastion_id.eq(bastion_id))
+            .filter(bastion_token::token.eq(token)))
+            .execute(&mut conn)?;            
+        Ok(())
+    }
+
+    // /bastion/{bastion_id} endpoint =================================================================
+
+    pub fn find_un_bastion(id: String) -> Result<Bastion, ApiError> {
+        let mut conn = db::connection()?;
+
+        let bastion = bastion::table.filter(bastion::bastion_id.eq(id)).first(&mut conn)?;
 
         Ok(bastion)
     }
 
     pub fn update_un_bastion(
-        id: i32,
+        bastion_id: String,
         modifications: BastionModification,
     ) -> Result<Bastion, ApiError> {
         let mut conn = db::connection()?;
@@ -133,7 +71,7 @@ impl Bastion {
         let agent_endpoint = modifications.agent_endpoint;
 
         let bastion = diesel::update(bastion::table)
-            .filter(bastion::id.eq(id))
+            .filter(bastion::bastion_id.eq(bastion_id))
             .set((
                 bastion::name.eq(name),
                 bastion::subnet_cidr.eq(subnet_cidr),
@@ -144,16 +82,16 @@ impl Bastion {
         Ok(bastion)
     }
 
-    pub fn delete_un_bastion(id: i32) -> Result<usize, ApiError> {
+    pub fn delete_un_bastion(id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
         let bastion =
-            diesel::delete(bastion::table.filter(bastion::id.eq(id))).execute(&mut conn)?;
+            diesel::delete(bastion::table.filter(bastion::bastion_id.eq(id))).execute(&mut conn)?;
 
         Ok(bastion)
     }
 
-    pub fn verification_appartenance(user_id: i32, bastion_id: i32) -> Result<bool, ApiError> {
+    pub fn verification_appartenance(user_id: String, bastion_id: String) -> Result<bool, ApiError> {
         let mut conn = db::connection()?;
 
         let users: Vec<Users> = users::table
@@ -164,7 +102,7 @@ impl Bastion {
         Ok(!users.is_empty())
     }
 
-    pub fn bastion_user(user_id: i32) -> Result<Vec<Users>, ApiError> {
+    pub fn bastion_user(user_id: String) -> Result<Vec<Users>, ApiError> {
         let mut conn = db::connection()?;
 
         let users: Vec<Users> = users::table
@@ -178,10 +116,10 @@ impl Bastion {
 // /bastion/{bastion_id}/users
 
 impl Users {
-    pub fn find_users_bastion(_bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+    pub fn find_users_bastion(bastion_id: String) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_users = users::table
-            .filter(users::bastion_id.eq(_bastion_id))
+            .filter(users::bastion_id.eq(bastion_id))
             .load::<Users>(&mut conn)?;
         Ok(des_users)
     }
@@ -196,7 +134,7 @@ impl Users {
 
     // /bastion/{bastion_id}/users/{user_id} endpoint =================================================================
 
-    pub fn find_un_user(bastion_id: i32, user_id: i32) -> Result<Users, ApiError> {
+    pub fn find_un_user(bastion_id: String, user_id: String) -> Result<Users, ApiError> {
         let mut conn = db::connection()?;
 
         let user = users::table
@@ -207,7 +145,7 @@ impl Users {
         Ok(user)
     }
 
-    pub fn delete_all_users(bastion_id: i32) -> Result<usize, ApiError> {
+    pub fn delete_all_users(bastion_id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
         let user = diesel::delete(users::table.filter(users::bastion_id.eq(bastion_id)))
@@ -216,7 +154,7 @@ impl Users {
         Ok(user)
     }
 
-    pub fn delete_un_user(bastion_id: i32, user_id: i32) -> Result<usize, ApiError> {
+    pub fn delete_un_user(bastion_id: String, user_id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
         let user = diesel::delete(
@@ -232,11 +170,11 @@ impl Users {
 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard
 
-pub fn build_client_address(bastion_id: i32, user_id: i32) -> Result<String, ApiError> {
+pub fn build_client_address(bastion_id: String, user_id: String) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
     let bastion: Bastion = bastion::table
-        .filter(bastion::id.eq(bastion_id))
+        .filter(bastion::bastion_id.eq(bastion_id.clone()))
         .first(&mut conn)?;
 
     let user: Users = users::table
@@ -252,11 +190,11 @@ pub fn build_client_address(bastion_id: i32, user_id: i32) -> Result<String, Api
     Ok(client_address.to_string())
 }
 
-pub fn build_endpoint_user(bastion_ip: String, bastion_id: i32) -> Result<String, ApiError> {
+pub fn build_endpoint_user(bastion_ip: String, bastion_id: String) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
     let bastion: Bastion = bastion::table
-        .filter(bastion::id.eq(bastion_id))
+        .filter(bastion::bastion_id.eq(bastion_id))
         .first(&mut conn)?;
 
     let mut endpoint_user = bastion_ip;
@@ -266,27 +204,27 @@ pub fn build_endpoint_user(bastion_ip: String, bastion_id: i32) -> Result<String
     Ok(endpoint_user.to_string())
 }
 
-pub fn get_bastion_public_key(bastion_id: i32) -> Result<String, ApiError> {
+pub fn get_bastion_public_key(bastion_id: String) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
     let bastion: Bastion = bastion::table
-        .filter(bastion::id.eq(bastion_id))
+        .filter(bastion::bastion_id.eq(bastion_id))
         .first(&mut conn)?;
 
-    Ok(bastion.pubkey.clone())
+    Ok(bastion.pubkey)
 }
 
-pub fn get_bastion_subnet_cidr(bastion_id: i32) -> Result<String, ApiError> {
+pub fn get_bastion_subnet_cidr(bastion_id: String) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
     let bastion: Bastion = bastion::table
-        .filter(bastion::id.eq(bastion_id))
+        .filter(bastion::bastion_id.eq(bastion_id))
         .first(&mut conn)?;
 
-    Ok(bastion.subnet_cidr.clone())
+    Ok(bastion.subnet_cidr)
 }
 
-pub fn update_un_user(user_id: i32, bool: bool) -> Result<Users, ApiError> {
+pub fn update_un_user(user_id: String, bool: bool) -> Result<Users, ApiError> {
     let mut conn = db::connection()?;
 
     let user = diesel::update(users::table)
@@ -300,7 +238,7 @@ pub fn update_un_user(user_id: i32, bool: bool) -> Result<Users, ApiError> {
 // /bastion/{bastion_id}/ressources        ===================================================================
 
 impl Ressource {
-    pub fn find_all_ressources(id_bastion: i32) -> Result<Vec<Self>, ApiError> {
+    pub fn find_all_ressources(id_bastion: String) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_ressources = ressource::table
             .filter(ressource::id_bastion.eq(id_bastion))
@@ -316,21 +254,22 @@ impl Ressource {
         Ok(newressource)
     }
 
-    pub fn find_a_ressource(id: i32, id_bastion: i32) -> Result<Vec<Self>, ApiError> {
+    pub fn find_a_ressource(id: String, id_bastion: String) -> Result<Ressource, ApiError> {
         let mut conn = db::connection()?;
         let une_ressource = ressource::table
-            .filter(ressource::id_bastion.eq(id_bastion))
             .filter(ressource::id.eq(id))
-            .load::<Ressource>(&mut conn)?;
+            .filter(ressource::id_bastion.eq(id_bastion))
+            .first::<Ressource>(&mut conn)?;
         Ok(une_ressource)
     }
 
-    pub fn delete_a_ressource(id: i32, id_bastion: i32) -> Result<usize, ApiError> {
+    pub fn delete_a_ressource(id: String, id_bastion: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
         let ressource = diesel::delete(
             ressource::table
+                .filter(ressource::id.eq(id))
                 .filter(ressource::id_bastion.eq(id_bastion))
-                .filter(ressource::id.eq(id)),
+
         )
         .execute(&mut conn)?;
         Ok(ressource)
@@ -338,7 +277,7 @@ impl Ressource {
 }
 
 impl WireguardRessource {
-    pub fn find_all_wireguard_ressources(bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+    pub fn find_all_wireguard_ressources(bastion_id: String) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_ressources = wireguardressource::table
             .filter(wireguardressource::id_bastion.eq(bastion_id))
@@ -346,12 +285,12 @@ impl WireguardRessource {
         Ok(des_ressources)
     }
 
-    pub fn find_a_wireguard_ressource(id: i32, bastion_id: i32) -> Result<WireguardRessource, ApiError>{
+    pub fn find_a_wireguard_ressource(id: i32, bastion_id: String) -> Result<WireguardRessource, ApiError>{
         let mut conn = db::connection()?;
         let une_ressource = wireguardressource::table
-            .filter(wireguardressource::id_bastion.eq(bastion_id))
             .filter(wireguardressource::id.eq(id))
-            .load::<WireguardRessource>(&mut conn)?;
+            .filter(wireguardressource::id_bastion.eq(bastion_id))
+            .first::<WireguardRessource>(&mut conn)?;
         Ok(une_ressource)
     }
 
@@ -363,7 +302,7 @@ impl WireguardRessource {
         Ok(newressource)
     }
 
-    pub fn delete_a_wireguard_ressource(id: i32, bastion_id: i32) -> Result<usize, ApiError> {
+    pub fn delete_a_wireguard_ressource(id: i32, bastion_id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
         let ressource = diesel::delete(
             wireguardressource::table
@@ -376,7 +315,7 @@ impl WireguardRessource {
 }
 
 impl SshRessource{
-    pub fn find_all_ssh_ressources(bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+    pub fn find_all_ssh_ressources(bastion_id: String) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_ressources = sshressource::table
             .filter(sshressource::id_bastion.eq(bastion_id))
@@ -384,12 +323,12 @@ impl SshRessource{
         Ok(des_ressources)
     }
 
-    pub fn find_a_ssh_ressource(id: i32, bastion_id: i32) -> Result<SshRessource, ApiError>{
+    pub fn find_a_ssh_ressource(id: i32, bastion_id: String) -> Result<SshRessource, ApiError>{
         let mut conn = db::connection()?;
         let une_ressource = sshressource::table
             .filter(sshressource::id_bastion.eq(bastion_id))
             .filter(sshressource::id.eq(id))
-            .load::<SshRessource>(&mut conn)?;
+            .first::<SshRessource>(&mut conn)?;
         Ok(une_ressource)
     }
 
@@ -401,7 +340,7 @@ impl SshRessource{
         Ok(newressource)
     }
 
-    pub fn delete_a_ssh_ressource(id: i32, bastion_id: i32) -> Result<usize, ApiError> {
+    pub fn delete_a_ssh_ressource(id: i32, bastion_id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
         let ressource = diesel::delete(
             sshressource::table
@@ -414,7 +353,7 @@ impl SshRessource{
 }
 
 impl K8sRessource{
-    pub fn find_all_k8s_ressources(bastion_id: i32) -> Result<Vec<Self>, ApiError> {
+    pub fn find_all_k8s_ressources(bastion_id: String) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_ressources = k8sressource::table
             .filter(k8sressource::id_bastion.eq(bastion_id))
@@ -422,12 +361,12 @@ impl K8sRessource{
         Ok(des_ressources)
     }
 
-    pub fn find_a_k8s_ressource(id: i32, bastion_id: i32) -> Result<K8sRessource, ApiError>{
+    pub fn find_a_k8s_ressource(id: i32, bastion_id: String) -> Result<K8sRessource, ApiError>{
         let mut conn = db::connection()?;
         let une_ressource = k8sressource::table
             .filter(k8sressource::id_bastion.eq(bastion_id))
             .filter(k8sressource::id.eq(id))
-            .load::<K8sRessource>(&mut conn)?;
+            .first::<K8sRessource>(&mut conn)?;
         Ok(une_ressource)
     }
 
@@ -439,7 +378,7 @@ impl K8sRessource{
         Ok(newressource)
     }
 
-    pub fn delete_a_k8s_ressource(id: i32, bastion_id: i32) -> Result<usize, ApiError> {
+    pub fn delete_a_k8s_ressource(id: i32, bastion_id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
         let ressource = diesel::delete(
             k8sressource::table

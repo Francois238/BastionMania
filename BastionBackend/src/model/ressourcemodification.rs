@@ -10,9 +10,8 @@ pub struct RessourceCreation {
  
 }
 
-#[derive(Serialize, Deserialize, Insertable)]
-#[table_name = "ressource"]
+#[derive(Serialize, Deserialize)]
 pub struct RessourceSuppression {
     pub id: i32,
-    pub id_bastion: i32,
+    pub id_bastion: String,
 }

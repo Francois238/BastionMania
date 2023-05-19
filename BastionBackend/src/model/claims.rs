@@ -1,21 +1,32 @@
+use std::env;
+use actix_web::HttpRequest;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
+use uuid::Uuid;
+use crate::api_error::ApiError;
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
     //Structure composant le JWT
-    pub id: i32,
-    pub name: String,
-    pub last_name: String,
+    pub id: Uuid,
     pub mail: String,
     pub admin: bool,
-    pub change_password: bool,
-    pub mfa_active: bool,
+    pub otp: Option<bool>,
     pub complete_authentication: bool,
     #[serde(with = "jwt_numeric_date")]
     iat: OffsetDateTime,
     #[serde(with = "jwt_numeric_date")]
     exp: OffsetDateTime,
+}
+
+#[derive(Serialize)]
+pub struct MyToken {
+    pub jwt: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ResponseToken{
+    pub id: Uuid
 }
 
 mod jwt_numeric_date {
@@ -41,3 +52,91 @@ mod jwt_numeric_date {
             .map_err(|_| serde::de::Error::custom("invalid Unix timestamp value"))
     }
 }
+
+pub fn extract_jwt_header(req: HttpRequest) -> Result<String, ApiError> {
+    //Fct pour extraire le JWT du header
+
+    let header = req.headers().get("Authorization");
+
+    if header.is_none() {
+        return Err(ApiError::new(404, "Unauthorized".to_string()));
+    }
+
+    let session = header.unwrap().to_str();
+
+    if session.is_err() {
+        return Err(ApiError::new(404, "Unauthorized".to_string()));
+    }
+
+    let jwt = session.unwrap().split("Bearer ").collect::<Vec<&str>>()[1];
+
+    Ok(jwt.to_string())
+}
+
+pub async fn VerifyUser(req: HttpRequest) -> Result<Uuid, ApiError> {
+
+    let jwt = extract_jwt_header(req)?;
+
+    let mytoken = MyToken {
+        jwt
+    };
+
+    let url = env::var("AUTHENTICATION_USER").map_err(|_| {
+        ApiError::new(
+            500,
+            "Impossible to communicate with authentication".to_string(),
+        )
+    })?;
+
+    let client = reqwest::Client::new(); //Envoie une requete au micro service user mangement pour ajouter le user dans sa BDD
+    let response = client.get(url).json(&mytoken).send().await.map_err(|_| {
+        ApiError::new(
+            401,
+            "unauthorized".to_string(),
+        )
+    })?.json::<ResponseToken>().await.map_err(|_| {
+        ApiError::new(
+            401,
+            "unauthorized".to_string(),
+        )
+    })?;
+
+    let id = response.id;
+
+    Ok(id)
+}
+
+pub async fn VerifyAdmin(req: HttpRequest) -> Result<Uuid, ApiError> {
+
+    let jwt = extract_jwt_header(req)?;
+
+    let token = MyToken {
+        jwt
+    };
+
+    let url = env::var("AUTHENTICATION_ADMIN").map_err(|_| {
+        ApiError::new(
+            500,
+            "Impossible to communicate with authentication".to_string(),
+        )
+    })?;
+
+    let client = reqwest::Client::new(); //Envoie une requete au micro service user mangement pour ajouter le user dans sa BDD
+    let response = client.get(url).json(&token).send().await.map_err(|_| {
+        ApiError::new(
+            401,
+            "unauthorized".to_string(),
+        )
+    })?.json::<ResponseToken>().await.map_err(|_| {
+        ApiError::new(
+            401,
+            "unauthorized".to_string(),
+        )
+    })?;
+
+    let id = response.id;
+
+    Ok(id)
+}
+
+

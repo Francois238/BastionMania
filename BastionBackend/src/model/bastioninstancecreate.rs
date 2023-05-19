@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+
 #[derive(Serialize, Deserialize)]
 pub struct BastionInstanceCreate {
+    pub mytoken: String,
+    pub bastion_id: String,
     pub private_key: String,
     pub cidr_protege: String,
     pub agent_public_key: String,
