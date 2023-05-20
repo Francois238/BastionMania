@@ -53,8 +53,7 @@ diesel::table! {
     users (id) {
         id -> Int4,
         user_id -> Text,
-        bastion_id -> Text,
-        wireguard -> Bool,
+        ressource_id -> Text,
         net_id -> Int4,
     }
 }

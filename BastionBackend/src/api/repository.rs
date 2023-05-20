@@ -60,6 +60,8 @@ impl Bastion {
         Ok(bastion)
     }
 
+
+
     pub fn update_un_bastion(
         bastion_id: String,
         modifications: BastionModification,
@@ -91,12 +93,12 @@ impl Bastion {
         Ok(bastion)
     }
 
-    pub fn verification_appartenance(user_id: String, bastion_id: String) -> Result<bool, ApiError> {
+    pub fn verification_appartenance(user_id: String, ressource_id: String) -> Result<bool, ApiError> {
         let mut conn = db::connection()?;
 
         let users: Vec<Users> = users::table
             .filter(users::user_id.eq(user_id))
-            .filter(users::bastion_id.eq(bastion_id))
+            .filter(users::ressource_id.eq(ressource_id))
             .load::<Users>(&mut conn)?;
 
         Ok(!users.is_empty())
@@ -116,10 +118,10 @@ impl Bastion {
 // /bastion/{bastion_id}/users
 
 impl Users {
-    pub fn find_users_bastion(bastion_id: String) -> Result<Vec<Self>, ApiError> {
+    pub fn find_users_bastion(ressource_id: String) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_users = users::table
-            .filter(users::bastion_id.eq(bastion_id))
+            .filter(users::ressource_id.eq(ressource_id))
             .load::<Users>(&mut conn)?;
         Ok(des_users)
     }
@@ -134,33 +136,33 @@ impl Users {
 
     // /bastion/{bastion_id}/users/{user_id} endpoint =================================================================
 
-    pub fn find_un_user(bastion_id: String, user_id: String) -> Result<Users, ApiError> {
+    pub fn find_un_user(ressource_id: String, user_id: String) -> Result<Users, ApiError> {
         let mut conn = db::connection()?;
 
         let user = users::table
             .filter(users::user_id.eq(user_id))
-            .filter(users::bastion_id.eq(bastion_id))
+            .filter(users::ressource_id.eq(ressource_id))
             .first(&mut conn)?;
 
         Ok(user)
     }
 
-    pub fn delete_all_users(bastion_id: String) -> Result<usize, ApiError> {
+    pub fn delete_all_users(ressource_id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
-        let user = diesel::delete(users::table.filter(users::bastion_id.eq(bastion_id)))
+        let user = diesel::delete(users::table.filter(users::ressource_id.eq(ressource_id)))
             .execute(&mut conn)?;
 
         Ok(user)
     }
 
-    pub fn delete_un_user(bastion_id: String, user_id: String) -> Result<usize, ApiError> {
+    pub fn delete_un_user(ressource_id: String, user_id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
         let user = diesel::delete(
             users::table
                 .filter(users::user_id.eq(user_id))
-                .filter(users::bastion_id.eq(bastion_id)),
+                .filter(users::ressource_id.eq(ressource_id)),
         )
         .execute(&mut conn)?;
 
@@ -170,7 +172,7 @@ impl Users {
 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard
 
-pub fn build_client_address(bastion_id: String, user_id: String) -> Result<String, ApiError> {
+pub fn build_client_address(ressource_id: String, user_id: String, bastion_id: String) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
     let bastion: Bastion = bastion::table
@@ -179,7 +181,7 @@ pub fn build_client_address(bastion_id: String, user_id: String) -> Result<Strin
 
     let user: Users = users::table
         .filter(users::user_id.eq(user_id))
-        .filter(users::bastion_id.eq(bastion_id))
+        .filter(users::ressource_id.eq(ressource_id))
         .first(&mut conn)?;
 
     let mut client_address = "10.10".to_string();
@@ -224,16 +226,7 @@ pub fn get_bastion_subnet_cidr(bastion_id: String) -> Result<String, ApiError> {
     Ok(bastion.subnet_cidr)
 }
 
-pub fn update_un_user(user_id: String, bool: bool) -> Result<Users, ApiError> {
-    let mut conn = db::connection()?;
 
-    let user = diesel::update(users::table)
-        .filter(users::user_id.eq(user_id))
-        .set((users::wireguard.eq(bool)))
-        .get_result(&mut conn)?;
-
-    Ok(user)
-}
 
 // /bastion/{bastion_id}/ressources        ===================================================================
 
@@ -254,11 +247,10 @@ impl Ressource {
         Ok(newressource)
     }
 
-    pub fn find_a_ressource(id: String, id_bastion: String) -> Result<Ressource, ApiError> {
+    pub fn find_a_ressource(id_ressource: String) -> Result<Ressource, ApiError> {
         let mut conn = db::connection()?;
         let une_ressource = ressource::table
-            .filter(ressource::id.eq(id))
-            .filter(ressource::id_bastion.eq(id_bastion))
+            .filter(ressource::id.eq(id_ressource))
             .first::<Ressource>(&mut conn)?;
         Ok(une_ressource)
     }
@@ -273,6 +265,16 @@ impl Ressource {
         )
         .execute(&mut conn)?;
         Ok(ressource)
+    }
+
+    pub fn ressource_user(user_id: String) -> Result<Vec<Users>, ApiError> {
+        let mut conn = db::connection()?;
+
+        let users: Vec<Users> = users::table
+            .filter(users::user_id.eq(user_id))
+            .load::<Users>(&mut conn)?;
+
+        Ok(users)
     }
 }
 

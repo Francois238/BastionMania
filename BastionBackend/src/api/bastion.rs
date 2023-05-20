@@ -35,12 +35,27 @@ pub async fn get_bastion(req: HttpRequest) -> Result<HttpResponse, ApiError> {
         },
         Err(ApiError) => {
             let id_user :Uuid = VerifyUser(req).await?;
-            let users = Bastion::bastion_user(id_user.to_string())?;
+            let users = Ressource::ressource_user(id_user.to_string())?;
             let mut bastions: Vec<Bastion> = Vec::new();
 
+            let mut flag=true;
+
             for user in users {
-                let bastion = Bastion::find_un_bastion(user.bastion_id)?;
-                bastions.push(bastion);
+                
+                let ressource = Ressource::find_a_ressource(user.ressource_id)?;
+                let bastion = Bastion::find_un_bastion(ressource.id_bastion)?;
+                for b in bastions.iter() {
+                    if b.bastion_id == bastion.bastion_id {
+                        flag=false;
+                    }
+                }
+
+                if flag {
+                    bastions.push(bastion);
+                }
+                else{
+                    flag=true;
+                }
             }
 
             Ok(HttpResponse::Ok().json(bastions))
@@ -249,8 +264,7 @@ pub async fn create_users(
 
     let users_insertion = UsersModification {
         user_id: users.id.clone(),
-        bastion_id: bastion_id.clone(),
-        wireguard: false,
+        ressource_id: users.ressource_id.clone(),
         net_id: net_id.clone(),
     };
 
@@ -294,7 +308,7 @@ pub async fn delete_a_user(
 }
 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
-
+/*
 #[post("/bastions/{bastion_id}/users/{user_id}/generate_wireguard")]
 pub async fn get_user_wireguard_status(
     req: HttpRequest,
@@ -360,7 +374,7 @@ pub async fn get_user_wireguard_status(
 
     Ok(HttpResponse::Ok().json(retour_api))
 }
-
+*/
 // /bastion/{bastion_id}/ressources        ===================================================================
 
 #[get("/bastions/{bastion_id}/ressources")]
@@ -368,7 +382,28 @@ pub async fn get_ressources(
     bastion_id: web::Path<String>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
-    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let claims_admin : Result<Uuid, ApiError> = VerifyAdmin(req.clone()).await;
+
+    match claims_admin {
+        Ok(id_admin) => {
+            let bastion_insere = Bastion::find_all()?;
+            return Ok(HttpResponse::Ok().json(bastion_insere))
+        },
+        Err(ApiError) => {
+            let id_user :Uuid = VerifyUser(req).await?;
+            let users = Ressource::ressource_user(id_user.to_string())?;
+            let mut ressources: Vec<Ressource> = Vec::new();
+
+            for user in users {
+                
+                let ressource = Ressource::find_a_ressource(user.ressource_id)?;
+                ressources.push(ressource);
+            
+            
+        }
+        return Ok(HttpResponse::Ok().json(ressources))
+    }
+}
 
     let bastion_id = bastion_id.into_inner();
     let ressources = Ressource::find_all_ressources(bastion_id)?;
@@ -484,7 +519,7 @@ pub async fn get_a_ressource(
 ) -> Result<HttpResponse, ApiError> {
     let admin_id: Uuid = VerifyAdmin(req).await?;
 
-    let ressource = Ressource::find_a_ressource(ressource_id.into_inner(),bastion_id.into_inner())?;
+    let ressource = Ressource::find_a_ressource(ressource_id.into_inner())?;
     Ok(HttpResponse::Ok().json(ressource))
 }
 
@@ -497,7 +532,7 @@ pub async fn delete_a_ressource(
     let admin_id: Uuid = VerifyAdmin(req).await?;
     let ressource_id = ressource_id.into_inner();
     let bastion_id = bastion_id.into_inner();
-    let ressource = Ressource::find_a_ressource(ressource_id.clone(),bastion_id.clone())?;
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
     let rtype = ressource.rtype;
 
     if rtype == "wireguard"{
@@ -532,7 +567,7 @@ pub async fn generate_access_credentials(
         return Err(ApiError::new(404, "Not Found".to_string()));
     }
 
-    let ressource = Ressource::find_a_ressource(ressource_id.clone(),bastion_id.clone())?;
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
     let rtype = ressource.rtype;
 
 
@@ -544,7 +579,7 @@ pub async fn generate_access_credentials(
 
         let bastion_ip = env::var("BASTION_IP").expect("BASTION_IP must be set");
 
-        let client_address = build_client_address(bastion_id.clone(), user_id.clone())?;
+        let client_address = build_client_address(ressource_id.clone(), bastion_id.clone(), user_id.clone())?;
         let bastion_endpoint = build_endpoint_user(bastion_ip.to_string(), bastion_id.clone())?;
 
         let client_public_key = client_pub.to_base64();
@@ -567,8 +602,6 @@ pub async fn generate_access_credentials(
             .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
 
         info!("Peer ajouté au bastion");
-
-        update_un_user(user_id, true)?;
 
         let bastion_public_key = get_bastion_public_key(bastion_id)?;
         let subnet_cidr = sepcressource.target_cidr;
@@ -593,6 +626,7 @@ pub async fn generate_access_credentials(
 
     }
     else {
+        //TODO
         return Ok(HttpResponse::Ok().finish())
 
     }
@@ -613,7 +647,7 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(get_a_user);
     cfg.service(delete_a_user);
 
-    cfg.service(get_user_wireguard_status);
+   // cfg.service(get_user_wireguard_status);
 
     cfg.service(get_ressources);
     cfg.service(create_ressources);

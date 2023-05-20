@@ -11,8 +11,7 @@ CREATE TABLE "bastion"(
 CREATE TABLE "users"(
                         id SERIAL PRIMARY KEY,
                         user_id TEXT NOT NULL,
-                        bastion_id TEXT NOT NULL,
-                        wireguard BOOLEAN NOT NULL,
+                        ressource_id TEXT NOT NULL,
                         net_id INT NOT NULL
 
 );
