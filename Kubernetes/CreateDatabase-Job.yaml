@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-database-script
+  namespace: bastion
+data:
+  create-database.sql: |
+    
+    CREATE DATABASE authentication;
+    CREATE DATABASE gestion_admin;
+    CREATE DATABASE gestion_user;
+    CREATE USER bastion WITH ENCRYPTED PASSWORD 'set a password here';
+    GRANT ALL PRIVILEGES ON DATABASE authentication TO bastion;
+    GRANT ALL PRIVILEGES ON DATABASE gestion_admin TO bastion;
+    GRANT ALL PRIVILEGES ON DATABASE gestion_user TO bastion;
+    \c authentication
+    CREATE TABLE IF NOT EXISTS users (
+      id uuid PRIMARY KEY,
+      name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      mail TEXT UNIQUE NOT NULL,
+      password BYTEA,
+      change BOOLEAN,
+      otp TEXT,
+      otpactive BOOLEAN
+    );
+    GRANT ALL PRIVILEGES ON TABLE users TO bastion;
+    \c authentication
+    CREATE TABLE IF NOT EXISTS admins (
+      id uuid PRIMARY KEY,
+      name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      mail TEXT UNIQUE NOT NULL,
+      password BYTEA,
+      change BOOLEAN,
+      otp TEXT,
+      otpactive BOOLEAN
+    );
+    GRANT ALL PRIVILEGES ON TABLE admins TO bastion;
+    \c gestion_admin
+    CREATE TABLE IF NOT EXISTS admins (
+      id uuid PRIMARY KEY,
+      name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      mail TEXT UNIQUE NOT NULL
+    );
+    GRANT ALL PRIVILEGES ON TABLE admins TO bastion;
+    \c gestion_user
+    CREATE TABLE IF NOT EXISTS users (
+      id uuid PRIMARY KEY,
+      name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      mail TEXT UNIQUE NOT NULL
+    );
+    GRANT ALL PRIVILEGES ON TABLE users TO bastion;
+
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-database
+  namespace: bastion
+spec:
+  template:
+    spec:
+      containers:
+      - name: create-database
+        image: docker.io/bitnami/postgresql:14.5.0-debian-11-r24
+        command: ["psql", "-h", "postgresqlnfs", "-U", "postgres", "-f", "/tmp/create-database.sql"]
+        env:
+          - name: PGPASSWORD
+            value: ChangeMe #password of the admin postgresql that you set in the Postgres-values.yaml file
+        volumeMounts:
+        - name: script-volume
+          mountPath: /tmp
+      volumes:
+      - name: script-volume
+        configMap:
+          name: create-database-script
+          items:
+          - key: create-database.sql
+            path: create-database.sql
+      restartPolicy: Never
