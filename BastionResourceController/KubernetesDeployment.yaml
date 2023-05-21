@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: BastionController
+  namespace: bastion-system
+imagePullSecrets:
+  - name: repogithub
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: BastionController
+  namespace: bastion-system
+rules:
+  - verbs:
+      - get
+      - delete
+      - create
+    resources: ["pods", "services"]
+  - verbs:
+      - watch
+    resources: ["bastions.bastionmania.fr"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: BastionController
+  namespace: bastion-system
+subjects:
+  - kind: ServiceAccount
+    name: BastionController
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: BastionController
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: BastionController-token
+  namespace: bastion-system
+  annotations:
+    kubernetes.io/service-account.name: bastioninstancieur
+type: kubernetes.io/service-account-token
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bastion-controller-deployment
+  namespace: bastion-system
+  labels:
+    app: bastion-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bastion-controller
+  template:
+    metadata:
+      labels:
+        app: bastion-controller
+    spec:
+      containers:
+        - name: bastion-controller
+          image: ghcr.io/bastionmania/bastionmania/bastionresourcecontroller:dev
+          imagePullPolicy: IfNotPresent
+      serviceAccountName: BastionController
