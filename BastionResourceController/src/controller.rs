@@ -4,10 +4,9 @@ use kube::{
     runtime::{watcher, watcher::Event},
     Api, CustomResource, Client,
 };
-use log::info;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use crate::ressources::bastion_pod::BastionPod;
+use crate::ressources::{BastionInternService, BastionPod, BastionPublicService};
 
 #[derive(Debug, Clone, Serialize, Deserialize, CustomResource, JsonSchema, Default)]
 #[kube(
@@ -27,7 +26,7 @@ pub struct BastionSpec {
 }
 
 impl BastionSpec{
-    fn to_bastion_pod(&self) -> BastionPod {
+    fn bastion_pod(&self) -> BastionPod {
         BastionPod::new(
             self.image.clone(),
             self.bastion_id.clone(),
@@ -35,14 +34,42 @@ impl BastionSpec{
         )
     }
 
+    fn public_service(&self) -> BastionPublicService{
+        BastionPublicService::new(
+            self.bastion_id.clone(),
+            self.ssh_port,
+            self.wireguard_port
+        )
+    }
+
+    fn intern_service(&self) -> BastionInternService{
+        BastionInternService::new(
+            self.bastion_id.clone()
+        )
+    }
+
     pub async fn apply(&self, client: Client) -> Result<(), kube::Error> {
         log::info!("Applying bastion {}", self.bastion_id);
-        self.to_bastion_pod().apply_pod(client).await
+        log::debug!("Creating pod of {}", self.bastion_id);
+        self.bastion_pod().apply_pod(client.clone()).await?;
+        log::debug!("Creating public_service of {}", self.bastion_id);
+        self.public_service().create(client.clone()).await?;
+        log::debug!("Creating intern_service of {}", self.bastion_id);
+        self.intern_service().create(client.clone()).await?;
+
+        Ok(())
     }
 
     pub async fn delete(&self, client: Client) -> Result<(), kube::Error> {
         log::info!("Deleting bastion {}", self.bastion_id);
-        self.to_bastion_pod().delete_pod(client).await
+        log::debug!("Deleting pod of {}", self.bastion_id);
+        self.bastion_pod().delete_pod(client.clone()).await?;
+        log::debug!("Deleting public_service of {}", self.bastion_id);
+        self.public_service().delete(client.clone()).await?;
+        log::debug!("Deleting intern_service of {}", self.bastion_id);
+        self.intern_service().delete(client.clone()).await?;
+
+        Ok(())
     }
 }
 
@@ -60,7 +87,7 @@ pub async fn watch_bastion(client: Client) -> Result<(), watcher::Error> {
                     }
                 }
                 Event::Deleted(bn) => {
-                    info!("Bastion deleted: {}", bn.spec.bastion_id);
+                    log::info!("Bastion deleted: {}", bn.spec.bastion_id);
                     bn.spec.delete(client.clone()).await.unwrap();
                 }
                 Event::Restarted(bns) => {

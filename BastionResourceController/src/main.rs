@@ -1,6 +1,6 @@
 use kube::{client::Client};
 
-use bastion_kubernetes_ressource::controller;
+use bastion_ressource_controller::controller;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
