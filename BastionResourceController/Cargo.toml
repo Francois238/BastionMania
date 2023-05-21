@@ -1,13 +1,13 @@
 [package]
-name = "bastion-kubernetes-ressource"
+name = "bastion-ressource-controller"
 version = "0.1.0"
 edition = "2021"
-default-run = "bastion-kubernetes-controller"
+default-run = "bastion-ressource-controller"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
 doc = false
-name = "bastion-kubernetes-controller"
+name = "bastion-ressource-controller"
 path = "src/main.rs"
 
 [[bin]]
