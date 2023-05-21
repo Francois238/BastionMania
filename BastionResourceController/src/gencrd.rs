@@ -1,4 +1,4 @@
-use bastion_kubernetes_ressource::controller::Bastion;
+use bastion_ressource_controller::controller::Bastion;
 use kube::CustomResourceExt;
 
 fn main() {
