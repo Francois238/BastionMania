@@ -36,6 +36,14 @@ impl Bastion {
         Ok(newtoken)
     }
 
+    pub fn token_find(token: String) -> Result<Vec<BastionToken>, ApiError> {
+        let mut conn = db::connection()?;
+        let un_bastion = bastion_token::table
+            .filter(bastion_token::token.eq(token))
+            .load::<BastionToken>(&mut conn)?;
+        Ok(un_bastion)
+    }
+
     pub fn token_delete(bastion_token: BastionToken) -> Result<(), ApiError> {
         let mut conn = db::connection()?;
 

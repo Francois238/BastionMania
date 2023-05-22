@@ -13,6 +13,7 @@ pub mod ressourcemodification;
 pub mod wireguardressourcemodification;
 pub mod sshressourcemodification;
 pub mod k8sressourcemodification;
+pub mod agentproof;
 
 pub use bastioninstancecreate::BastionInstanceCreate;
 pub use bastionmodification::BastionModification;

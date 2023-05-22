@@ -1,3 +1,4 @@
+use actix_session::config;
 use actix_web::{
     delete,
     get,
@@ -5,7 +6,7 @@ use actix_web::{
 };
 use std::env;
 
-use crate::{api::*, model::claims::{VerifyAdmin, VerifyUser}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -21,6 +22,25 @@ use crate::model::ressourcemodification::RessourceCreation;
 use crate::model::sshressourcemodification::SshRessourceCreation;
 use crate::model::wireguardressourcemodification::WireguardRessourceCreation;
 use uuid::Uuid;
+
+#[post("/agent")]
+pub async fn Config_my_agent(
+    token: web::Json<AgentProof>,
+    config_agent: web::Json<ConfigAgent>,
+) -> Result<HttpResponse, ApiError> {
+    my_bastion=token_find(token.into_inner())?;
+
+    let url = format!("http://bastion-internal-{}:9000/agent", my_bastion.bastion_id);
+    let _response = _client
+        .post(&url)
+        .json(&config_agent.into_inner())
+        .send()
+        .await
+        .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+    Ok(HttpResponse::Ok().json(retour_api))
+}
+
 
 // /bastion =======================================================================================
 
