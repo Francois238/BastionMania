@@ -1,18 +1,18 @@
-use serde::{Deserialize, Serialize};
-use kube::{Api, Client, CustomResource};
-use kube::api::{DeleteParams, PostParams};
-use schemars::JsonSchema;
-use serde_json::json;
 use crate::BastionConfig;
+use kube::api::{DeleteParams, PostParams};
+use kube::{Api, Client, CustomResource};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 #[derive(Debug, Clone, Serialize, Deserialize, CustomResource, JsonSchema, Default)]
 #[kube(
-group = "bastionmania.fr",
-version = "v1alpha1",
-kind = "Bastion",
-plural = "bastions",
-shortname = "bs",
-namespaced
+    group = "bastionmania.fr",
+    version = "v1alpha1",
+    kind = "Bastion",
+    plural = "bastions",
+    shortname = "bs",
+    namespaced
 )]
 pub struct BastionSpec {
     pub image: String,

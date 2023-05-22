@@ -1,6 +1,6 @@
-use std::env::VarError;
 use kube::Client;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::env::VarError;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct BastionConfig {
@@ -18,9 +18,6 @@ pub struct InstancieurConfig {
 impl InstancieurConfig {
     pub fn new(client: Client) -> Result<Self, VarError> {
         let image = std::env::var("BASTION_IMAGE")?;
-        Ok(Self {
-            image,
-            client
-        })
+        Ok(Self { image, client })
     }
 }
