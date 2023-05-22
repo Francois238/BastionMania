@@ -1,9 +1,10 @@
-use actix_session::config;
 use actix_web::{
     delete,
     get,
     patch, post, web, HttpResponse, HttpRequest,
 };
+use base64::{engine, Engine};
+use rand::{SeedableRng, RngCore};
 use std::env;
 
 use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof}};
@@ -28,17 +29,20 @@ pub async fn Config_my_agent(
     token: web::Json<AgentProof>,
     config_agent: web::Json<ConfigAgent>,
 ) -> Result<HttpResponse, ApiError> {
-    my_bastion=token_find(token.into_inner())?;
+    let my_bastion=Bastion::token_find(token.into_inner().token)?;
+    let client = reqwest::Client::new();
 
     let url = format!("http://bastion-internal-{}:9000/agent", my_bastion.bastion_id);
-    let _response = _client
+    let _response = client
         .post(&url)
         .json(&config_agent.into_inner())
         .send()
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
 
-    Ok(HttpResponse::Ok().json(retour_api))
+    let _suppr = Bastion::token_delete(my_bastion)?;
+
+    Ok(HttpResponse::Ok().finish())
 }
 
 
@@ -104,14 +108,19 @@ pub async fn create_bastion(
     let net_ids: Vec<i32> = liste_bastions.into_iter().map(|b| b.net_id).collect();
     let net_id = generate_bastion_freenetid(&net_ids);
 
-    let mytoken: Uuid = Uuid::new_v4();
-    let mytoken = mytoken.to_string();
+    let mut mytoken = [0u8, 16];
+
+    let mut alea = rand::rngs::StdRng::from_entropy();
+    alea.fill_bytes(&mut mytoken);
+
+    let engine = engine::general_purpose::STANDARD;
+
+    let mytoken = engine.encode(mytoken);
 
     let bastion_id: Uuid = Uuid::new_v4();
     let bastion_id = bastion_id.to_string();
 
     let bastion_instance_create = BastionInstanceCreate {
-        mytoken: mytoken.clone(),
         bastion_id: bastion_id.clone(),
         private_key: bastion_priv.to_base64(),
         cidr_protege: bastion.subnet_cidr.clone(),
@@ -162,8 +171,10 @@ pub async fn create_bastion(
         success: true,
         message: "Bastion créé".to_string(),
         data: ConfigAgent {
-            privkey: agent_priv.to_base64(),
+            //privkey: agent_priv.to_base64(),
             pubkey: bastion_pub.to_base64(),
+            endpoint: bastion.agent_endpoint.clone(),
+            target_cidr: bastion.subnet_cidr.clone(),
         },
     };
 
@@ -652,6 +663,22 @@ pub async fn generate_access_credentials(
     }
     Ok(HttpResponse::Ok().finish())
 }
+/*
+pub fn start_session(){
+    let my_bastion=Bastion::token_find(token.into_inner().token)?;
+    let client = reqwest::Client::new();    
+    let url = format!("http://bastion-internal-{}:9000/agent", my_bastion.bastion_id);
+    let _response = client
+        .post(&url)
+        .json(&config_agent.into_inner())
+        .send()
+        .await
+        .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+    
+    let _suppr = Bastion::token_delete(my_bastion)?;
+    
+     Ok(HttpResponse::Ok().finish())
+}*/
 
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(create_bastion);
