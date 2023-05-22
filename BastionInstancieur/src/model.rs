@@ -1,11 +1,26 @@
-use serde::{Deserialize, Serialize};
+use std::env::VarError;
+use kube::Client;
+use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct BastionConfig {
-    pub private_key: String,
-    pub cidr_protege: String,
-    pub agent_public_key: String,
-    pub agent_endpoint: String,
+    pub ssh_port: u16,
+    pub wireguard_port: u16,
+    pub bastion_id: String,
     pub net_id: u8,
-    pub bastion_port: u16,
+}
+
+pub struct InstancieurConfig {
+    pub image: String,
+    pub client: Client,
+}
+
+impl InstancieurConfig {
+    pub fn new(client: Client) -> Result<Self, VarError> {
+        let image = std::env::var("BASTION_IMAGE")?;
+        Ok(Self {
+            image,
+            client
+        })
+    }
 }

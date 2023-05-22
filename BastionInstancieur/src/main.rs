@@ -1,25 +1,21 @@
 use actix_web::{App, HttpServer};
-use bastion_mania_bastioninstancieur::api;
+use actix_web::web::Data;
+use kube::Client;
+use simple_logger::SimpleLogger;
+use bastion_mania_bastioninstancieur::{api, InstancieurConfig};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    tracing_subscriber::fmt::init();
+    SimpleLogger::new().with_level(log::LevelFilter::Info).env().init().unwrap();
 
+    let client = Client::try_default().await.unwrap();
 
-    // Wait for Pod to be running
-    // loop{
-    //     let bastion_pod_recup = pods.get(&format!("bastion-{}", bastion_id)).await.map_err(|e| e.to_string())?;
-    //     let phase = bastion_pod_recup.status.unwrap().phase.unwrap();
-    //     info!("Pod bastion-{} phase: {}", bastion_id, phase);
-    //     if phase != "Pending" {
-    //         break;
-    //     }
-    //     thread::sleep(std::time::Duration::from_secs(1));
-    // }
-
-
-    HttpServer::new(|| {
-        App::new().configure(api::config)
+    HttpServer::new(move || {
+        App::new()
+            .configure(api::config)
+            .app_data(Data::new(
+                InstancieurConfig::new(client.clone()).unwrap()
+            ))
     })
         .bind(("0.0.0.0", 9000))?
         .run()
