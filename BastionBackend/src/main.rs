@@ -1,5 +1,4 @@
-use actix_session::{storage::CookieSessionStore, SessionMiddleware};
-use actix_web::{cookie::Key, App, HttpServer};
+use actix_web::{App, HttpServer};
 use dotenvy::dotenv;
 use BastionManager::api;
 
@@ -10,11 +9,6 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            .wrap(
-                SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
-                    .cookie_secure(false)
-                    .build(),
-            )
             .configure(api::routes_bastion)
     })
     .bind(("0.0.0.0", 8080))?

@@ -50,6 +50,26 @@ diesel::table! {
 }
 
 diesel::table! {
+    user_config_ssh (id) {
+        id -> Int4,
+        uuid_user -> Text,
+        uuid_ressource -> Text,
+        pubkey -> Text,
+        username -> Text,
+    }
+}
+
+diesel::table! {
+    user_config_wireguard (id) {
+        id -> Int4,
+        uuid_user -> Text,
+        uuid_ressource -> Text,
+        pubkey -> Text,
+        user_net_id -> Int4,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Int4,
         user_id -> Text,
@@ -73,6 +93,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     k8sressource,
     ressource,
     sshressource,
+    user_config_ssh,
+    user_config_wireguard,
     users,
     wireguardressource,
 );

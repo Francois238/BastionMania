@@ -6,5 +6,7 @@ DROP TABLE "wireguardressource";
 DROP TABLE "sshressource";
 DROP TABLE "k8sressource";
 DROP TABLE "bastion_token";
+DROP TABLE "user_config_ssh";
+DROP TABLE "user_config_wireguard";
 
 

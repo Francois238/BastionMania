@@ -284,6 +284,17 @@ impl Ressource {
 
         Ok(users)
     }
+
+    pub fn verification_appartenance(user_id: String, ressource_id: String) -> Result<bool, ApiError> {
+        let mut conn = db::connection()?;
+
+        let users: Vec<Users> = users::table
+            .filter(users::user_id.eq(user_id))
+            .filter(users::ressource_id.eq(ressource_id))
+            .load::<Users>(&mut conn)?;
+
+        Ok(!users.is_empty())
+    }
 }
 
 impl WireguardRessource {

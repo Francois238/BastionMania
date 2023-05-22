@@ -55,7 +55,22 @@ CREATE TABLE "bastion_token"(
 );
 
 
+CREATE TABLE "user_config_ssh"(
+    id SERIAL PRIMARY KEY,
+    uuid_user TEXT NOT NULL,
+    uuid_ressource TEXT NOT NULL,
+    pubkey TEXT NOT NULL,
+    username TEXT NOT NULL
+);
 
+CREATE TABLE "user_config_wireguard"(
+    id SERIAL PRIMARY KEY,
+    uuid_user TEXT NOT NULL,
+    uuid_ressource TEXT NOT NULL,
+    pubkey TEXT NOT NULL,
+    user_net_id INT NOT NULL
+
+);
 
 
 

@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::RessourceCredentialsSsh}, entities::userconfigssh::UserConfigSshInsertable};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -175,6 +175,7 @@ pub async fn create_bastion(
             pubkey: bastion_pub.to_base64(),
             endpoint: bastion.agent_endpoint.clone(),
             target_cidr: bastion.subnet_cidr.clone(),
+            token: mytoken.clone(),
         },
     };
 
@@ -586,13 +587,22 @@ pub async fn delete_a_ressource(
 pub async fn generate_access_credentials(
     req: HttpRequest,
     donnees: web::Path<(String, String)>,
+    sshdata: web::Json<RessourceCredentialsSsh>,
 ) -> Result<HttpResponse, ApiError>{
+
+    let client = reqwest::Client::new();
 
     info!("request: generation_wireguard");
     let user_id: Uuid = VerifyUser(req).await?;
     let (bastion_id, ressource_id) = donnees.into_inner();
     let user_id = user_id.to_string();
     let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+
+    let authorisation: bool = Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())
         .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
     if !authorisation {
         return Err(ApiError::new(404, "Not Found".to_string()));
@@ -653,6 +663,22 @@ pub async fn generate_access_credentials(
     }
     else if rtype == "ssh" {
         //TODO
+        let sshcredentials = UserConfigSshInsertable {
+            uuid_user: user_id.clone(),
+            uuid_ressource: ressource_id.clone(),
+            pubkey: sshdata.pubkey.clone(),
+            username: sshdata.username.clone(),
+        };
+
+        let url = format!("??");
+        let _response = client
+            .post(&url)
+            .json(&sshcredentials)
+            .send()
+            .await
+            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+    
+        
         return Ok(HttpResponse::Ok().finish())
 
     }
@@ -678,8 +704,8 @@ pub fn start_session(){
     let _suppr = Bastion::token_delete(my_bastion)?;
     
      Ok(HttpResponse::Ok().finish())
-}*/
-
+}
+*/
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(create_bastion);
     cfg.service(get_bastion);
