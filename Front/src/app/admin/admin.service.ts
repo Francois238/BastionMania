@@ -25,20 +25,23 @@ export class AdminService {
   constructor(private http: HttpClient, protected router: Router, protected authenticationService: AuthenticationService) { }
 
 /****gestion du token ********/
-  public validate_token() {
+  public validate_token(): boolean{
       
       let token = this.authenticationService.get_token();
   
       if (token == '') {
-        this.router.navigate(['/login']);
+        return false;
       }
 
       let data= jwt_decode(token) as Jwt;
 
       if (data.admin == false || data.complete_authentication == false) {
-        this.router.navigate(['/login']);
+        //this.router.navigate(['/login']);
+        return false;
         
       }  
+
+      return true;
   
   }
 
