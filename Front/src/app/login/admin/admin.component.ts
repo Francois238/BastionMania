@@ -44,6 +44,8 @@ export class AdminComponent {
     }
 
     else{
+
+      console.log(this.mail + ' ' + this.password)
       this.credentials = { mail : this.mail, password : this.serviceAuthentication.get_hash_password(this.password)}
 
       this.serviceAuthentication.login_admin(this.credentials).subscribe({

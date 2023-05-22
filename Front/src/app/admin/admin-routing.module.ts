@@ -7,10 +7,17 @@ import { ProfilComponent } from './profil/profil.component';
 import { ListUserComponent } from './list-user/list-user.component';
 
 const routes: Routes = [
-  { path: 'menu', component: MenuComponent },
-  { path: 'admins', component: ListAdminComponent },
-  { path: 'profil', component: ProfilComponent },
-  { path: 'users', component: ListUserComponent }
+  {
+    path: '',
+    component: AdminComponent,
+    children: [
+      { path: '', redirectTo: 'menu', pathMatch: 'full' }, // Default route, redirect to 'menu'
+      { path: 'menu', component: MenuComponent },
+      { path: 'admins', component: ListAdminComponent },
+      { path: 'profil', component: ProfilComponent },
+      { path: 'users', component: ListUserComponent }
+    ]
+  }
 ];
 
 @NgModule({

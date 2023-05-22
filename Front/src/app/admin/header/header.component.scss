@@ -1,0 +1,35 @@
+html,body{
+    margin:0;
+    padding:0;
+    font-size:16px;
+    color:#333;
+  }
+  // main navbar css
+  .main-navbar{
+    background-color:#333;
+    .navbar{
+      background-color:#333 !important;
+      color:#fff;
+      padding:16px !important;
+    }
+    a.navbar-brand{
+      color:#fff;
+      font-size:26px;
+      font-weight:bold;
+      &:hover{
+        color:#fff;
+      }
+    }
+    .nav-item > a{
+      color:#fff !important;
+      transition:all .3s ease;
+    }
+    .nav-item > a:hover,.nav-item.active > a{
+      color:#339999 !important;
+      
+    }
+  }
+  button.navbar-toggler{
+    background-color:#fff;
+  }
+ 

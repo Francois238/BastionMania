@@ -14,11 +14,11 @@ export class AuthAdminGuard{
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     
-    let ok = this.adminService.validate_token();
+   /* let ok = this.adminService.validate_token();
 
     if (!ok) {
       this.router.navigate(['/login']);
-      }
+      }*/
     return true;
   }
   

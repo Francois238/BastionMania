@@ -1,22 +1,41 @@
-<div class="row mt-3 col-12">
-    <div class="col-4 mx-auto">
 
-      <h3 class="mb-5 text-center">Saisissez vos identifiants</h3>
-
-        <form (ngSubmit)="login()" [formGroup]="loginForm">
-            <div class="mb-3">
-            <label for="mail" class="form-label">Mail</label>
-            <input formControlName="mail" class="form-control" id="mail">
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 col-md-2"></div>
+        <div class="col-lg-6 col-md-8 login-box">
+            <div class="col-lg-12 login-key">
+                <i class="fa fa-key" aria-hidden="true"></i>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" formControlName="password" class="form-control" id="password">
+            <div class="col-lg-12 login-title">
+                SE CONNECTER
+            </div>
+
+            <div class="col-lg-12 login-form">
+                <div class="col-lg-12 login-form">
+                    <form (ngSubmit)="login()" [formGroup]="loginForm">  
+                        <div class="form-group">
+                            <label class="form-control-label">USERNAME</label>
+                            <input type="text" formControlName="mail" class="form-control" id="mail">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-control-label">PASSWORD</label>
+                            <input type="password" formControlName="password" class="form-control" id="password">
+                        </div>
+
+                        <div class="col-lg-12 loginbttm">
+                            <div class="col-lg-6 login-btm login-text">
+                                <!-- Error Message -->
+                            </div>
+                            <div class="col-lg-6 login-btm login-button">
+                                <button type="submit" class="btn btn-outline-primary">LOGIN</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            <button type="submit" class="btn btn-primary">S'authentifier</button>
-        </form>
-
-        <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
-
+            </div>
+            <div class="col-lg-3 col-md-2"></div>
+        </div>
     </div>
+
 
     <button (click)="loginExtern()">Se connecter avec Keycloak</button>
