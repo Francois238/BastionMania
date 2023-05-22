@@ -57,7 +57,7 @@ impl BastionSpec {
 
         let bastions: Api<Bastion> = Api::namespaced(client.clone(), "bastion");
 
-        let bastion = self.spec().map_err(|e| kube::Error::SerdeError(e))?;
+        let bastion = self.spec().map_err(kube::Error::SerdeError)?;
 
         let pp = PostParams::default();
         bastions.create(&pp, &bastion).await?;
