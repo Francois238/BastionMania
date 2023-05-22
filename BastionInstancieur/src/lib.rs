@@ -1,6 +1,7 @@
-mod model;
-mod k8s;
 pub mod api;
+mod bastions;
+mod model;
+
+pub use bastions::Bastion;
 
 pub use model::*;
-pub use k8s::*;
