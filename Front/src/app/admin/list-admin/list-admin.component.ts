@@ -28,7 +28,6 @@ export class ListAdminComponent implements OnInit {
   public listAdmins : Array<AdminInfo> = new Array<AdminInfo>();
 
   constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService) { 
-    this.adminService.validate_token();
 
     this.nameCrtl = new FormControl('')
     this.last_nameCrtl = new FormControl('')

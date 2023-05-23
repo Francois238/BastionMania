@@ -10,7 +10,6 @@ export class MenuComponent {
 
   constructor(private adminService: AdminService) {
 
-    //this.adminService.validate_token();
 
   }
 }
