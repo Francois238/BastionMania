@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::UserConfigSshInsertable, userconfigwireguard::UserConfigWireguardInsertable}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentPairInfo, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::UserConfigSshInsertable, userconfigwireguard::UserConfigWireguardInsertable}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -23,26 +23,37 @@ use crate::model::ressourcemodification::RessourceCreation;
 use crate::model::sshressourcemodification::SshRessourceCreation;
 use crate::model::wireguardressourcemodification::WireguardRessourceCreation;
 use uuid::Uuid;
+use crate::model::agentproof::AgentAskPairInfo;
 
 #[post("/agent")]
 pub async fn Config_my_agent(
-    token: web::Json<AgentProof>,
-    config_agent: web::Json<ConfigAgent>,
+    agent_ask_info: web::Json<AgentAskPairInfo>,
 ) -> Result<HttpResponse, ApiError> {
-    let my_bastion=Bastion::token_find(token.into_inner().token)?;
-    let client = reqwest::Client::new();
+    let agent_ask_info = agent_ask_info.into_inner();
+    let my_bastion=Bastion::token_find(agent_ask_info.token)?;
+    let bastion = Bastion::find_un_bastion(my_bastion.bastion_id.to_string())?;
 
-    let url = format!("http://bastion-internal-{}:9000/agent", my_bastion.bastion_id);
-    let _response = client
+    let agent_pair = AgentPairInfo{
+        agent_host: agent_ask_info.agent_host,
+        public_key: agent_ask_info.public_key,
+        target_cidr: bastion.subnet_cidr,
+    };
+
+    let client = reqwest::Client::new();
+    let url = format!("http://bastion-internal-{}:9000/agent", my_bastion.bastion_id.to_string());
+    let res = client
         .post(&url)
-        .json(&config_agent.into_inner())
+        .json(&agent_pair)
         .send()
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
 
     let _suppr = Bastion::token_delete(my_bastion)?;
-
-    Ok(HttpResponse::Ok().finish())
+    let bastion_public_key = res.text().await.map_err(|e| {
+        log::error!("Error: {}", e);
+        ApiError::new(500, "Error: Can't get bastion public key".to_string())
+    })?;
+    Ok(HttpResponse::Ok().body(bastion_public_key))
 }
 
 
@@ -93,7 +104,7 @@ pub async fn create_bastion(
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     let id_user:Uuid = VerifyUser(req).await?;
-       
+
     //generation pair de clé pour agent et bastion
     let agent_priv = wireguard_keys::Privkey::generate();
     let agent_pub = agent_priv.pubkey();

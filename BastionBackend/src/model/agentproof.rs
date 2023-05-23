@@ -1,11 +1,16 @@
-use crate::schema::bastion_token;
 use serde::{Deserialize, Serialize};
-use diesel::Insertable;
 
 
-#[derive(Serialize, Deserialize, Insertable)]
-#[table_name = "bastion_token"]
-pub struct AgentProof {
+#[derive(Serialize, Deserialize)]
+pub struct AgentAskPairInfo {
     pub token: String,
+    pub public_key: String,
+    pub agent_host: String,
+}
 
+#[derive(Serialize, Deserialize)]
+pub struct AgentPairInfo{
+    pub agent_host: String,
+    pub public_key: String,
+    pub target_cidr: String,
 }
