@@ -9,7 +9,7 @@ use crate::entities::{Bastion, BastionInsertable, BastionTokenInsertable, K8sRes
 use crate::model::{BastionModification};
 
 
-use actix_web::Result;
+use actix_web::{Result, HttpResponse};
 
 use diesel::prelude::*;
 use diesel::query_dsl::RunQueryDsl;
@@ -592,7 +592,7 @@ impl UserConfigSsh {
 
 }}
 
-pub async fn user_suppression(user_id: String, ressource_id: String) -> Result<(), ApiError> {
+pub async fn user_suppression(user_id: String, ressource_id: String) -> Result<HttpResponse, ApiError> {
     let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
     if ressource.rtype == "wireguard" && ressource.id_wireguard.is_some(){
 
@@ -608,9 +608,34 @@ pub async fn user_suppression(user_id: String, ressource_id: String) -> Result<(
 
     // supprimer le user de la ressource
     let user_suppr = Users::delete_un_user(ressource_id.clone(), user_id.clone())?;
-    Ok(())
+    Ok(HttpResponse::Ok().json(user_suppr))
 }
 
+pub async fn ressource_suppression(bastion_id: String,ressource_id: String) -> Result<HttpResponse, ApiError>{
+
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+    let users: Vec<Users> = Users::find_users_ressources(ressource.id.clone())?;
+
+    for user in users{
+        let _ = user_suppression(user.user_id, ressource_id.clone()).await?;
+    }
+    //TODO envoyer à bastion
+
+    // supprimer la ressource de la base de donnée
+    let rtype = ressource.rtype;
+
+    if rtype == "wireguard" && ressource.id_wireguard.is_some(){
+        let wid = ressource.id_wireguard.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
+        let _ = WireguardRessource::delete_a_wireguard_ressource(wid, bastion_id.clone())?;
+    }
+    else if rtype == "ssh" && ressource.id_ssh.is_some(){
+        let sid = ressource.id_ssh.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
+        let _ = SshRessource::delete_a_ssh_ressource(sid, bastion_id.clone())?;
+    }
+    let ressource = Ressource::delete_a_ressource(ressource_id,bastion_id)?;
+    Ok(HttpResponse::Ok().json(ressource))
+
+}
 
 
 
