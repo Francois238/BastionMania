@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::{UserConfigSshInsertable, UserConfigSsh}, userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard, self}, ressource}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate, RessourceCredentialsWireguard}}, entities::{userconfigssh::{UserConfigSshInsertable, UserConfigSsh}, userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard, self}, ressource}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -582,61 +582,12 @@ pub async fn delete_a_ressource(
     let ressource_id = ressource_id.into_inner();
     let bastion_id = bastion_id.into_inner();
 
-    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
-    let users: Vec<Users> = Users::find_users_ressources(ressource.id.clone())?;
-
-    // stop session de tout utilisateur sur la ressource
-    for user in users{
-        let client = reqwest::Client::new();
-        if ressource.rtype == "wireguard"{
-            UserConfigWireguard::stop_wireguard_session(user.user_id, ressource_id.clone()).await?;
-        } 
-
-        else if ressource.rtype == "ssh"{
-            UserConfigSsh::stop_ssh_session(user.user_id, ressource_id.clone()).await?;
-        }
-        else{
-            return Err(ApiError::new(404, "Not Found".to_string()));
-        }
-    };
-
-    // supprimer les config user sur la ressource
-
-    if ressource.rtype == "wireguard"{
-        let _ = UserConfigWireguard::userconfigwireguarddeleteall(ressource_id.clone());
-    }
-    else if ressource.rtype == "ssh"{
-        let _ = UserConfigSsh::userconfigsshdeleteall(ressource_id.clone());
-    }
-    else{
-        return Err(ApiError::new(404, "Not Found".to_string()));
-    }
-
-    // supprimer les users de la ressource
-    let _ = Users::delete_all_users(ressource_id.clone())?;
-    //TODO envoyer à bastion
-
-    // supprimer la ressource de la base de donnée
-    let rtype = ressource.rtype;
-
-    if rtype == "wireguard"{
-        let wid = ressource.id_wireguard.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
-        let _ = WireguardRessource::delete_a_wireguard_ressource(wid, bastion_id.clone())?;
-    }
-    else if rtype == "ssh"{
-        let sid = ressource.id_ssh.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
-        let _ = SshRessource::delete_a_ssh_ressource(sid, bastion_id.clone())?;
-    }
-    else{
-        let kid = ressource.id_k8s.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
-        let _ = K8sRessource::delete_a_k8s_ressource(kid, bastion_id.clone())?;
-    }
-    let ressource = Ressource::delete_a_ressource(ressource_id,bastion_id)?;
-    Ok(HttpResponse::Ok().json(ressource))
+    let ressource_suppr = ressource_suppression(bastion_id, ressource_id).await?;
+    Ok(HttpResponse::Ok().json("supprimé"))
 }
 
-#[post("/bastions/{bastion_id}/ressources/{ressource_id}")]
-pub async fn generate_access_credentials(
+#[post("/bastions/{bastion_id}/ressources/{ressource_id}/getressourcecredentials/ssh")]
+pub async fn generate_ssh_access_credentials(
     req: HttpRequest,
     donnees: web::Path<(String, String)>,
     sshdata: web::Json<RessourceCredentialsSsh>,
@@ -661,93 +612,92 @@ pub async fn generate_access_credentials(
     }
 
     let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
-    let rtype = ressource.rtype;
-
-
-    if rtype == "wireguard"{
-
-        let liste_users = Users::find_users_ressources(ressource_id.clone())?;
-
-        let net_ids: Vec<i32> = liste_users.into_iter().map(|b| b.net_id).collect();
-        let net_id = generate_user_freenetid(&net_ids);
-        
-        //instancier le client dans Bastion
-        
-        let _client = reqwest::Client::new();
-
-        let wireguardconfig = UserConfigWireguardInsertable{
-            uuid_user: user_id.clone(),
-            uuid_ressource: ressource_id.clone(),
-            pubkey: sshdata.pubkey.clone(),
-            user_net_id: net_id.clone(),
-        };
-
-        let configrequest = ConfigWireguardInstanceCreate{
-            uuid_user: user_id.clone(),
-            uuid_ressource: ressource_id.clone(),
-            pubkey: sshdata.pubkey.clone(),
-            user_net_id: net_id.clone(),
-        };
-
-        let _test=UserConfigWireguard::userconfigwireguardcreate(wireguardconfig);
-        
-
-        let url = format!("http://intern-bastion-{}:9000/adduser", bastion_id);
-        let _response = _client
-            .post(&url)
-            .json(&configrequest)
-            .send()
-            .await
-            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
-
-       
-
-        let retour_api = RetourAPI {
-            success: true,
-            message: "accés client créé".to_string(),
-            data: "ok".to_string(),
-        };
-
-        return Ok(HttpResponse::Ok().json(retour_api))
-    }
-    else if rtype == "ssh" {
         //TODO
-        let sshcredentials = UserConfigSshInsertable {
-            uuid_user: user_id.clone(),
-            uuid_ressource: ressource_id.clone(),
-            pubkey: sshdata.pubkey.clone(),
-            username: sshdata.username.clone(),
-        };
+    let sshcredentials = UserConfigSshInsertable {
+        uuid_user: user_id.clone(),
+        uuid_ressource: ressource_id.clone(),
+        pubkey: sshdata.pubkey.clone(),
+        username: sshdata.username.clone(),
+    };
 
-        let configrequest = ConfigSshInstanceCreate{
-            uuid_user: user_id.clone(),
-            uuid_ressource: ressource_id.clone(),
-            pubkey: sshdata.pubkey.clone(),
-            username: sshdata.username.clone(),
-        };
+    let configrequest = ConfigSshInstanceCreate{
+        uuid_user: user_id.clone(),
+        uuid_ressource: ressource_id.clone(),
+        pubkey: sshdata.pubkey.clone(),
+        username: sshdata.username.clone(),
+    };
 
-        let _test=UserConfigSsh::userconfigsshcreate(sshcredentials);
+    let _test=UserConfigSsh::userconfigsshcreate(sshcredentials);
 
-        let url = format!("??");
-        let _response = client
-            .post(&url)
-            .json(&configrequest)
-            .send()
-            .await
-            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+    let url = format!("??");
+    let _response = client
+        .post(&url)
+        .json(&configrequest)
+        .send()
+        .await
+        .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
     
         
-        return Ok(HttpResponse::Ok().finish())
-
-    }
-    else {
-        //TODO
-        return Ok(HttpResponse::Ok().finish())
-
-    }
     Ok(HttpResponse::Ok().finish())
+
 }
 
+#[post("/bastions/{bastion_id}/ressources/{ressource_id}/getressourcecredentials/wireguard")]
+
+pub async fn generate_wireguard_access_credentials(
+    req: HttpRequest,
+    donnees: web::Path<(String, String)>,
+    wireguarddata: web::Json<RessourceCredentialsWireguard>,
+) -> Result<HttpResponse, ApiError>{
+
+    let client = reqwest::Client::new();
+
+    //TODO url
+    let user_id: Uuid = VerifyUser(req).await?;
+    let (bastion_id, ressource_id) = donnees.into_inner();
+    let user_id = user_id.to_string();
+    let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+
+    let authorisation: bool = Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+    
+    let wireguardcredentials = UserConfigWireguardInsertable {
+        uuid_user: user_id.clone(),
+        uuid_ressource: ressource_id.clone(),
+        pubkey: wireguarddata.pubkey.clone(),
+        user_net_id: wireguarddata.user_net_id.clone(),
+    };
+
+    let configrequest = ConfigWireguardInstanceCreate{
+        uuid_user: user_id.clone(),
+        uuid_ressource: ressource_id.clone(),
+        pubkey: wireguarddata.pubkey.clone(),
+        user_net_id: wireguarddata.user_net_id.clone(),
+    };  
+
+    let _test=UserConfigWireguard::userconfigwireguardcreate(wireguardcredentials);
+
+    let url = format!("??");
+    let _response = client
+        .post(&url)
+        .json(&configrequest)
+        .send()
+        .await
+        .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+
+    Ok(HttpResponse::Ok().finish())
+
+}
 #[post("/bastions/{bastion_id}/ressources/{ressource_id}")]
 pub async fn start_session(
     req: HttpRequest,
@@ -931,7 +881,8 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(get_a_ressource);
     cfg.service(delete_a_ressource);
 
-    cfg.service(generate_access_credentials);
+    cfg.service(generate_ssh_access_credentials);
+    cfg.service(generate_wireguard_access_credentials);
     cfg.service(start_session);
     cfg.service(stop_session);
 
