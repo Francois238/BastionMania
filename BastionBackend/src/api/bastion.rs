@@ -272,9 +272,8 @@ pub async fn delete_a_bastion(
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
 
-    let _users = Users::delete_all_users(bastion_id.clone())?;
+    let bastion_supr = suppression_bastion(bastion_id).await?;
 
-    let bastion_suppr = Bastion::delete_un_bastion(bastion_id)?;
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 
@@ -469,104 +468,19 @@ pub async fn get_ressources(
     let ressources = Ressource::find_all_ressources(bastion_id)?;
     Ok(HttpResponse::Ok().json(ressources))
 }
-#[post("/bastions/{bastion_id}/ressources")]
-pub async fn create_ressources(
+
+#[delete("/bastions/{bastion_id}/ressources")]
+pub async fn delete_ressources(
     bastion_id: web::Path<String>,
-    nom: web::Json<RessourceCreation>,
-    rtype: web::Json<RessourceCreation>,
-    pers_subnet_cidr: web::Json<WireguardRessourceCreation>,
-    ip_machine: web::Json<SshRessourceCreation>,
-    ip_cluster: web::Json<K8sRessourceCreation>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     let admin_id: Uuid = VerifyAdmin(req).await?;
     let bastion_id = bastion_id.into_inner();
-    let liste_ressources = Ressource::find_all_ressources(bastion_id.clone())?;
-
-    let uuid= Uuid::new_v4();
-    let uuid = uuid.to_string();
-
-    let name = nom.into_inner().name;
-    let rtype = rtype.into_inner().rtype;
-
-    if rtype=="wireguard"{
-        //let wids: Vec<i32> = (&liste_ressources).into_iter().filter(|b| b.rtype=="wireguard").map(|b| b.id_wireguard).collect();
-        //let wid = generate_ressource_wireguard_freenetid(&wids);
-        let sid = None;
-        let kid = None;
-
-        let wiregard_insertion = WireguardRessourceInsertable{
-            id_bastion: bastion_id.clone(),
-            name: name.clone(),
-            subnet_cidr: pers_subnet_cidr.into_inner().subnet_cidr,
-
-        };
-        let specressource = WireguardRessource::create_wireguard_ressources(wiregard_insertion)?;
-
-        let ressource_insertion = RessourceInsertable {
-            id: uuid,
-            name,
-            rtype,
-            id_bastion: bastion_id,
-            id_wireguard: Some(specressource.id),
-            id_ssh: sid,
-            id_k8s: kid,
-        };
-        let ressources = Ressource::create_ressources(ressource_insertion)?;
-        Ok(HttpResponse::Ok().json(ressources))
+    let ressources = Ressource::find_all_ressources(bastion_id.clone())?;
+    for ressource in ressources {
+        let ressource_suppr = ressource_suppression(bastion_id.clone(), ressource.id).await?;
     }
-    else if rtype=="ssh" {
-        //let sids: Vec<i32> = (&liste_ressources).into_iter().filter(|b| b.rtype=="ssh").map(|b| b.id_ssh).collect();
-        //let sid = generate_ressource_ssh_freenetid(&sids);
-        let wid = None;
-        let kid = None;
-
-        let ssh_insertion = SshRessourceInsertable{
-            id_bastion: bastion_id.clone(),
-            name: name.clone(),
-            ip_machine: ip_machine.into_inner().ip_machine
-        };
-        let specressource = SshRessource::create_ssh_ressources(ssh_insertion)?;
-
-        let ressource_insertion = RessourceInsertable {
-            id: uuid,
-            name,
-            rtype,
-            id_bastion: bastion_id,
-            id_wireguard: wid,
-            id_ssh: Some(specressource.id),
-            id_k8s: kid,
-        };
-        let ressources = Ressource::create_ressources(ressource_insertion)?;
-        Ok(HttpResponse::Ok().json(ressources))
-    }
-    else{
-        //let kids: Vec<i32> = (&liste_ressources).into_iter().filter(|b| b.rtype=="kubernetes").map(|b| b.id_k8s).collect();
-        //let kid = generate_ressource_k8s_freenetid(&kids);
-        let wid = None;
-        let sid = None;
-
-        let k8s_insertion = K8sRessourceInsertable{
-            id_bastion: bastion_id.clone(),
-            name: name.clone(),
-            ip_cluster: ip_cluster.into_inner().ip_cluster,
-        };
-        let specressource = K8sRessource::create_k8s_ressources(k8s_insertion)?;
-
-
-        let ressource_insertion = RessourceInsertable {
-            id: uuid,
-            name,
-            rtype,
-            id_bastion: bastion_id,
-            id_wireguard: wid,
-            id_ssh: sid,
-            id_k8s: Some(specressource.id),
-        };
-        let ressources = Ressource::create_ressources(ressource_insertion)?;
-        Ok(HttpResponse::Ok().json(ressources))
-    }
-
+    Ok(HttpResponse::Ok().json("supprimé"))
 }
 
 #[post("/bastions/{bastion_id}/ressources/create/ssh")]
@@ -590,7 +504,7 @@ pub async fn create_ssh_ressource(
     for ressource in ressources{
         if ressource.id_ssh.is_some(){
             if ressource.id_ssh>Some(sid){
-                Some(sid)=ressource.id_ssh;
+                sid=ressource.id_ssh.unwrap();
             }
         }
     }
@@ -639,7 +553,7 @@ pub async fn create_wireguard_ressource(
     for ressource in ressources{
         if ressource.id_wireguard.is_some(){
             if ressource.id_wireguard>Some(wid){
-                Some(wid)=ressource.id_wireguard;
+                wid=ressource.id_wireguard.unwrap();
             }
         }
     }
@@ -692,7 +606,7 @@ pub async fn delete_a_ressource(
     let admin_id: Uuid = VerifyAdmin(req).await?;
     let ressource_id = ressource_id.into_inner();
     let bastion_id = bastion_id.into_inner();
-
+    //TODO: envoyer la requete de suppression de ressource a l'intancieur
     let ressource_suppr = ressource_suppression(bastion_id, ressource_id).await?;
     Ok(HttpResponse::Ok().json("supprimé"))
 }
@@ -987,7 +901,8 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
    // cfg.service(get_user_wireguard_status);
 
     cfg.service(get_ressources);
-    cfg.service(create_ressources);
+    cfg.service(delete_ressources);
+
 
     cfg.service(get_a_ressource);
     cfg.service(delete_a_ressource);

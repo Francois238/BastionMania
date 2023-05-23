@@ -637,6 +637,17 @@ pub async fn ressource_suppression(bastion_id: String,ressource_id: String) -> R
 
 }
 
+pub async fn suppression_bastion(bastion_id: String) -> Result<HttpResponse, ApiError>{
 
+    let ressources: Vec<Ressource> = Ressource::find_all_ressources(bastion_id.clone())?;
+
+    for ressource in ressources{
+        let _ = ressource_suppression(bastion_id.clone(), ressource.id.clone()).await?;
+    }
+
+    let bastion = Bastion::delete_un_bastion(bastion_id.clone())?;
+    Ok(HttpResponse::Ok().json(bastion))
+
+}
 
 
