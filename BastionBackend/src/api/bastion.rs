@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::RessourceCredentialsSsh}, entities::userconfigssh::UserConfigSshInsertable};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::RessourceCredentialsSsh}, entities::{userconfigssh::UserConfigSshInsertable, userconfigwireguard::UserConfigWireguardInsertable}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -613,50 +613,38 @@ pub async fn generate_access_credentials(
 
 
     if rtype == "wireguard"{
-        let specid = ressource.id_wireguard.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
-        let sepcressource = WireguardRessource::find_a_wireguard_ressource(specid,bastion_id.clone())?;
-        let client_priv = wireguard_keys::Privkey::generate();
-        let client_pub = client_priv.pubkey();
 
-        let bastion_ip = env::var("BASTION_IP").expect("BASTION_IP must be set");
+        let liste_users = Users::find_users_bastion(bastion_id.clone())?;
 
-        let client_address = build_client_address(ressource_id.clone(), bastion_id.clone(), user_id.clone())?;
-        let bastion_endpoint = build_endpoint_user(bastion_ip.to_string(), bastion_id.clone())?;
-
-        let client_public_key = client_pub.to_base64();
-        let client_private_key = client_priv.to_base64();
-
-        let instance_client = InstanceClient {
-            public_key: client_public_key,
-            allowed_ips: client_address.clone(),
-        };
-
+        let net_ids: Vec<i32> = liste_users.into_iter().map(|b| b.net_id).collect();
+        let net_id = generate_user_freenetid(&net_ids);
+        
         //instancier le client dans Bastion
-        info!("ajout du peer dans le bastion : {:?}", instance_client);
+        
         let _client = reqwest::Client::new();
+
+        let wireguardconfig = UserConfigWireguardInsertable{
+            uuid_user: user_id.clone(),
+            uuid_ressource: ressource_id.clone(),
+            pubkey: sshdata.pubkey.clone(),
+            user_net_id: net_id.clone(),
+        };
+        
+
         let url = format!("http://intern-bastion-{}:9000/adduser", bastion_id);
         let _response = _client
             .post(&url)
-            .json(&instance_client)
+            .json(&wireguardconfig)
             .send()
             .await
             .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
 
-        info!("Peer ajouté au bastion");
-
-        let bastion_public_key = get_bastion_public_key(bastion_id)?;
-        let subnet_cidr = sepcressource.target_cidr;
+       
 
         let retour_api = RetourAPI {
             success: true,
             message: "accés client créé".to_string(),
-            data: ConfigClient {
-                client_private_key,
-                client_address,
-                bastion_public_key,
-                bastion_endpoint,
-                subnet_cidr,
-            },
+            data: wireguardconfig,
         };
 
         return Ok(HttpResponse::Ok().json(retour_api))
@@ -689,6 +677,7 @@ pub async fn generate_access_credentials(
     }
     Ok(HttpResponse::Ok().finish())
 }
+
 /*
 pub fn start_session(){
     let my_bastion=Bastion::token_find(token.into_inner().token)?;
