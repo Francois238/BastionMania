@@ -429,3 +429,21 @@ pub fn userconfigwireguardcreate(userconf: UserConfigWireguardInsertable) -> Res
         .get_result(&mut conn)?;
     Ok(())
 }
+
+pub fn userconfigsshfind(user_id: String, ressource_id: String) -> Result<UserConfigSsh, ApiError> {
+    let mut conn = db::connection()?;
+    let userconf = user_config_ssh::table
+        .filter(user_config_ssh::uuid_user.eq(user_id))
+        .filter(user_config_ssh::uuid_ressource.eq(ressource_id))
+        .first::<UserConfigSsh>(&mut conn)?;
+    Ok(userconf)
+}
+
+pub fn userconfigwireguardfind(user_id: String, ressource_id: String) -> Result<UserConfigWireguard, ApiError> {
+    let mut conn = db::connection()?;
+    let userconf = user_config_wireguard::table
+        .filter(user_config_wireguard::uuid_user.eq(user_id))
+        .filter(user_config_wireguard::uuid_ressource.eq(ressource_id))
+        .first::<UserConfigWireguard>(&mut conn)?;
+    Ok(userconf)
+}

@@ -15,10 +15,10 @@ pub struct ConfigSshInstanceCreate {
     pub username: String,
 }
 
+
 #[derive(Serialize, Deserialize)]
-pub struct ConfigWireguardInstanceCreate {
-    pub uuid_user: String,
-    pub uuid_ressource: String,
+pub struct ActivationSshSession{
     pub pubkey: String,
-    pub user_net_id: i32,
+    pub username: String,
 }
+

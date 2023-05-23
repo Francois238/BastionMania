@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::UserConfigSshInsertable, userconfigwireguard::UserConfigWireguardInsertable}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::UserConfigSshInsertable, userconfigwireguard::UserConfigWireguardInsertable}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -696,23 +696,141 @@ pub async fn generate_access_credentials(
     Ok(HttpResponse::Ok().finish())
 }
 
-/*
-pub fn start_session(){
-    let my_bastion=Bastion::token_find(token.into_inner().token)?;
-    let client = reqwest::Client::new();    
-    let url = format!("http://bastion-internal-{}:9000/agent", my_bastion.bastion_id);
-    let _response = client
-        .post(&url)
-        .json(&config_agent.into_inner())
-        .send()
-        .await
-        .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+pub async fn start_session(
+    req: HttpRequest,
+    donnees: web::Path<(String, String)>
+) -> Result<HttpResponse, ApiError>{
+    let client = reqwest::Client::new();
+
+    info!("request: generation_wireguard");
+    let user_id: Uuid = VerifyUser(req).await?;
+    let (bastion_id, ressource_id) = donnees.into_inner();
+    let user_id = user_id.to_string();
+    let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+
+    let authorisation: bool = Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+    if ressource.rtype == "wireguard"{
+            let userconfig = userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
+
+            let session = ActivationWireguardSession{
+                pubkey: userconfig.pubkey.clone(),
+                user_net_id: userconfig.user_net_id.clone(),
+            };
+
+            let url = format!("??");
+
+            let _response = client
+                .post(&url)
+                .json(&session)
+                .send()
+                .await
+                .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+            return Ok(HttpResponse::Ok().finish())
+
+    }
+    else if ressource.rtype == "ssh"{
+        let userconfig = userconfigsshfind(user_id.clone(), ressource_id.clone())?;
+
+        let session = ActivationSshSession{
+            pubkey: userconfig.pubkey.clone(),
+            username: userconfig.username.clone(),
+        };
+
+        let url = format!("??");
+
+        let _response = client
+            .post(&url)
+            .json(&session)
+            .send()
+            .await
+            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+        return Ok(HttpResponse::Ok().finish())
+    }
+
     
-    let _suppr = Bastion::token_delete(my_bastion)?;
     
      Ok(HttpResponse::Ok().finish())
 }
-*/
+
+pub async fn stop_session(req: HttpRequest,
+    donnees: web::Path<(String, String)>
+) -> Result<HttpResponse, ApiError>{
+    let client = reqwest::Client::new();
+
+    info!("request: generation_wireguard");
+    let user_id: Uuid = VerifyUser(req).await?;
+    let (bastion_id, ressource_id) = donnees.into_inner();
+    let user_id = user_id.to_string();
+    let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+
+    let authorisation: bool = Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())
+        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
+    if !authorisation {
+        return Err(ApiError::new(404, "Not Found".to_string()));
+    }
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+    if ressource.rtype == "wireguard"{
+            let userconfig = userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
+
+            let session = ActivationWireguardSession{
+                pubkey: userconfig.pubkey.clone(),
+                user_net_id: userconfig.user_net_id.clone(),
+            };
+
+            let url = format!("??");
+
+            let _response = client
+                .post(&url)
+                .json(&session)
+                .send()
+                .await
+                .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+            return Ok(HttpResponse::Ok().finish())
+
+    }
+    else if ressource.rtype == "ssh"{
+        let userconfig = userconfigsshfind(user_id.clone(), ressource_id.clone())?;
+
+        let session = ActivationSshSession{
+            pubkey: userconfig.pubkey.clone(),
+            username: userconfig.username.clone(),
+        };
+
+        let url = format!("??");
+
+        let _response = client
+            .post(&url)
+            .json(&session)
+            .send()
+            .await
+            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+        return Ok(HttpResponse::Ok().finish())
+    }
+
+    
+    
+     Ok(HttpResponse::Ok().finish())
+}
+
+
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(create_bastion);
     cfg.service(get_bastion);
