@@ -592,6 +592,24 @@ impl UserConfigSsh {
 
 }}
 
+pub async fn user_suppression(user_id: String, ressource_id: String) -> Result<(), ApiError> {
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+    if ressource.rtype == "wireguard" && ressource.id_wireguard.is_some(){
+
+        let _ = UserConfigWireguard::stop_wireguard_session(user_id.clone(), ressource_id.clone()).await?;
+        let _ = UserConfigWireguard::userconfigwireguarddelete(user_id.clone(), ressource_id.clone())?;
+    }
+    else if ressource.rtype == "ssh" && ressource.id_ssh.is_some(){
+
+        let _ = UserConfigSsh::stop_ssh_session(user_id.clone(), ressource_id.clone()).await?;
+        let _ = UserConfigSsh::userconfigsshdelete(user_id.clone(), ressource_id.clone())?;
+    }
+    
+
+    // supprimer le user de la ressource
+    let user_suppr = Users::delete_un_user(ressource_id.clone(), user_id.clone())?;
+    Ok(())
+}
 
 
 

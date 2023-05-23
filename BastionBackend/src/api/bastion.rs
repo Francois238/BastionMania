@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::{UserConfigSshInsertable, UserConfigSsh}, userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard, self}}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::{UserConfigSshInsertable, UserConfigSsh}, userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard, self}, ressource}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -589,42 +589,11 @@ pub async fn delete_a_ressource(
     for user in users{
         let client = reqwest::Client::new();
         if ressource.rtype == "wireguard"{
-            let configs = UserConfigWireguard::userconfigwireguardfind(user.user_id, ressource_id.clone());
-
-            for config in configs{
-                let configrequest = ActivationWireguardSession{
-                    pubkey: config.pubkey.clone(),
-                    user_net_id: config.user_net_id.clone(),
-                };
-
-                let url = format!("http://api/bastions/{bastion_id}/ressources/{ressource_id}");
-                let _response = client
-                    .post(&url)
-                    .json(&configrequest)
-                    .send()
-                    .await
-                    .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
-            }
-
+            UserConfigWireguard::stop_wireguard_session(user.user_id, ressource_id.clone()).await?;
         } 
 
         else if ressource.rtype == "ssh"{
-            let configs = UserConfigSsh::userconfigsshfind(user.user_id, ressource_id.clone());
-
-            for config in configs{
-                let configrequest = ActivationSshSession{
-                    pubkey: config.pubkey.clone(),
-                    username: config.username.clone(),
-                };
-
-                let url = format!("http://api/bastions/{bastion_id}/ressources/{ressource_id}");
-                let _response = client
-                    .post(&url)
-                    .json(&configrequest)
-                    .send()
-                    .await
-                    .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
-            }
+            UserConfigSsh::stop_ssh_session(user.user_id, ressource_id.clone()).await?;
         }
         else{
             return Err(ApiError::new(404, "Not Found".to_string()));
@@ -909,7 +878,10 @@ pub async fn delete_users(
 ) -> Result<HttpResponse, ApiError>{
     let admin_id: Uuid = VerifyAdmin(req).await?;
     let (bastion_id, ressource_id) = donnees.into_inner();
-    let users_suppr = Users::delete_all_users(ressource_id.clone())?;
+    let users = Users::find_users_ressources(ressource_id.clone())?;
+    for user in users{
+        user_suppression(user.user_id, ressource_id.clone()).await?;
+    }
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 // /bastion/{bastion_id}/ressources/{ressource_id}/users/{user_id}        ===================================================================
@@ -926,13 +898,12 @@ pub async fn get_a_user(
 
 #[delete("/bastions/{bastion_id}/ressources/{ressource_id}/users/{user_id}")]
 pub async fn delete_user(
-    donnees: web::Path<(String, String)>,
+    donnees: web::Path<(String, String, String)>,
     req: HttpRequest,
-    user: web::Json<UsersCreation>,
 ) -> Result<HttpResponse, ApiError>{
     let admin_id: Uuid = VerifyAdmin(req).await?;
-    let (bastion_id, ressource_id) = donnees.into_inner();
-    let user_suppr = Users::delete_un_user(ressource_id.clone(), user.id.clone())?;
+    let (bastion_id, ressource_id, user_id) = donnees.into_inner();
+    user_suppression(user_id, ressource_id).await?;
     Ok(HttpResponse::Ok().json("supprimé"))
 }
 
