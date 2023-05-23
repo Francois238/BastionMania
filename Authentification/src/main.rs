@@ -1,6 +1,6 @@
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
-    cookie::{Key, SameSite},
+    cookie::{Key},
     App, HttpServer,
 };
 use dotenvy::dotenv;
@@ -24,7 +24,6 @@ async fn main() -> std::io::Result<()> {
                 // create cookie based session middleware
                 SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
                     .cookie_secure(true)
-                    .cookie_same_site(SameSite::None)
                     .build(),
             )
             .configure(admin::routes_admin)

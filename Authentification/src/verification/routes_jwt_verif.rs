@@ -5,7 +5,7 @@ use crate::{tools::{ApiError, Claims}, verification::{Token, Response}};
 
 #[get("/verification/user")]
 async fn verif_user(token: web::Json<Token>) -> Result<HttpResponse, ApiError> {
-    //Enregistre un user
+    //verification utilisateur 
 
     let token = token.into_inner();
 
@@ -22,8 +22,7 @@ async fn verif_user(token: web::Json<Token>) -> Result<HttpResponse, ApiError> {
 
 #[get("/verification/admin")]
 async fn verif_admin(token: web::Json<Token>) -> Result<HttpResponse, ApiError> {
-    //Enregistre un user
-
+//verification admin 
     let token = token.into_inner();
 
     let jwt = token.jwt;

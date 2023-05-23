@@ -158,6 +158,8 @@ async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiEr
 
         let tok = "Bearer ".to_string() + &token;
 
+        session.insert("id", " ").unwrap();
+
         Ok(HttpResponse::Ok()
             .insert_header(("Authorization", tok))
             .insert_header(("Access-Control-Expose-Headers", "Authorization"))
