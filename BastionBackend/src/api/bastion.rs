@@ -268,15 +268,32 @@ pub async fn delete_a_bastion(
 }
 
 //  /bastion/{bastion_id}/users ===================================================================
-
+/*
 #[get("/bastions/{bastion_id}/users")]
 pub async fn get_users(
     bastion_id: web::Path<String>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     let admin_id: Uuid = VerifyAdmin(req).await?;
-    let users = Users::find_users_ressources(ressource_id.into_inner())?;
-    Ok(HttpResponse::Ok().json(users))
+    let ressources = Ressource::find_all_ressources(bastion_id.into_inner())?;
+    let listeuserunique: Vec<Users> = Vec::new();
+    for ressource in ressources {
+        let users = Users::find_users_ressources(ressource.id)?;
+        
+        for u in users {
+            let mut flag = true;
+            for l in listeuserunique.iter() {
+                if l.user_id == u.user_id {
+                    flag = false;
+                }
+            }
+            if flag {
+                listeuserunique.push(u);
+            }
+            return Ok(HttpResponse::Ok().json(listeuserunique)); 
+        }; 
+    };
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[post("/bastions/{bastion_id}/users")]
@@ -340,7 +357,7 @@ pub async fn delete_a_user(
 }
 
 // /bastion/{bastion_id}/users/{user_id}/generate_wireguard" ===============================================
-/*
+
 #[post("/bastions/{bastion_id}/users/{user_id}/generate_wireguard")]
 pub async fn get_user_wireguard_status(
     req: HttpRequest,
@@ -895,6 +912,11 @@ pub async fn stop_session(
 }
 
 
+// /bastion/{bastion_id}/ressources/{ressource_id}/users        ===================================================================
+
+
+// /bastion/{bastion_id}/ressources/{ressource_id}/users/{user_id}        ===================================================================
+
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(Config_my_agent);
 
@@ -905,11 +927,11 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(find_a_bastion);
     cfg.service(delete_a_bastion);
 
-    cfg.service(get_users);
+    /*cfg.service(get_users);
     cfg.service(create_users);
 
     cfg.service(get_a_user);
-    cfg.service(delete_a_user);
+    cfg.service(delete_a_user);*/
 
    // cfg.service(get_user_wireguard_status);
 
