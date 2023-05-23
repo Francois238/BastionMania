@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentPairInfo, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate, RessourceCredentialsWireguard}}, entities::{userconfigssh::{UserConfigSshInsertable, UserConfigSsh}, userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard, self}, ressource}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate, RessourceCredentialsWireguard}, ressourcemodification::{RessourceSshCreation, RessourceWireguardCreation}, agentproof::AgentPairInfo}, entities::{userconfigssh::{UserConfigSshInsertable, UserConfigSsh}, userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard, self}, ressource}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -568,6 +568,106 @@ pub async fn create_ressources(
     }
 
 }
+
+#[post("/bastions/{bastion_id}/ressources/create/ssh")]
+pub async fn create_ssh_ressource(
+    req: HttpRequest,
+    donnees: web::Path<String>,
+    ressource_data: web::Json<RessourceSshCreation>,
+) -> Result<HttpResponse, ApiError>{
+    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let bastion_id = donnees.into_inner();
+    let liste_ressources = Ressource::find_all_ressources(bastion_id.clone())?;
+
+    let uuid= Uuid::new_v4();
+    let uuid = uuid.to_string();
+
+    let wid = None;
+    let kid = None;
+    let ressources = Ressource::find_all_ressources(bastion_id.clone())?;
+    let mut sid = 0;
+
+    for ressource in ressources{
+        if ressource.id_ssh.is_some(){
+            if ressource.id_ssh>Some(sid){
+                Some(sid)=ressource.id_ssh;
+            }
+        }
+    }
+    sid=sid+1;
+
+    let ssh_insertion = SshRessourceInsertable{
+        id: sid,
+        id_bastion: bastion_id.clone(),
+        name: ressource_data.name.clone(),
+        ip_machine: ressource_data.ip_machine.clone()
+    };
+    let specressource = SshRessource::create_ssh_ressources(ssh_insertion)?;
+
+    let ressource_insertion = RessourceInsertable {
+        id: uuid,
+        name: ressource_data.name.clone(),
+        rtype: "ssh".to_string(),
+        id_bastion: bastion_id,
+        id_wireguard: wid,
+        id_ssh: Some(sid),
+        id_k8s: kid,
+    };
+    let ressources = Ressource::create_ressources(ressource_insertion)?;
+    Ok(HttpResponse::Ok().json(ressources))
+    
+
+} 
+#[post("/bastions/{bastion_id}/ressources/create/wireguard")]
+pub async fn create_wireguard_ressource(
+    req: HttpRequest,
+    donnees: web::Path<String>,
+    ressource_data: web::Json<RessourceWireguardCreation>,
+) -> Result<HttpResponse, ApiError>{
+    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let bastion_id = donnees.into_inner();
+    let liste_ressources = Ressource::find_all_ressources(bastion_id.clone())?;
+
+    let uuid= Uuid::new_v4();
+    let uuid = uuid.to_string();
+
+    let sid = None;
+    let kid = None;
+    let ressources = Ressource::find_all_ressources(bastion_id.clone())?;
+    let mut wid = 0;
+
+    for ressource in ressources{
+        if ressource.id_wireguard.is_some(){
+            if ressource.id_wireguard>Some(wid){
+                Some(wid)=ressource.id_wireguard;
+            }
+        }
+    }
+    wid=wid+1;
+
+    let wiregard_insertion = WireguardRessourceInsertable{
+        id: wid,
+        id_bastion: bastion_id.clone(),
+        name: ressource_data.name.clone(),
+        subnet_cidr: ressource_data.subnet_cidr.clone(),
+
+    };
+    let specressource = WireguardRessource::create_wireguard_ressources(wiregard_insertion)?;
+
+    let ressource_insertion = RessourceInsertable {
+        id: uuid,
+        name: ressource_data.name.clone(),
+        rtype: "wireguard".to_string(),
+        id_bastion: bastion_id,
+        id_wireguard: Some(wid),
+        id_ssh: sid,
+        id_k8s: kid,
+    };
+    let ressources = Ressource::create_ressources(ressource_insertion)?;
+    Ok(HttpResponse::Ok().json(ressources))
+
+}
+
 
 // /bastion/{bastion_id}/ressources/{ressource_id}        ===================================================================
 

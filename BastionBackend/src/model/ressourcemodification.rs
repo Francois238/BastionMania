@@ -11,6 +11,21 @@ pub struct RessourceCreation {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct RessourceSshCreation {
+    pub name: String,
+    pub rtype: String,
+    pub ip_machine: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct RessourceWireguardCreation {
+    pub name: String,
+    pub rtype: String,
+    pub subnet_cidr: String,
+}
+
+
+#[derive(Serialize, Deserialize)]
 pub struct RessourceSuppression {
     pub id: i32,
     pub id_bastion: String,
