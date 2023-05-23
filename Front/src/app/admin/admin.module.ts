@@ -12,6 +12,11 @@ import { HeaderComponent } from './header/header.component';
 import { ListUserComponent } from './list-user/list-user.component';
 import { UserDetailComponent } from './user-detail/user-detail.component';
 import { ListBastionComponent } from './list-bastion/list-bastion.component';
+import { BastionDetailComponent } from './bastion-detail/bastion-detail.component';
+import { ListResourcesComponent } from './list-resources/list-resources.component';
+import { ResourceDetailComponent } from './resource-detail/resource-detail.component';
+import { ListUserResourceComponent } from './list-user-resource/list-user-resource.component';
+import { ListUserResourceDetailComponent } from './list-user-resource-detail/list-user-resource-detail.component';
 
 
 @NgModule({
@@ -24,7 +29,12 @@ import { ListBastionComponent } from './list-bastion/list-bastion.component';
     HeaderComponent,
     ListUserComponent,
     UserDetailComponent,
-    ListBastionComponent
+    ListBastionComponent,
+    BastionDetailComponent,
+    ListResourcesComponent,
+    ResourceDetailComponent,
+    ListUserResourceComponent,
+    ListUserResourceDetailComponent,
   ],
   imports: [
     CommonModule,

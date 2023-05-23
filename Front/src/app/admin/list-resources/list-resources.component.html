@@ -3,25 +3,25 @@
     <div class="row mt-3 col-12">
         <div class="col-6 mx-auto">
     
-          <h3 class="mb-5 text-center">Gestion des administrateurs</h3>
+          <h3 class="mb-5 text-center">Gestion des Ressources</h3>
     
     
     
           <!-- Button trigger modal -->
-    <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutBastion">
-        Ajouter un bastion
+    <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutRessource">
+        Ajouter une ressource sur ce bastion
       </button>
       
       <!-- Modal -->
-      <div class="modal fade" id="ajoutBastion" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutBastionLabel" aria-hidden="true">
+      <div class="modal fade" id="ajoutRessource" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutRessourceLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="ajoutBastionLabel">Ajouter un bastion</h1>
+              <h1 class="modal-title fs-5" id="ajoutRessourceLabel">Ajouter une Ressource</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form (ngSubmit)="ajoutBastion()" [formGroup]="ajoutForm">
+                <form (ngSubmit)="ajoutRessource()" [formGroup]="ajoutForm">
                     <div class="mb-3">
                     <label for="last_name" class="form-label">Nom</label>
                     <input formControlName="last_name" class="form-control" id="last_name">
@@ -71,10 +71,10 @@
       
       </div>
     
-      <ng-container *ngIf="listBastions.length > 0">
-        <ng-container *ngFor="let item of listBastions">
+      <ng-container *ngIf="listRessources.length > 0">
+        <ng-container *ngFor="let item of listRessources">
       
-          <app-bastion-detail [bastion]="item" (newItemEvent)="refreshList($event)"></app-bastion-detail> 
+          <app-resource-detail [ressource]="item" (newItemEvent)="refreshList($event)"></app-resource-detail> 
         </ng-container>
       </ng-container>
       

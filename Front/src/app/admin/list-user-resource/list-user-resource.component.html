@@ -3,25 +3,25 @@
     <div class="row mt-3 col-12">
         <div class="col-6 mx-auto">
     
-          <h3 class="mb-5 text-center">Gestion des administrateurs</h3>
+          <h3 class="mb-5 text-center">Gestion des utilisateur sur cette ressource</h3>
     
     
     
           <!-- Button trigger modal -->
-    <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutBastion">
-        Ajouter un bastion
+    <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutUser">
+        Ajouter un utilisateur
       </button>
       
       <!-- Modal -->
-      <div class="modal fade" id="ajoutBastion" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutBastionLabel" aria-hidden="true">
+      <div class="modal fade" id="ajoutUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutUserLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="ajoutBastionLabel">Ajouter un bastion</h1>
+              <h1 class="modal-title fs-5" id="ajoutUserLabel">Ajouter une Ressource</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form (ngSubmit)="ajoutBastion()" [formGroup]="ajoutForm">
+                <form (ngSubmit)="ajoutUser()" [formGroup]="ajoutForm">
                     <div class="mb-3">
                     <label for="last_name" class="form-label">Nom</label>
                     <input formControlName="last_name" class="form-control" id="last_name">
@@ -71,10 +71,10 @@
       
       </div>
     
-      <ng-container *ngIf="listBastions.length > 0">
-        <ng-container *ngFor="let item of listBastions">
+      <ng-container *ngIf="listUsers.length > 0">
+        <ng-container *ngFor="let item of listUsers">
       
-          <app-bastion-detail [bastion]="item" (newItemEvent)="refreshList($event)"></app-bastion-detail> 
+          <app-list-user-resource-detail [user]="item" (newItemEvent)="refreshList($event)"></app-list-user-resource-detail> 
         </ng-container>
       </ng-container>
       
@@ -82,3 +82,4 @@
         </div>
     </div>
     
+
