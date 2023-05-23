@@ -1,4 +1,4 @@
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, web};
 use dotenvy::dotenv;
 use BastionManager::api;
 
@@ -6,10 +6,12 @@ use BastionManager::api;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     tracing_subscriber::fmt::init();
+    
 
     HttpServer::new(|| {
-        App::new()
-            .configure(api::routes_bastion)
+        let scope = web::scope("/api").configure(api::routes_bastion);
+        App::new().service(scope)
+            
     })
     .bind(("0.0.0.0", 8080))?
     .run()

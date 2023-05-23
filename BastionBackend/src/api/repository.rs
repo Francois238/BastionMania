@@ -128,7 +128,7 @@ impl Bastion {
 // /bastion/{bastion_id}/users
 
 impl Users {
-    pub fn find_users_bastion(ressource_id: String) -> Result<Vec<Self>, ApiError> {
+    pub fn find_users_ressources(ressource_id: String) -> Result<Vec<Self>, ApiError> {
         let mut conn = db::connection()?;
         let des_users = users::table
             .filter(users::ressource_id.eq(ressource_id))
@@ -446,4 +446,46 @@ pub fn userconfigwireguardfind(user_id: String, ressource_id: String) -> Result<
         .filter(user_config_wireguard::uuid_ressource.eq(ressource_id))
         .first::<UserConfigWireguard>(&mut conn)?;
     Ok(userconf)
+}
+
+pub fn userconfigsshdelete(user_id: String, ressource_id: String) -> Result<(), ApiError> {
+    let mut conn = db::connection()?;
+    let _userconf = diesel::delete(
+        user_config_ssh::table
+            .filter(user_config_ssh::uuid_user.eq(user_id))
+            .filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
+    )
+        .execute(&mut conn)?;
+    Ok(())
+}
+
+pub fn userconfigwireguarddelete(user_id: String, ressource_id: String) -> Result<(), ApiError> {
+    let mut conn = db::connection()?;
+    let _userconf = diesel::delete(
+        user_config_wireguard::table
+            .filter(user_config_wireguard::uuid_user.eq(user_id))
+            .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
+    )
+        .execute(&mut conn)?;
+    Ok(())
+}
+
+pub fn userconfigsshdeleteall(ressource_id: String) -> Result<(), ApiError> {
+    let mut conn = db::connection()?;
+    let _userconf = diesel::delete(
+        user_config_ssh::table
+            .filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
+    )
+        .execute(&mut conn)?;
+    Ok(())
+}
+
+pub fn userconfigwireguarddeleteall(ressource_id: String) -> Result<(), ApiError> {
+    let mut conn = db::connection()?;
+    let _userconf = diesel::delete(
+        user_config_wireguard::table
+            .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
+    )
+        .execute(&mut conn)?;
+    Ok(())
 }
