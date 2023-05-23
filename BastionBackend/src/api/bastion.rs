@@ -913,9 +913,88 @@ pub async fn stop_session(
 
 
 // /bastion/{bastion_id}/ressources/{ressource_id}/users        ===================================================================
+#[get("/bastions/{bastion_id}/ressources/{ressource_id}/users")]
+pub async fn get_user(
+    donnees: web::Path<(String, String)>,
+    req: HttpRequest,
+) -> Result<HttpResponse, ApiError>{
+    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let (bastion_id, ressource_id) = donnees.into_inner();
+    let users = Users::find_users_ressources(ressource_id.clone())?;
+    Ok(HttpResponse::Ok().json(users))
 
+}
 
+#[post("/bastions/{bastion_id}/ressources/{ressource_id}/users")]
+pub async fn create_user(
+    donnees: web::Path<(String, String)>,
+    req: HttpRequest,
+    user: web::Json<UsersCreation>,
+) -> Result<HttpResponse, ApiError>{
+    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let (bastion_id, ressource_id) = donnees.into_inner();
+
+    let liste_users = Users::find_users_ressources(ressource_id.clone())?;
+    let mut net_id: i32 = 0;
+    for user in liste_users{
+        if user.net_id > net_id{
+            net_id = user.net_id;
+        }
+    }
+    net_id = net_id + 1;
+
+    let users_insertion = UsersModification {
+        user_id: user.id.clone(),
+        ressource_id: user.ressource_id.clone(),
+        net_id: net_id.clone(),
+    };
+
+    let users = Users::create_users(users_insertion)?;
+
+    let retour_api = RetourAPI {
+        success: true,
+        message: "User créé".to_string(),
+        data: ConfigUser {
+            id: users.user_id.clone(),
+            net_id,
+        },
+    };
+    Ok(HttpResponse::Ok().json(retour_api))
+}
+
+#[delete("/bastions/{bastion_id}/ressources/{ressource_id}/users")]
+pub async fn delete_users(
+    donnees: web::Path<(String, String)>,
+    req: HttpRequest,
+) -> Result<HttpResponse, ApiError>{
+    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let (bastion_id, ressource_id) = donnees.into_inner();
+    let users_suppr = Users::delete_all_users(ressource_id.clone())?;
+    Ok(HttpResponse::Ok().json("supprimé"))
+}
 // /bastion/{bastion_id}/ressources/{ressource_id}/users/{user_id}        ===================================================================
+#[get("/bastions/{bastion_id}/ressources/{ressource_id}/users/{user_id}")]
+pub async fn get_a_user(
+    données: web::Path<(String, String, String)>,
+    req: HttpRequest,
+) -> Result<HttpResponse, ApiError> {
+    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let (bastion_id,ressource_id, user_id) = données.into_inner();
+    let users = Users::find_un_user(ressource_id, user_id)?;
+    Ok(HttpResponse::Ok().json(users))
+}
+
+#[delete("/bastions/{bastion_id}/ressources/{ressource_id}/users/{user_id}")]
+pub async fn delete_user(
+    donnees: web::Path<(String, String)>,
+    req: HttpRequest,
+    user: web::Json<UsersCreation>,
+) -> Result<HttpResponse, ApiError>{
+    let admin_id: Uuid = VerifyAdmin(req).await?;
+    let (bastion_id, ressource_id) = donnees.into_inner();
+    let user_suppr = Users::delete_un_user(ressource_id.clone(), user.id.clone())?;
+    Ok(HttpResponse::Ok().json("supprimé"))
+}
 
 pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(Config_my_agent);
