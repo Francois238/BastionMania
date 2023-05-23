@@ -1,4 +1,6 @@
-use crate::schema::{bastion, bastion_token, k8sressource, ressource, sshressource, users, wireguardressource};
+use crate::entities::userconfigssh::{UserConfigSshInsertable, UserConfigSsh};
+use crate::entities::userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard};
+use crate::schema::{bastion, bastion_token, k8sressource, ressource, sshressource, users, wireguardressource, user_config_ssh, user_config_wireguard};
 use crate::api_error::ApiError;
 use crate::db;
 use crate::entities::{Bastion, BastionInsertable, BastionTokenInsertable, K8sRessource, K8sRessourceInsertable, Ressource, RessourceInsertable, SshRessource, SshRessourceInsertable, Users, UsersModification, WireguardRessource, WireguardRessourceInsertable, BastionToken};
@@ -409,4 +411,21 @@ impl K8sRessource{
             .execute(&mut conn)?;
         Ok(ressource)
     }
+}
+
+
+pub fn userconfigsshcreate(userconf: UserConfigSshInsertable) -> Result<(), ApiError> {
+    let mut conn = db::connection()?;
+    let _newuserconf: UserConfigSsh = diesel::insert_into(user_config_ssh::table)
+        .values(userconf)
+        .get_result(&mut conn)?;
+    Ok(())
+}
+
+pub fn userconfigwireguardcreate(userconf: UserConfigWireguardInsertable) -> Result<(), ApiError> {
+    let mut conn = db::connection()?;
+    let _newuserconf: UserConfigWireguard = diesel::insert_into(user_config_wireguard::table)
+        .values(userconf)
+        .get_result(&mut conn)?;
+    Ok(())
 }

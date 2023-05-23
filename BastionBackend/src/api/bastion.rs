@@ -7,7 +7,7 @@ use base64::{engine, Engine};
 use rand::{SeedableRng, RngCore};
 use std::env;
 
-use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::RessourceCredentialsSsh}, entities::{userconfigssh::UserConfigSshInsertable, userconfigwireguard::UserConfigWireguardInsertable}};
+use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, agentproof::AgentProof, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ConfigWireguardInstanceCreate}}, entities::{userconfigssh::UserConfigSshInsertable, userconfigwireguard::UserConfigWireguardInsertable}};
 use crate::api_error::ApiError;
 use crate::services::{generate_bastion_freenetid, generate_bastion_freeport,generate_user_freenetid};
 //use derive_more::{Display};
@@ -629,12 +629,21 @@ pub async fn generate_access_credentials(
             pubkey: sshdata.pubkey.clone(),
             user_net_id: net_id.clone(),
         };
+
+        let configrequest = ConfigWireguardInstanceCreate{
+            uuid_user: user_id.clone(),
+            uuid_ressource: ressource_id.clone(),
+            pubkey: sshdata.pubkey.clone(),
+            user_net_id: net_id.clone(),
+        };
+
+        let _test=userconfigwireguardcreate(wireguardconfig);
         
 
         let url = format!("http://intern-bastion-{}:9000/adduser", bastion_id);
         let _response = _client
             .post(&url)
-            .json(&wireguardconfig)
+            .json(&configrequest)
             .send()
             .await
             .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
@@ -644,7 +653,7 @@ pub async fn generate_access_credentials(
         let retour_api = RetourAPI {
             success: true,
             message: "accés client créé".to_string(),
-            data: wireguardconfig,
+            data: "ok".to_string(),
         };
 
         return Ok(HttpResponse::Ok().json(retour_api))
@@ -658,10 +667,19 @@ pub async fn generate_access_credentials(
             username: sshdata.username.clone(),
         };
 
+        let configrequest = ConfigSshInstanceCreate{
+            uuid_user: user_id.clone(),
+            uuid_ressource: ressource_id.clone(),
+            pubkey: sshdata.pubkey.clone(),
+            username: sshdata.username.clone(),
+        };
+
+        let _test=userconfigsshcreate(sshcredentials);
+
         let url = format!("??");
         let _response = client
             .post(&url)
-            .json(&sshcredentials)
+            .json(&configrequest)
             .send()
             .await
             .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
