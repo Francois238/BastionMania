@@ -1,5 +1,7 @@
 use crate::entities::userconfigssh::{UserConfigSshInsertable, UserConfigSsh};
 use crate::entities::userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard};
+use crate::model::ressourcecredentialsssh::ActivationSshSession;
+use crate::model::ressourcecredentialwireguard::ActivationWireguardSession;
 use crate::schema::{bastion, bastion_token, k8sressource, ressource, sshressource, users, wireguardressource, user_config_ssh, user_config_wireguard};
 use crate::api_error::ApiError;
 use crate::db;
@@ -414,78 +416,184 @@ impl K8sRessource{
 }
 
 
-pub fn userconfigsshcreate(userconf: UserConfigSshInsertable) -> Result<(), ApiError> {
-    let mut conn = db::connection()?;
-    let _newuserconf: UserConfigSsh = diesel::insert_into(user_config_ssh::table)
-        .values(userconf)
-        .get_result(&mut conn)?;
-    Ok(())
-}
+impl UserConfigWireguard{
+    pub fn userconfigwireguardcreate(userconf: UserConfigWireguardInsertable) -> Result<(), ApiError> {
+        let mut conn = db::connection()?;
+        let _newuserconf: UserConfigWireguard = diesel::insert_into(user_config_wireguard::table)
+            .values(userconf)
+            .get_result(&mut conn)?;
+        Ok(())
+    }
 
-pub fn userconfigwireguardcreate(userconf: UserConfigWireguardInsertable) -> Result<(), ApiError> {
-    let mut conn = db::connection()?;
-    let _newuserconf: UserConfigWireguard = diesel::insert_into(user_config_wireguard::table)
-        .values(userconf)
-        .get_result(&mut conn)?;
-    Ok(())
-}
-
-pub fn userconfigsshfind(user_id: String, ressource_id: String) -> Result<UserConfigSsh, ApiError> {
-    let mut conn = db::connection()?;
-    let userconf = user_config_ssh::table
-        .filter(user_config_ssh::uuid_user.eq(user_id))
-        .filter(user_config_ssh::uuid_ressource.eq(ressource_id))
-        .first::<UserConfigSsh>(&mut conn)?;
-    Ok(userconf)
-}
-
-pub fn userconfigwireguardfind(user_id: String, ressource_id: String) -> Result<UserConfigWireguard, ApiError> {
-    let mut conn = db::connection()?;
-    let userconf = user_config_wireguard::table
-        .filter(user_config_wireguard::uuid_user.eq(user_id))
-        .filter(user_config_wireguard::uuid_ressource.eq(ressource_id))
-        .first::<UserConfigWireguard>(&mut conn)?;
-    Ok(userconf)
-}
-
-pub fn userconfigsshdelete(user_id: String, ressource_id: String) -> Result<(), ApiError> {
-    let mut conn = db::connection()?;
-    let _userconf = diesel::delete(
-        user_config_ssh::table
-            .filter(user_config_ssh::uuid_user.eq(user_id))
-            .filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
-    )
-        .execute(&mut conn)?;
-    Ok(())
-}
-
-pub fn userconfigwireguarddelete(user_id: String, ressource_id: String) -> Result<(), ApiError> {
-    let mut conn = db::connection()?;
-    let _userconf = diesel::delete(
-        user_config_wireguard::table
+    pub fn userconfigwireguardfind(user_id: String, ressource_id: String) -> Result<UserConfigWireguard, ApiError> {
+        let mut conn = db::connection()?;
+        let userconf = user_config_wireguard::table
             .filter(user_config_wireguard::uuid_user.eq(user_id))
-            .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
-    )
-        .execute(&mut conn)?;
-    Ok(())
+            .filter(user_config_wireguard::uuid_ressource.eq(ressource_id))
+            .first::<UserConfigWireguard>(&mut conn)?;
+        Ok(userconf)
+    }
+    
+    pub fn userconfigwireguarddelete(user_id: String, ressource_id: String) -> Result<(), ApiError> {
+        let mut conn = db::connection()?;
+        let _userconf = diesel::delete(
+            user_config_wireguard::table
+                .filter(user_config_wireguard::uuid_user.eq(user_id))
+                .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
+        )
+            .execute(&mut conn)?;
+        Ok(())
+    }
+
+    pub fn userconfigwireguarddeleteall(ressource_id: String) -> Result<(), ApiError> {
+        let mut conn = db::connection()?;
+        let _userconf = diesel::delete(
+            user_config_wireguard::table
+                .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
+        )
+            .execute(&mut conn)?;
+        Ok(())
+    }
+
+    pub async fn start_wireguard_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
+        let userconfig = UserConfigWireguard::userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
+        let client = reqwest::Client::new();
+    
+                let session = ActivationWireguardSession{
+                    pubkey: userconfig.pubkey.clone(),
+                    user_net_id: userconfig.user_net_id.clone(),
+                };
+                //TODO url
+                let url = format!("??");
+    
+                let _response = client
+                    .post(&url)
+                    .json(&session)
+                    .send()
+                    .await
+                    .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+        Ok(())
+    }
+
+    pub async fn stop_wireguard_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
+        let userconfig = UserConfigWireguard::userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
+        let client = reqwest::Client::new();
+    
+                let session = ActivationWireguardSession{
+                    pubkey: userconfig.pubkey.clone(),
+                    user_net_id: userconfig.user_net_id.clone(),
+                };
+                //TODO url
+                let url = format!("??");
+    
+                let _response = client
+                    .post(&url)
+                    .json(&session)
+                    .send()
+                    .await
+                    .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+        Ok(())
+    }
+
+
+
 }
 
-pub fn userconfigsshdeleteall(ressource_id: String) -> Result<(), ApiError> {
-    let mut conn = db::connection()?;
-    let _userconf = diesel::delete(
-        user_config_ssh::table
-            .filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
-    )
-        .execute(&mut conn)?;
-    Ok(())
-}
+impl UserConfigSsh {
 
-pub fn userconfigwireguarddeleteall(ressource_id: String) -> Result<(), ApiError> {
-    let mut conn = db::connection()?;
-    let _userconf = diesel::delete(
-        user_config_wireguard::table
-            .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
-    )
-        .execute(&mut conn)?;
-    Ok(())
-}
+    pub fn userconfigsshcreate(userconf: UserConfigSshInsertable) -> Result<(), ApiError> {
+        let mut conn = db::connection()?;
+        let _newuserconf: UserConfigSsh = diesel::insert_into(user_config_ssh::table)
+            .values(userconf)
+            .get_result(&mut conn)?;
+        Ok(())
+    }
+
+
+    pub fn userconfigsshfind(user_id: String, ressource_id: String) -> Result<UserConfigSsh, ApiError> {
+        let mut conn = db::connection()?;
+        let userconf = user_config_ssh::table
+            .filter(user_config_ssh::uuid_user.eq(user_id))
+            .filter(user_config_ssh::uuid_ressource.eq(ressource_id))
+            .first::<UserConfigSsh>(&mut conn)?;
+        Ok(userconf)
+    }
+
+
+
+
+    pub fn userconfigsshdelete(user_id: String, ressource_id: String) -> Result<(), ApiError> {
+        let mut conn = db::connection()?;
+        let _userconf = diesel::delete(
+            user_config_ssh::table
+                .filter(user_config_ssh::uuid_user.eq(user_id))
+                .filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
+        )
+            .execute(&mut conn)?;
+        Ok(())
+    }
+
+
+
+    pub fn userconfigsshdeleteall(ressource_id: String) -> Result<(), ApiError> {
+        let mut conn = db::connection()?;
+        let _userconf = diesel::delete(
+            user_config_ssh::table
+                .filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
+        )
+            .execute(&mut conn)?;
+        Ok(())
+    }
+
+    pub async fn start_ssh_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
+        
+        let client = reqwest::Client::new();
+        let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
+
+        let session = ActivationSshSession{
+            pubkey: userconfig.pubkey.clone(),
+            username: userconfig.username.clone(),
+        };
+        //TODO url
+        let url = format!("??");
+
+        let _response = client
+            .post(&url)
+            .json(&session)
+            .send()
+            .await
+            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+        return Ok(())
+    }
+
+    pub async fn stop_ssh_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
+        
+        let client = reqwest::Client::new();
+        let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
+
+        let session = ActivationSshSession{
+            pubkey: userconfig.pubkey.clone(),
+            username: userconfig.username.clone(),
+        };
+        //TODO url
+        let url = format!("??");
+
+        let _response = client
+            .post(&url)
+            .json(&session)
+            .send()
+            .await
+            .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+        return Ok(())
+
+}}
+
+
+
+
+
+
