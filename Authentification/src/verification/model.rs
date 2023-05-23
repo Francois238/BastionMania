@@ -1,4 +1,5 @@
-use serde::{Deserialize};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 
 
@@ -8,4 +9,8 @@ pub struct Token {
     pub jwt: String,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct Response{
+    pub id: Uuid
+}
 
