@@ -68,6 +68,12 @@ export class ListAdminComponent implements OnInit {
     this.mail = this.mailCrtl.value.trim();
     this.password = this.passwordCrtl.value.trim();
 
+    if( this.password.length< 2){
+
+      this.message = "Le mot de passe doit contenir au moins 2 caractères"
+      return
+    }
+
     this.admin = {
       name : this.name,
       last_name : this.last_name,

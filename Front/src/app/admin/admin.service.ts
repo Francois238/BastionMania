@@ -58,6 +58,7 @@ export class AdminService {
 
   }
 
+
   public add_admin(admin : NewAdmin) : Observable<AdminInfo>{
 
     const token = this.authenticationService.get_token();
@@ -131,6 +132,17 @@ export class AdminService {
       const url = this.baseUrlUser +`users`;
       return this.http.get<UserInfo[]>(url, {headers})
   
+    }
+
+    public get_user_mail(mail: string) : Observable<UserInfo[]>{
+
+      const token = this.authenticationService.get_token();
+  
+      const headers = {'Authorization': 'Bearer ' + token};
+  
+      const url = this.baseUrlUser +`users` + `?mail=${mail}`;
+      return this.http.get<UserInfo[]>(url, {headers})
+
     }
   
     public add_user(admin : NewUser) : Observable<UserInfo>{

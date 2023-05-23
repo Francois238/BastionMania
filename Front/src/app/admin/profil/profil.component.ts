@@ -22,8 +22,6 @@ export class ProfilComponent implements OnInit {
   public change : boolean = false
   public infoLogin! : InfoLogin
 
-  public validationPassword= new RegExp("^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[^A-Za-z0-9]).{8,}$");
-
   constructor(protected adminService : AdminService, protected authenticationService: AuthenticationService) { 
     this.passwordCrtl = new FormControl('')
     this.passwordForm = new FormGroup({
@@ -59,13 +57,6 @@ export class ProfilComponent implements OnInit {
     this.password = this.passwordCrtl.value.trim()
 
     if(this.password.length >2 ){
-
-      if( !this.validationPassword.test(this.password)){
-
-        this.message = "Votre mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial"
-        return
-
-      }
 
       this.passwordEnvoye = { password : this.authenticationService.get_hash_password(this.password)}
       this.adminService.change_password(this.passwordEnvoye).subscribe({

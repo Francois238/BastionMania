@@ -24,6 +24,8 @@ export class ListUserComponent implements OnInit {
   public last_nameCrtl: FormControl;
   public mailCrtl: FormControl;
   public passwordCrtl: FormControl;
+  public userCrtl: FormControl;
+  public searchForm: FormGroup;
 
   public listUsers : Array<UserInfo> = new Array<UserInfo>();
 
@@ -41,6 +43,10 @@ export class ListUserComponent implements OnInit {
         password: this.passwordCrtl
 
     })
+    this.userCrtl = new FormControl('')
+    this.searchForm = new FormGroup({
+      mailSearch: this.userCrtl,
+    })
   }
 
   ngOnInit(): void {
@@ -56,6 +62,10 @@ export class ListUserComponent implements OnInit {
         password: this.passwordCrtl
 
     })
+    this.userCrtl = new FormControl('')
+    this.searchForm = new FormGroup({
+      mailSearch: this.userCrtl,
+    })
 
     this.getListUser()
   }
@@ -67,6 +77,12 @@ export class ListUserComponent implements OnInit {
     this.last_name = this.last_nameCrtl.value.trim();
     this.mail = this.mailCrtl.value.trim();
     this.password = this.passwordCrtl.value.trim();
+
+    if( this.password.length< 2){
+
+      this.message = "Le mot de passe doit contenir au moins 2 caractères"
+      return
+    }
 
     this.user = {
       name : this.name,
@@ -113,6 +129,28 @@ export class ListUserComponent implements OnInit {
   refreshList(data : string){
 
     this.getListUser()
+  }
+
+  searchUser(){
+
+    let mailForm = this.userCrtl.value as string
+
+    let mail = mailForm.trim();
+
+    this.adminService.get_user_mail(mail).subscribe({
+
+      next: (data : UserInfo[]) => {
+          
+          this.listUsers = data
+      
+        },
+         error: (e) => {
+        
+          console.error(e)
+        }
+      })
+
+
   }
 
 }
