@@ -4,22 +4,24 @@
 
       <h3 class="mb-5 text-center">Gestion des utilisateurs</h3>
 
+      <div class="col-6 mx-auto mt-3">
 
-      <form (ngSubmit)="searchUser()" [formGroup]="searchForm">
-        <div class="mb-3">
-        <label for="mailSearch" class="form-label">Rechercher un utilisateur</label>
-        <input formControlName="mailSearch" class="form-control" id="mailSearch" placeholder="mail">
-        </div>
-        <div class="col-lg-12 loginbttm mx-auto text-center">
-            <div class="col-lg-6 login-btm login-text">
-                    <!-- Error Message -->
-            </div>
-            <div class="col-lg-6 login-btm login-button mx-auto">
-                <button type="submit" class="btn btn-outline-secondary mb-3 ">Rechercher</button>
+
+        <form (ngSubmit)="searchUser()" [formGroup]="searchForm">
+          <div class="mb-3 text-center">
+          <label for="mailSearch" class="form-label">Rechercher un utilisateur</label>
+          <input formControlName="mailSearch" class="form-control" id="mailSearch" placeholder="mail">
+          </div>
+          <div class="col-lg-12 loginbttm mx-auto text-center">
+              <div class="col-lg-6 login-btm login-text">
+                      <!-- Error Message -->
               </div>
-        </div>
-      </form>
-
+              <div class="col-lg-6 login-btm login-button mx-auto">
+                  <button type="submit" class="btn btn-outline-secondary mb-3 ">Rechercher</button>
+                </div>
+          </div>
+        </form>
+      </div>
 
       <!-- Button trigger modal -->
 <button type="button" class="btn  btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutUser">

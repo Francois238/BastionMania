@@ -5,6 +5,7 @@ import { MenuComponent } from './menu/menu.component';
 import { ListAdminComponent } from './list-admin/list-admin.component';
 import { ProfilComponent } from './profil/profil.component';
 import { ListUserComponent } from './list-user/list-user.component';
+import { ListBastionComponent } from './list-bastion/list-bastion.component';
 
 const routes: Routes = [
   {
@@ -15,7 +16,8 @@ const routes: Routes = [
       { path: 'menu', component: MenuComponent },
       { path: 'admins', component: ListAdminComponent },
       { path: 'profil', component: ProfilComponent },
-      { path: 'users', component: ListUserComponent }
+      { path: 'users', component: ListUserComponent },
+      {path: 'bastions', component: ListBastionComponent}
     ]
   }
 ];

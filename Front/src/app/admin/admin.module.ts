@@ -11,6 +11,7 @@ import { ProfilComponent } from './profil/profil.component';
 import { HeaderComponent } from './header/header.component';
 import { ListUserComponent } from './list-user/list-user.component';
 import { UserDetailComponent } from './user-detail/user-detail.component';
+import { ListBastionComponent } from './list-bastion/list-bastion.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { UserDetailComponent } from './user-detail/user-detail.component';
     ProfilComponent,
     HeaderComponent,
     ListUserComponent,
-    UserDetailComponent
+    UserDetailComponent,
+    ListBastionComponent
   ],
   imports: [
     CommonModule,
