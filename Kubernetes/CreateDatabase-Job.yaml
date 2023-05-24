@@ -9,10 +9,12 @@ data:
     CREATE DATABASE authentication;
     CREATE DATABASE gestion_admin;
     CREATE DATABASE gestion_user;
+    CREATE DATABASE bastion_manager;
     CREATE USER bastion WITH ENCRYPTED PASSWORD 'set a password here';
     GRANT ALL PRIVILEGES ON DATABASE authentication TO bastion;
     GRANT ALL PRIVILEGES ON DATABASE gestion_admin TO bastion;
     GRANT ALL PRIVILEGES ON DATABASE gestion_user TO bastion;
+    GRANT ALL PRIVILEGES ON DATABASE bastion_manager TO bastion;
     \c authentication
     CREATE TABLE IF NOT EXISTS users (
       id uuid PRIMARY KEY,
@@ -53,6 +55,107 @@ data:
       mail TEXT UNIQUE NOT NULL
     );
     GRANT ALL PRIVILEGES ON TABLE users TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS bastion(
+        bastion_id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        subnet_cidr TEXT NOT NULL,
+        ssh_port INT NOT NULL,
+        wireguard_port INT NOT NULL,
+        net_id INT NOT NULL
+      );
+    GRANT ALL PRIVILEGES ON TABLE bastion TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS "users"(
+      id SERIAL PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      ressource_id TEXT NOT NULL,
+      net_id INT NOT NULL
+    );
+
+     GRANT ALL PRIVILEGES ON TABLE users TO bastion;
+     GRANT ALL PRIVILEGES ON SEQUENCE users_id_seq TO bastion;
+
+    \c bastion_manager
+      CREATE TABLE IF NOT EXISTS "ressource"(
+      id           TEXT PRIMARY KEY,
+      id_bastion   TEXT NOT NULL,
+      name         TEXT NOT NULL,
+      rtype         TEXT NOT NULL,
+      id_wireguard INT ,
+      id_ssh       INT ,
+      id_k8s       INT
+    );
+
+    GRANT ALL PRIVILEGES ON TABLE ressource TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS wireguardressource(
+        id SERIAL PRIMARY KEY,
+        id_bastion TEXT NOT NULL,
+        name TEXT NOT NULL,
+        target_ip TEXT NOT NULL
+    );
+
+    GRANT ALL PRIVILEGES ON TABLE wireguardressource TO bastion;
+     GRANT ALL PRIVILEGES ON SEQUENCE wireguardressource_id_seq TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS sshressource(
+      id SERIAL PRIMARY KEY,
+      id_bastion TEXT NOT NULL,
+      name TEXT NOT NULL,
+      ip_machine TEXT NOT NULL,
+      port INT NOT NULL
+    );
+
+    GRANT ALL PRIVILEGES ON TABLE sshressource TO bastion;
+     GRANT ALL PRIVILEGES ON SEQUENCE sshressource_id_seq TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS k8sressource(
+      id SERIAL PRIMARY KEY,
+      id_bastion TEXT NOT NULL,
+      name TEXT NOT NULL,
+      ip_cluster TEXT NOT NULL
+    );
+
+    GRANT ALL PRIVILEGES ON TABLE k8sressource TO bastion;
+    GRANT ALL PRIVILEGES ON SEQUENCE k8sressource_id_seq TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS "bastion_token"(
+        token TEXT PRIMARY KEY,
+        bastion_id TEXT NOT NULL
+
+      );
+    GRANT ALL PRIVILEGES ON TABLE bastion_token TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS "user_config_ssh"(
+        id SERIAL PRIMARY KEY,
+        uuid_user TEXT NOT NULL,
+        uuid_ressource TEXT NOT NULL,
+        pubkey TEXT NOT NULL,
+        username TEXT NOT NULL
+    );
+      GRANT ALL PRIVILEGES ON TABLE user_config_ssh TO bastion;
+      GRANT ALL PRIVILEGES ON SEQUENCE user_config_ssh_id_seq TO bastion;
+
+    \c bastion_manager
+    CREATE TABLE IF NOT EXISTS "user_config_wireguard"(
+        id SERIAL PRIMARY KEY,
+        uuid_user TEXT NOT NULL,
+        uuid_ressource TEXT NOT NULL,
+        pubkey TEXT NOT NULL,
+        user_net_id INT NOT NULL
+
+    );
+
+    GRANT ALL PRIVILEGES ON TABLE user_config_wireguard TO bastion;
+    GRANT ALL PRIVILEGES ON SEQUENCE user_config_wireguard_id_seq TO bastion;
 
 ---
 

@@ -56,8 +56,8 @@ services:
     plugins:
     - name: "oidc"
       config:
-        discovery: "http://10.10.40.30:8080/realms/bastionmania/.well-known/openid-configuration"
-        client_id: bastionmania
+        discovery: "URL discovery"
+        client_id: ClientID
         client_secret: ClientSecret
 
     
@@ -84,6 +84,18 @@ services:
     - https
     https_redirect_status_code: 308
 
+- name: bastion-backend
+  url: http://bastionbackend.bastion:80/
+  routes:
+  - name: bastion-backend
+    paths:
+    - /api/agent
+    - /api/bastions
+    strip_path: false
+    protocols:
+    - https
+    https_redirect_status_code: 308
+
 - name: front
   url: http://front.bastion:80/
   routes:
@@ -93,3 +105,15 @@ services:
     protocols:
     - https
     https_redirect_status_code: 308
+
+certificates:
+- cert: |
+    -----BEGIN CERTIFICATE-----
+    ...
+    -----END CERTIFICATE-----
+  key: |
+    -----BEGIN PRIVATE KEY-----
+    ...
+    -----END PRIVATE KEY-----
+  snis:
+  - name: bastionmania.intra
