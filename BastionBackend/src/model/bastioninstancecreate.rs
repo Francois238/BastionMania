@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct BastionInstanceCreate {
     pub ssh_port: i32,
     pub wireguard_port: i32,
