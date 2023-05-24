@@ -12,7 +12,7 @@ pub struct UserConfigSsh {
     pub username: String,
 }
 
-#[derive(Serialize, Deserialize, AsChangeset, Insertable)]
+#[derive(Serialize, Deserialize, AsChangeset, Insertable, Debug)]
 #[table_name = "user_config_ssh"]
 pub struct UserConfigSshInsertable {
     pub uuid_user: String,
