@@ -1,8 +1,6 @@
 name: Build and upload Admin Management
 
 on:
-  schedule:
-    - cron: '39 20 * * *'
   push:
     branches: [ "main", "dev" ]
     paths:

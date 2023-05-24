@@ -1,17 +1,14 @@
-use diesel::Insertable;
 use serde::{Deserialize, Serialize};
-use crate::schema::bastion;
 
-#[derive(Serialize, Deserialize, Insertable)]
-#[table_name="bastion"]
+
+#[derive(Serialize, Deserialize)]
 pub struct BastionModification {
-    pub name: String,
+    pub bastion_name: String,
     pub subnet_cidr: String,
-    pub agent_endpoint: String,
+
 }
 
-#[derive(Serialize, Deserialize, Insertable)]
-#[table_name="bastion"]
+#[derive(Serialize, Deserialize)]
 pub struct BastionSuppression {
-    pub id: i32,
+    pub id: String,
 }

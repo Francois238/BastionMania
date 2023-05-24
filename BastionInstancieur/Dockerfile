@@ -1,5 +1,5 @@
 
-FROM rust:1.66-slim AS builder
+FROM rust:1.69-slim AS builder
 
 WORKDIR /usr/src
 RUN cargo new bastion-mania-bastioninstancieur --vcs none \
@@ -14,12 +14,14 @@ COPY Cargo.toml Cargo.lock ./
 RUN cargo build --release
 
 COPY src ./src
-RUN cargo install --path .
+RUN cargo build --release
 
 
 FROM gcr.io/distroless/cc
 
 EXPOSE 9000
 
-COPY --from=builder /usr/local/cargo/bin/bastion-mania-bastioninstancieur /app/bastion-mania-bastioninstancieur
+USER 1000
+
+COPY --from=builder /usr/src/bastion-mania-bastioninstancieur/target/release/bastion-mania-bastioninstancieur /app/bastion-mania-bastioninstancieur
 CMD ["/app/bastion-mania-bastioninstancieur"]

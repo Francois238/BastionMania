@@ -1,54 +1,95 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: bastionmania-ingress
-  annotations:
-    konghq.com/strip-path: 'true'
-    konghq.com/protocols: 'https'
-    konghq.com/https-redirect-status-code: '308'
-    konghq.com/plugins: cors-example
-spec:
-  ingressClassName: kong
-  tls:
-    - hosts:
-        - bastionmania.intra
-      secretName: bastionmania.intra
-  rules:
-    - host: bastionmania.intra
-      http:
-        paths:
-          - path: /user
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: front-user
-                port:
-                  number: 80
-          - path: /admin
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: front-admin
-                port:
-                  number: 80
-          - path: /authentication
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: authentication
-                port:
-                  number: 80
-          - path: /admin-management
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: admin-management
-                port:
-                  number: 80
-          - path: /user-management
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: user-management
-                port:
-                  number: 80
+_format_version: "1.1"
+
+plugins:
+- name: cors
+  config: 
+    origins:
+    - '*'
+    methods:
+    - GET
+    - POST
+    - PATCH
+    - DELETE
+    headers:
+    - Accept
+    - Accept-Version
+    - Content-Length
+    - Content-MD5
+    - Content-Type
+    - Date
+    - Authorization
+    - X-Auth-Token
+    - Access-Control-Allow-Origin
+    - Access-Control-Allow-Headers
+    exposed_headers:
+    - X-Auth-Token
+    - Access-Control-Allow-Origin
+    - Authorization
+    credentials: true
+    max_age: 3600
+
+services:
+- name: authentication
+  url: http://authentication.bastion:80/
+  routes:
+  - name: authentication
+    paths:
+    - /api/authentication/login
+    - /api/authentication/login/otp
+    - /api/authentication/login/extern/next
+    - /api/authentication/login/admin
+    - /api/authentication/login/admin/otp
+    - /api/authentication/login/admin/extern/next
+    strip_path: false
+    protocols:
+    - https
+    https_redirect_status_code: 308
+
+  - name: authentication-keycloak
+    paths:
+    - /api/authentication/login/admin/extern
+    - /api/authentication/login/extern
+    strip_path: false
+    protocols:
+    - https
+    https_redirect_status_code: 308
+    plugins:
+    - name: "oidc"
+      config:
+        discovery: "http://10.10.40.30:8080/realms/bastionmania/.well-known/openid-configuration"
+        client_id: bastionmania
+        client_secret: ClientSecret
+
+    
+
+- name: admin-management
+  url: http://admin-management.bastion:80/
+  routes:
+  - name: admin-route
+    paths:
+    - /api/admin-management
+    strip_path: true
+    protocols:
+    - https
+    https_redirect_status_code: 308
+
+- name: user-management
+  url: http://user-management.bastion:80/
+  routes:
+  - name: user-route
+    paths:
+    - /api/user-management
+    strip_path: true
+    protocols:
+    - https
+    https_redirect_status_code: 308
+
+- name: front
+  url: http://front.bastion:80/
+  routes:
+  - name: front-route
+    paths:
+    - /
+    protocols:
+    - https
+    https_redirect_status_code: 308

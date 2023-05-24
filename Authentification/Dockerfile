@@ -1,4 +1,4 @@
-FROM rust:1.64.0 as build
+FROM rust:1.69.0 as build
 
 WORKDIR /app
 COPY Cargo.* /app/
@@ -8,16 +8,22 @@ RUN cargo build --release
 
 FROM ubuntu:23.04
 
-WORKDIR /app
-COPY --from=build /app/target/release/authentication /app/authentication
-
 RUN  apt-get update \
-  && apt-get install -y wget \
-  && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y libpq-dev openssl wget\
+    && wget http://nz2.archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
+    && dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
+    && apt-get remove -y wget \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m runner 
 
-RUN apt update
-RUN apt install -y libpq-dev
+COPY --from=build /app/target/release/authentication /home/runner/app/authentication
+
+RUN chown -R runner:runner /home/runner/app/
 
 EXPOSE 8080
 
-CMD ["/app/authentication"]
+USER runner
+
+WORKDIR /home/runner/app/
+
+ENTRYPOINT ["./authentication"]

@@ -1,26 +1,21 @@
-use diesel::{Queryable, AsChangeset, Insertable};
-use serde::{Serialize, Deserialize};
 use crate::schema::users;
+use diesel::{AsChangeset, Insertable, Queryable};
+use serde::{Deserialize, Serialize};
 
-#[derive(Queryable)]
-#[derive(Serialize, Deserialize, AsChangeset, Insertable)]
-#[table_name="users"]
-pub struct Users{
+
+#[derive(Queryable, Serialize, Deserialize, AsChangeset, Insertable, Debug)]
+#[table_name = "users"]
+pub struct Users {
     pub id: i32,
-    pub user_id: i32,
-    pub bastion_id: i32,
-    pub wireguard: bool,
+    pub user_id: String,
+    pub ressource_id: String,
     pub net_id: i32,
-
 }
 
 #[derive(Serialize, Deserialize, Insertable)]
-#[table_name="users"]
+#[table_name = "users"]
 pub struct UsersModification {
-    pub user_id: i32,
-    pub bastion_id: i32,
-    pub wireguard: bool,
+    pub user_id: String,
+    pub ressource_id: String,
     pub net_id: i32,
-
 }
-

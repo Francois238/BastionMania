@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bastion-instancieur
+  namespace: bastion
+imagePullSecrets:
+  - name: repogithub
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: bastion-instancieur
+  namespace: bastion
+rules:
+  - verbs:
+      - delete
+      - create
+    resources: ["bastions"]
+    apiGroups: ["bastionmania.fr"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bastion-instancieur
+  namespace: bastion
+subjects:
+  - kind: ServiceAccount
+    name: bastion-instancieur
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: bastion-instancieur
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bastion-instancieur-token
+  namespace: bastion
+  annotations:
+    kubernetes.io/service-account.name: bastion-instancieur
+type: kubernetes.io/service-account-token
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bastion-instancieur-deployment
+  namespace: bastion
+  labels:
+    app: bastion-instancieur
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bastion-instancieur
+  template:
+    metadata:
+      labels:
+        app: bastion-instancieur
+    spec:
+      containers:
+        - name: bastion-instancieur
+          image: ghcr.io/bastionmania/bastionmania/bastionresourcecontroller:dev
+          imagePullPolicy: Always
+      serviceAccountName: bastion-instancieur
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bastion-instancieur
+  namespace: bastion
+spec:
+    selector:
+        app: bastion-instancieur
+    ports:
+        - protocol: TCP
+          port: 80
+          targetPort: 9000

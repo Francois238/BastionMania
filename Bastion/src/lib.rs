@@ -1,9 +1,11 @@
-mod model;
-pub mod startup;
-pub mod wgconfigure;
-mod bastionconfig;
-pub mod persistance;
 pub mod api;
+pub mod ssh;
+pub mod wireguard;
 
-pub use model::*;
-pub use bastionconfig::*;
+pub mod bastionconfig;
+pub mod consts;
+pub mod database;
+pub mod init;
+
+pub use bastionconfig::BastionConfig;
+pub use wireguard::model::*;

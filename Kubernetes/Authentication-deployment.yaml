@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication
+  namespace: bastion
+spec:
+  ports:
+  - port: 80 
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    pod-name: authentication
+  type: ClusterIP
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication
+  namespace: bastion
+  labels:
+    app: authentication
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod-name: authentication
+  template:
+    metadata:
+      labels:
+        pod-name: authentication
+    spec:
+      containers:
+      - name: authentication
+        image: "docker.io/francois238/authentication:23.0"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 8080
+        volumeMounts:
+          - name: mnt
+            mountPath: /home/runner/app/.env
+            subPath: fichier.properties
+      volumes:
+      - name: mnt
+        secret:
+          secretName: authentication.conf
+
+

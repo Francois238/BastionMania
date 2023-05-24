@@ -1,0 +1,23 @@
+<div class="row mt-3 col-12">
+    <div class="col-4 mx-auto">
+  
+      <h3 class="mb-5 text-center">Activer la double authentification</h3>
+  
+      <div class="mx-auto w-25">
+  
+        <button type="submit" class="btn btn-primary" (click)="getOtp()">Obtenir l'otp</button>
+  
+        <div *ngIf="code" class="mt-5">
+  
+          <a href={{code}} target="_blank">Voir le qr code</a> <br>
+  
+          <input type="button" class="btn btn-primary mt-5" value="J'ai enregistré le code" (click)="nextPage()"/>
+  
+        </div>
+  
+    </div>
+  
+    <div class="mt-5 text-center" *ngIf="error">{{ error }}</div>
+  
+    </div>
+  </div>

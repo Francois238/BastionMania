@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bastionbackend
+  namespace: bastion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bastionbackend
+  template:
+    metadata:
+      labels:
+        app: bastionbackend
+    spec:
+      containers:
+        - name: bastionbackend
+          image: ghcr.io/bastionmania/bastionmania/bastionbackend:dev
+          env:
+            - name: INSTANCIEUR_ENDPOINT
+              value: "bastion-instancieur-service:9000"
+            - name: BASTION_IP
+              valueFrom:
+                secretKeyRef:
+                  key: externalip
+                  name: externalip
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: gestionbastionbackend.conf
+            - name: FIRST_PORT
+              value: "30000"
+            - name: FIRST_NET_ID
+              value: "2"
+            - name: FIRST_USER_NET_ID
+              value: "2"
+            - name: AUTHENTICATION_USER
+              value: "http://authentification/verification/user"
+            - name: AUTHENTICATION_ADMIN
+              value: "http://authentification/verification/admin"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8080
+      imagePullSecrets:
+        - name: repogithub
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bastionbackend
+  namespace: bastion
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: bastionbackend
+  type: ClusterIP

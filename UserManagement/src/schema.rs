@@ -2,10 +2,9 @@
 
 diesel::table! {
     users (id) {
-        id -> Int4,
+        id -> Uuid,
         name -> Text,
         last_name -> Text,
         mail -> Text,
-        password -> Bytea,
     }
 }
