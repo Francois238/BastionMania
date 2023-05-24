@@ -1,7 +1,7 @@
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
     cookie::{Key},
-    App, HttpServer,
+    App, HttpServer, middleware::Logger,
 };
 use dotenvy::dotenv;
 use simple_logger::SimpleLogger;
@@ -25,6 +25,9 @@ async fn main() -> std::io::Result<()> {
                 SessionMiddleware::builder(CookieSessionStore::default(), Key::from(&[0; 64]))
                     .cookie_secure(true)
                     .build(),
+            )
+            .wrap(
+                Logger::default()
             )
             .configure(admin::routes_admin)
             .configure(user::routes_user)
