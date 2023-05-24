@@ -21,5 +21,7 @@ FROM gcr.io/distroless/cc
 
 EXPOSE 9000
 
+USER 1000
+
 COPY --from=builder /usr/src/bastion-mania-bastioninstancieur/target/release/bastion-mania-bastioninstancieur /app/bastion-mania-bastioninstancieur
 CMD ["/app/bastion-mania-bastioninstancieur"]
