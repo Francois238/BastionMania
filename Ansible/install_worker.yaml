@@ -1,0 +1,59 @@
+---
+- name: Initial worker installation
+  hosts: workers
+  become: yes
+  tasks:
+    - apt:
+        name: bc
+        state: present
+        update_cache: yes
+    - name: Configure devmapper
+      block:
+        - apt:
+            name: bc
+            state: present
+        - copy:
+            src: worker_files/devmapper_create.sh
+            dest: /usr/local/bin/devmapper_create
+            owner: root
+            group: root
+            mode: '0755'
+        - copy:
+            src: worker_files/devmapper_reload.sh
+            dest: /usr/local/bin/devmapper_reload
+            owner: root
+            group: root
+            mode: '0755'
+        - copy:
+            src: worker_files/devmapper_reload.service
+            dest: /etc/systemd/system/devmapper_reload.service
+            owner: root
+            group: root
+            mode: '0644'
+        - name: Create devmapper pool
+          shell: |
+            /usr/local/bin/devmapper_create || true
+        - name: activate reload service
+          systemd:
+            name: devmapper_reload
+            enabled: yes
+            state: started
+            daemon_reload: true
+
+    - name: configure containerd
+      block:
+        - name: set containerd config
+          copy:
+            src: worker_files/containerd.toml
+            dest: /etc/containerd/config.toml
+            owner: root
+            group: root
+            mode: '0644'
+        - name: restart containerd
+          service:
+            name: containerd
+            state: restarted
+            enabled: true
+
+
+

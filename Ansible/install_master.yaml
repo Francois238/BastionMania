@@ -1,0 +1,30 @@
+---
+- hosts: masters
+  become: yes
+  tasks:
+    - name: Configure containerd
+      block:
+        - name: set containerd config
+          copy:
+            src: master_files/containerd.toml
+            dest: /etc/containerd/config.toml
+            owner: root
+            group: root
+            mode: '0644'
+        - name: restart containerd
+          service:
+            name: containerd
+            state: restarted
+            enabled: true
+    - name: Config grub
+      block:
+        - name: set grub config
+          copy:
+            src: master_files/grub
+            dest: /etc/default/grub
+            owner: root
+            group: root
+            mode: '0644'
+        - name: update grub
+          shell: |
+            sudo update-grub
