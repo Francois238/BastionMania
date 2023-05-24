@@ -5,7 +5,13 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
+pub struct MailAdmin{
+    //Structure recue dans le JSON
+    pub mail: Option<String>,
+}
+
+#[derive(Serialize)]
 pub struct CodeOtp {
     //Structure envoye dans le JSON
     pub url: String,
@@ -13,7 +19,7 @@ pub struct CodeOtp {
 
 //Structure gestion des admins
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct AdminReceived {
     //Structure recue dans le JSON
     pub name: String,
@@ -22,7 +28,7 @@ pub struct AdminReceived {
     pub password: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct AdminSent{ //structure envoyee vers authentication
 
     pub id: Uuid,
@@ -31,7 +37,7 @@ pub struct AdminSent{ //structure envoyee vers authentication
     pub mail: String,
     pub password : String
 }
-#[derive(AsChangeset, Insertable)]
+#[derive(Insertable)]
 #[diesel(table_name = admins)]
 pub struct AdminInserable {
     //Structure inseree en BDD pour ajouter un admin
@@ -50,7 +56,7 @@ pub struct Admin {
     pub mail: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive( Deserialize)]
 pub struct AdminChangeCred {
     //Structure envoye dans le JSON pour changer password
     pub password: String,
@@ -128,6 +134,19 @@ impl Admin {
         let res = diesel::delete(admins::table.filter(admins::id.eq(id))).execute(&mut conn)?;
 
         Ok(res)
+    }
+
+    pub fn find_by_mail_pattern(mail: String) -> Result<Vec<Self>, ApiError> {
+        //Fct pour récuperer tous les admins de la BDD
+        let mut conn = db::connection()?;
+
+        let mail = format!("%{}%", mail);
+
+        let admins = admins::table
+            .filter(admins::mail.ilike(mail))
+            .load::<Admin>(&mut conn)?; //On recupere la liste des noms
+
+        Ok(admins)
     }
 }
 

@@ -9,10 +9,15 @@ use uuid::Uuid;
 //Pour s'enregistrer en tant qu'admin
 
 #[get("/admins")]
-async fn find_all_admins(req: HttpRequest) -> Result<HttpResponse, ApiError> {
+async fn find_all_admins(req: HttpRequest, mail: web::Query<MailAdmin>) -> Result<HttpResponse, ApiError> {
     //Recupere la liste des admins
 
     let _claims = Claims::verify_admin_session_complete(req)?;
+
+    if let Some(mail) = &mail.mail {
+        let admin = Admin::find_by_mail_pattern(mail.to_string())?;
+        return Ok(HttpResponse::Ok().json(admin));
+    }
 
     let admins = Admin::find_all()?;
 

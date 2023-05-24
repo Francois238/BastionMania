@@ -1,5 +1,5 @@
 use reqwest::Response;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::{collections::HashMap, env};
 use uuid::Uuid;
 
@@ -7,7 +7,7 @@ use crate::tools::{ApiError, Claims};
 
 use super::{AdminSent};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize)]
 pub struct Sent{ //structure envoyee vers authentication
 
     pub id: Uuid,
