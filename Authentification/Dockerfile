@@ -13,16 +13,16 @@ RUN  apt-get update \
     && wget http://nz2.archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
     && dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb \
     && apt-get remove -y wget \
-  && rm -rf /var/lib/apt/lists/* 
-  #&& useradd -m runner 
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m runner 
 
 COPY --from=build /app/target/release/authentication /home/runner/app/authentication
 
-#RUN chown -R runner:runner /home/runner/app/
+RUN chown -R runner:runner /home/runner/app/
 
 EXPOSE 8080
 
-#USER runner
+USER runner
 
 WORKDIR /home/runner/app/
 
