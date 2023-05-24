@@ -3,7 +3,7 @@ use diesel::{AsChangeset, Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 
 
-#[derive(Queryable, Serialize, Deserialize, AsChangeset, Insertable)]
+#[derive(Queryable, Serialize, Deserialize, AsChangeset, Insertable, Debug)]
 #[table_name = "users"]
 pub struct Users {
     pub id: i32,

@@ -6,6 +6,7 @@ use actix_web::{
 use base64::{engine, Engine};
 use diesel::PgSortExpressionMethods;
 use rand::{SeedableRng, RngCore};
+use tracing_subscriber::field::debug;
 use std::env;
 
 use crate::{api::*, model::{claims::{VerifyAdmin, VerifyUser}, ressourcecredentialsssh::{RessourceCredentialsSsh, ConfigSshInstanceCreate, ActivationSshSession}, ressourcecredentialwireguard::{ActivationWireguardSession, ConfigWireguardInstanceCreate, RessourceCredentialsWireguard}, ressourcemodification::{RessourceSshCreation, RessourceWireguardCreation}, agentproof::AgentPairInfo, ressourceinstancecreate::RessourceSshInstanceCreate}, entities::{userconfigssh::{UserConfigSshInsertable, UserConfigSsh}, userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard, self}, ressource}};
@@ -30,6 +31,7 @@ use crate::model::agentproof::AgentAskPairInfo;
 pub async fn Config_my_agent(
     agent_ask_info: web::Json<AgentAskPairInfo>,
 ) -> Result<HttpResponse, ApiError> {
+    info!("début de la fonction Config_my_agent");
     let agent_ask_info = agent_ask_info.into_inner();
     let my_bastion=Bastion::token_find(agent_ask_info.token)?;
     let bastion = Bastion::find_un_bastion(my_bastion.bastion_id.to_string())?;
@@ -40,6 +42,8 @@ pub async fn Config_my_agent(
         target_cidr: bastion.subnet_cidr,
     };
 
+    log::debug!("agent_pair: ");
+    
     let client = reqwest::Client::new();
     let url = format!("http://bastion-internal-{}:9000/agent", my_bastion.bastion_id.to_string());
     let res = client
@@ -48,6 +52,8 @@ pub async fn Config_my_agent(
         .send()
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+    log::debug!("res: ");
 
     let _suppr = Bastion::token_delete(my_bastion)?;
     let bastion_public_key = res.text().await.map_err(|e| {
@@ -63,19 +69,23 @@ pub async fn Config_my_agent(
 
 #[get("/bastions")]
 pub async fn get_bastion(req: HttpRequest) -> Result<HttpResponse, ApiError> {
+    info!("début de la fonction get_bastion");
     let claims_admin : Result<Uuid, ApiError> = VerifyAdmin(req.clone()).await;
 
     match claims_admin {
         Ok(id_admin) => {
+            log::debug!("id_admin: {:?}", id_admin);
             let bastion_insere = Bastion::find_all()?;
             Ok(HttpResponse::Ok().json(bastion_insere))
         },
         Err(ApiError) => {
+            log::debug!("user: {:?}", ApiError);
             let id_user :Uuid = VerifyUser(req).await?;
             let users = Ressource::ressource_user(id_user.to_string())?;
             let mut bastions: Vec<Bastion> = Vec::new();
 
             let mut flag=true;
+            log::debug!("users: {:?}", users);
 
             for user in users {
                 
@@ -94,6 +104,7 @@ pub async fn get_bastion(req: HttpRequest) -> Result<HttpResponse, ApiError> {
                     flag=true;
                 }
             }
+            log::debug!("bastions: {:?}", bastions);
 
             
             let retour_api = RetourAPI {
@@ -111,17 +122,23 @@ pub async fn create_bastion(
     bastion: web::Json<BastionModification>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
+    info!("début de la fonction create_bastion");
     let id_user:Uuid = VerifyUser(req).await?;
     let liste_bastions = Bastion::find_all()?;
     //generation d'un net_id libre pour le bastion
     let net_ids: Vec<i32> = liste_bastions.into_iter().map(|b| b.net_id).collect();
     let net_id = generate_bastion_freenetid(&net_ids);
 
+    log::debug!("net_id: {:?}", net_id);
+
     let liste_bastions = Bastion::find_all()?;
     let ports = liste_bastions.into_iter().map(|b| b.ssh_port).collect();
     let ssh_port = generate_bastion_freeport(&ports);
 
     let wireguard_port = ssh_port + 1;
+
+    log::debug!("ssh_port: {:?}", ssh_port);
+    log::debug!("wireguard_port: {:?}", wireguard_port);
 
     let mut mytoken = [0u8, 16];
 
@@ -142,15 +159,19 @@ pub async fn create_bastion(
         net_id: net_id.clone(),
     };
 
+    log::debug!("bastion_instance_create: {:?}", bastion_instance_create);
+
     // envoyer la requete de creation de bastion a l'intancieur
     let _client = reqwest::Client::new();
     let url = format!("http://bastion-instancieur/create/");
-    let _response = _client
+    let response = _client
         .post(&url)
         .json(&bastion_instance_create)
         .send()
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+
+    log::debug!("reponse: {:?}", response);
 
     //creation du bastion
     let bastion_insertion = BastionInsertable {
@@ -161,11 +182,13 @@ pub async fn create_bastion(
         wireguard_port: wireguard_port.clone(),
         net_id,
     };
+    log::debug!("bastion_insertion: {:?}", bastion_insertion);
 
     let bastion_token = BastionTokenInsertable {
         bastion_id: bastion_id.clone(),
         token: mytoken.clone(),
     };
+    log::debug!("bastion_token: {:?}", bastion_token);
 
     let _bastion_insere = Bastion::create(bastion_insertion)?;
     let _bastion_token = Bastion::token_create(bastion_token)?;
@@ -186,20 +209,24 @@ pub async fn find_a_bastion(
     bastion_id: web::Path<String>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
+    info!("début de la fonction find_a_bastion");
     let claims_admin : Result<Uuid, ApiError> = VerifyAdmin(req.clone()).await;
     let bastion_id = bastion_id.into_inner();
 
     match claims_admin {
         Ok(Uuid) => {
+            log::debug!("admin");
             let bastion_affiche = Bastion::find_un_bastion(bastion_id)?;
             Ok(HttpResponse::Ok().json(bastion_affiche))
         }
         Err(ApiError) => {
+            log::debug!("non admin");
             let user_id: Uuid = VerifyUser(req).await?;
             let user_id = user_id.to_string();
             let authorisation = Bastion::verification_appartenance(user_id, bastion_id.clone())
                 .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
             if !authorisation {
+                log::debug!("non autorisé");
                 return Err(ApiError::new(404, "Not Found".to_string()));
             }
             let bastion = Bastion::find_un_bastion(bastion_id)?;
@@ -222,6 +249,7 @@ pub async fn delete_a_bastion(
     bastion_id: web::Path<String>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
+    info!("début de la fonction delete_a_bastion");
     let claims_admin : Uuid = VerifyAdmin(req).await?;
     let bastion_id = bastion_id.into_inner();
 
@@ -237,6 +265,7 @@ pub async fn delete_a_bastion(
         .send()
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+    log::debug!("reponse: {:?}", _response);
 
     let bastion_supr = suppression_bastion(bastion_id).await?;
 
