@@ -7,40 +7,61 @@
     "title": "BastionInstancieur",
     "version": "1.0",
     "summary": "Création et suppression de bastion.",
-    "description": "Intéragi avec l'API kubernetes pour créer et suprrimer les pods et services d'un bastion"
+    "description": "Intéragi avec l'API kubernetes pour créer et suprrimer les CRD bastions.bastionmania.fr sur le cluster"
   },
   "servers": [
     {
-      "url": "http://bastion-instancieur-service:9000",
+      "url": "http://bastion-instancieur",
       "description": "intern"
     }
   ],
   "paths": {
-    "/create/{bastion_id}": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "integer"
-          },
-          "name": "bastion_id",
-          "in": "path",
-          "required": true,
-          "description": "id du bastion"
-        }
-      ],
+    "/create": {
       "post": {
         "summary": "",
-        "operationId": "post-create-bastion_id",
+        "operationId": "post-create",
         "responses": {
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Quand le Body n'est pas valide"
+          "500": {
+            "description": "Internal Server Error"
           }
         },
+        "description": "Create a bastion",
         "requestBody": {
-          "$ref": "#/components/requestBodies/BastionConfig"
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ssh_port": {
+                    "type": "string",
+                    "description": "Port used by users to access ssh ressources"
+                  },
+                  "wireguard_port": {
+                    "type": "string",
+                    "description": "port used by users to access wireguard resources"
+                  },
+                  "bastion_id": {
+                    "type": "string",
+                    "description": "bastion id"
+                  },
+                  "net_id": {
+                    "type": "string",
+                    "description": "id used in the creation of wireguard network ip"
+                  }
+                },
+                "required": [
+                  "ssh_port",
+                  "wireguard_port",
+                  "bastion_id",
+                  "net_id"
+                ]
+              }
+            }
+          },
+          "description": "Bastion information"
         }
       }
     },
@@ -48,85 +69,32 @@
       "parameters": [
         {
           "schema": {
-            "type": "integer"
+            "type": "string"
           },
           "name": "bastion_id",
           "in": "path",
           "required": true,
-          "description": "id du bastion à supprimer"
+          "description": "The id of the bastion to delete"
         }
       ],
-      "post": {
+      "delete": {
         "summary": "",
-        "operationId": "post-delete-bastion_id",
+        "operationId": "delete-delete-bastion_id",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "description": "Supprime le bastion et ses services"
+        "description": "Delete a bastion form the cluster"
       }
     }
   },
   "components": {
     "schemas": {},
-    "requestBodies": {
-      "BastionConfig": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "private_key": {
-                  "type": "string"
-                },
-                "cidr_protege": {
-                  "type": "string"
-                },
-                "agent_public_key": {
-                  "type": "string"
-                },
-                "agent_endpoint": {
-                  "type": "string"
-                },
-                "net_id": {
-                  "type": "integer",
-                  "minimum": 2,
-                  "maximum": 255,
-                  "example": 5
-                },
-                "bastion_port": {
-                  "type": "integer",
-                  "maximum": 61000,
-                  "example": 60244,
-                  "minimum": 60000
-                }
-              },
-              "required": [
-                "private_key",
-                "cidr_protege",
-                "agent_public_key",
-                "agent_endpoint",
-                "net_id",
-                "bastion_port"
-              ]
-            },
-            "examples": {
-              "Example 1": {
-                "value": {
-                  "private_key": "ICF7BtX+cuS7SSjCif6rdbFbhlAe3rErVz9xDGapXVc=",
-                  "cidr_protege": "192.168.38.0/24",
-                  "agent_public_key": "0K4rqSW17ClEeKgqYon8Lg+B2BS5LkGhvE8Gb+yQrXc=",
-                  "agent_endpoint": "192.168.38.5:60469",
-                  "net_id": 5,
-                  "bastion_port": 60244
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    "requestBodies": {}
   },
   "x-internal": true
 }
