@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct BastionModification {
     pub bastion_name: String,
     pub subnet_cidr: String,
-    pub ssh_port: i32,
-    pub wireguard_port: i32,
+
 }
 
 #[derive(Serialize, Deserialize)]
