@@ -68,5 +68,5 @@ spec:
       containers:
         - name: bastion-controller
           image: ghcr.io/bastionmania/bastionmania/bastionresourcecontroller:dev
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
       serviceAccountName: bastion-controller

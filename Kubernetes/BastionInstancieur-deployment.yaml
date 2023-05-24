@@ -60,7 +60,7 @@ spec:
       containers:
         - name: bastion-instancieur
           image: ghcr.io/bastionmania/bastionmania/bastionresourcecontroller:dev
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
       serviceAccountName: bastion-instancieur
 ---
 apiVersion: v1
