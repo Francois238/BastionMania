@@ -144,7 +144,7 @@ pub async fn create_bastion(
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     info!("début de la fonction create_bastion");
-    let id_user: Uuid = VerifyUser(req).await?;
+    let id_user: Uuid = VerifyAdmin(req).await?;
     let liste_bastions = Bastion::find_all()?;
     //generation d'un net_id libre pour le bastion
     let net_ids: Vec<i32> = liste_bastions.into_iter().map(|b| b.net_id).collect();
@@ -565,7 +565,6 @@ pub async fn generate_ssh_access_credentials(
     if !authorisation {
         log::debug!("pas sur le bastion");
         return Err(ApiError::new(404, "Not Found".to_string()));
-        
     }
 
     let authorisation: bool =
@@ -574,7 +573,6 @@ pub async fn generate_ssh_access_credentials(
     if !authorisation {
         log::debug!("pas sur la ressource");
         return Err(ApiError::new(404, "Not Found".to_string()));
-        
     }
 
     let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
@@ -622,7 +620,6 @@ pub async fn generate_wireguard_access_credentials(
     if !authorisation {
         log::debug!("pas sur le bastion");
         return Err(ApiError::new(404, "Not Found".to_string()));
-        
     }
 
     let authorisation: bool =
@@ -631,7 +628,6 @@ pub async fn generate_wireguard_access_credentials(
     if !authorisation {
         log::debug!("pas sur la ressource");
         return Err(ApiError::new(404, "Not Found".to_string()));
-            
     }
 
     let wireguardcredentials = UserConfigWireguardInsertable {
@@ -813,7 +809,6 @@ pub async fn delete_users(
     for user in users {
         user_suppression(user.user_id, ressource_id.clone()).await?;
     }
-    
 
     let retour_api = RetourAPI {
         success: true,
