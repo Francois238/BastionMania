@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://intern-bastion-id:9000",
+      "url": "http://bastion-internal-<id>:9000",
       "description": "internal"
     }
   ],
