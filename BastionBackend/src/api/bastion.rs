@@ -874,4 +874,12 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(generate_wireguard_access_credentials);
     cfg.service(start_session);
     cfg.service(stop_session);
+
+    cfg.service(get_user);
+    cfg.service(create_user);
+    cfg.service(delete_users);
+
+    cfg.service(get_a_user);
+    cfg.service(delete_user);
+    
 }
