@@ -6,7 +6,7 @@ use diesel::Insertable;
 #[derive(Serialize, Deserialize, Insertable)]
 #[table_name = "wireguardressource"]
 pub struct WireguardRessourceCreation {
-    pub subnet_cidr: String,
+    pub target_ip: String,
 
 }
 

@@ -22,7 +22,7 @@ pub struct RessourceSshCreation {
 pub struct RessourceWireguardCreation {
     pub name: String,
     pub rtype: String,
-    pub subnet_cidr: String,
+    pub target_ip: String,
 }
 
 

@@ -30,7 +30,7 @@ CREATE TABLE wireguardressource(
                                    id SERIAL PRIMARY KEY,
                                    id_bastion TEXT NOT NULL,
                                    name TEXT NOT NULL,
-                                   subnet_cidr TEXT NOT NULL
+                                   target_ip TEXT NOT NULL
 );
 
 CREATE TABLE sshressource(

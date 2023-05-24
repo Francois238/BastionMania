@@ -83,7 +83,7 @@ diesel::table! {
         id -> Int4,
         id_bastion -> Text,
         name -> Text,
-        subnet_cidr -> Text,
+        target_ip -> Text,
     }
 }
 

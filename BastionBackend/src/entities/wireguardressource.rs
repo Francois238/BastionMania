@@ -17,5 +17,5 @@ pub struct WireguardRessourceInsertable {
     pub id: i32,
     pub id_bastion: String,
     pub name: String,
-    pub subnet_cidr: String,
+    pub target_ip: String,
 }

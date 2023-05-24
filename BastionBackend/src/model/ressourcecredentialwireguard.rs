@@ -16,11 +16,11 @@ pub struct ConfigWireguardInstanceCreate {
 
 #[derive(Serialize, Deserialize)]
 pub struct ActivationWireguardSession{
-    pub uuid_user: String,
-    pub uuid_ressource: String,
-    pub pubkey: String,
-    pub ip: String,
-    pub subnet_cidr: i32,
+    pub id: String,
+    pub id_client: String,
+    pub public_key: String,
+    pub client_ip: String,
+    pub target_ip: String,
 }
 
 #[derive(Serialize, Deserialize)]
