@@ -17,5 +17,7 @@ RUN cargo build --release --bin bastion-ressource-controller --target x86_64-unk
 
 FROM scratch
 
+USER 1000
+
 COPY --from=builder /usr/src/bastion-controller/target/x86_64-unknown-linux-musl/release/bastion-ressource-controller /app/bastion-ressource-controller
 CMD ["/app/bastion-ressource-controller"]
