@@ -5,6 +5,4 @@ pub struct RetourAPI<A> {
     pub success: bool,
     pub message: String,
     pub data: A,
-
 }
-
