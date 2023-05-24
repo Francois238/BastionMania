@@ -5,7 +5,8 @@
   },
   "info": {
     "title": "Bastion",
-    "version": "1.0"
+    "version": "1.0",
+    "description": ""
   },
   "servers": [
     {
@@ -14,41 +15,75 @@
     }
   ],
   "paths": {
-    "/adduser": {
-      "post": {
-        "summary": "",
-        "operationId": "post-adduser",
+    "/wireguard/public_key": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
         "responses": {
           "200": {
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request"
+            "description": "The raw pulbic key",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "public_key"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": "VNhIxEfMj9rY4hAhO1R2sZB7cDPI5krSMmeh0FTaM0Y="
+                  }
+                }
+              }
+            }
           }
         },
-        "description": "Ajoute un peer à la configuration wireguard",
+        "operationId": "get-wireguard-public_key",
+        "description": "Get the wireguard public_key of the bastion"
+      }
+    },
+    "/wireguard/configs": {
+      "post": {
+        "summary": "",
+        "operationId": "post-wireguard-configs",
+        "responses": {
+          "200": {
+            "description": "success"
+          }
+        },
+        "description": "Create a wireguard peer on the bastion. Used when activating a session",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "x-examples": {
-                  "Example 1": {
-                    "public_key": "EtzVua6mUvDrs9Y1ve/VOA5wkZWqLu36CFduyZr4LgE=",
-                    "allowed_ips": "10.10.5.2/32"
-                  }
-                },
                 "properties": {
-                  "public_key": {
-                    "type": "string"
+                  "id": {
+                    "type": "string",
+                    "description": "Ressource id"
                   },
-                  "allowed_ips": {
-                    "type": "string"
+                  "client_id": {
+                    "type": "string",
+                    "description": "User id"
+                  },
+                  "public_key": {
+                    "type": "string",
+                    "description": "User wireguard public key"
+                  },
+                  "client_ip": {
+                    "type": "string",
+                    "description": "wireguard client ip"
+                  },
+                  "target_ip": {
+                    "type": "string",
+                    "description": "Ip of the machine accessed by wireguard"
                   }
                 },
                 "required": [
+                  "id",
+                  "client_id",
                   "public_key",
-                  "allowed_ips"
+                  "client_ip",
+                  "target_ip"
                 ]
               }
             }
@@ -56,37 +91,271 @@
         }
       }
     },
-    "/deluser": {
-      "post": {
+    "/wireguard/configs/{res_id}/{client_id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "res_id",
+          "in": "path",
+          "required": true,
+          "description": "wireguard resource id"
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "client_id",
+          "in": "path",
+          "required": true,
+          "description": "user id"
+        }
+      ],
+      "delete": {
         "summary": "",
-        "operationId": "post-deluser",
+        "operationId": "delete-wireguard-configs-res_id-client_id",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "description": "Supprime un peer avec sa clé publique",
+        "description": "Delete a wireguard session"
+      }
+    },
+    "/ssh/ressources": {
+      "post": {
+        "summary": "",
+        "operationId": "post-ssh-ressources",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "description": "Create a ssh resource on the bastion",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "x-examples": {
-                  "Example 1": {
-                    "public_key": "EtzVua6mUvDrs9Y1ve/VOA5wkZWqLu36CFduyZr4LgE="
-                  }
-                },
                 "properties": {
-                  "public_key": {
-                    "type": "string"
+                  "id": {
+                    "type": "string",
+                    "description": "SSH resource id"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "ssh resource name, valid unix username"
+                  },
+                  "ip": {
+                    "type": "string",
+                    "description": "machien ip address"
+                  },
+                  "port": {
+                    "type": "string",
+                    "description": "machine port"
+                  },
+                  "users": {
+                    "type": "array",
+                    "description": "Empty list",
+                    "items": {}
                   }
                 },
                 "required": [
+                  "id",
+                  "name",
+                  "ip",
+                  "port",
+                  "users"
+                ]
+              }
+            }
+          },
+          "description": "SSh resource"
+        }
+      }
+    },
+    "/ssh/ressources/{ressource_id}/users": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-ssh-ressources-ressource_id-users",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "description": "Add access to a user on a resource, used when start session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "user id"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "username of user on machine"
+                  },
+                  "public_key": {
+                    "type": "string",
+                    "description": "ssh public key of user to access bastion"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
                   "public_key"
                 ]
               }
             }
+          },
+          "description": "SSH user"
+        }
+      }
+    },
+    "/ssh/ressources/{ressource_id}/users/{user_id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true,
+          "description": "ssh ressource id"
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "user id"
+        }
+      ],
+      "delete": {
+        "summary": "",
+        "operationId": "delete-ssh-ressources-ressource_id-users-user_id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
+        },
+        "description": "Remove and kill all session of a user on the ssh resource"
+      }
+    },
+    "/ssh/ressources/{ressource_id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true,
+          "description": "SSH ressource id"
+        }
+      ],
+      "delete": {
+        "summary": "",
+        "operationId": "delete-ssh-ressources-ressource_id",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "description": "Delete a ssh ressource, kill all active session"
+      }
+    },
+    "/agent": {
+      "post": {
+        "summary": "",
+        "operationId": "post-agent",
+        "responses": {
+          "200": {
+            "description": "The raw wireguard public_key of the bastion",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "description": "Configure the agent of the bastion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "public_key": {
+                    "type": "string",
+                    "description": "wireguard public key of the agent"
+                  },
+                  "endpoint": {
+                    "type": "string",
+                    "description": "ip:port that the bastion use to access the agent"
+                  },
+                  "target_cidr": {
+                    "type": "string",
+                    "description": "The CIDR of the network the agent is in"
+                  }
+                },
+                "required": [
+                  "public_key",
+                  "endpoint",
+                  "target_cidr"
+                ]
+              }
+            }
+          },
+          "description": "Agent config"
         }
       }
     }
