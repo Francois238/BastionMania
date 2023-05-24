@@ -26,4 +26,4 @@ USER runner
 
 WORKDIR /home/runner/app/
 
-ENTRYPOINT ["/app/BastionManager"]
+ENTRYPOINT ["/home/runner/app/BastionManager"]
