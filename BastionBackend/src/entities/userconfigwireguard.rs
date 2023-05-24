@@ -12,7 +12,7 @@ pub struct UserConfigWireguard {
     pub user_net_id: i32,
 }
 
-#[derive(Serialize, Deserialize, AsChangeset, Insertable)]
+#[derive(Serialize, Deserialize, AsChangeset, Insertable, Debug)]
 #[table_name = "user_config_wireguard"]
 pub struct UserConfigWireguardInsertable {
     pub uuid_user: String,

@@ -117,7 +117,7 @@ pub async fn VerifyAdmin(req: HttpRequest) -> Result<Uuid, ApiError> {
     let token = MyToken {
         jwt
     };
-    debug!("admin token : {:?}", mytoken);
+    debug!("admin token : {:?}", token);
 
     let url = env::var("AUTHENTICATION_ADMIN").map_err(|_| {
         ApiError::new(

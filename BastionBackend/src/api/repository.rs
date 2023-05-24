@@ -443,10 +443,12 @@ impl UserConfigWireguard{
     }
 
     pub async fn start_wireguard_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
+        log::info!("start_wireguard_session");
         let userconfig = UserConfigWireguard::userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
         let client = reqwest::Client::new();
         let bastion = Ressource::ressource_bastion(ressource_id.clone())?;
         let ip = format!("10.10.{}.{}", bastion.net_id.to_string(), userconfig.user_net_id.to_string());
+        log::debug!("ip: {}", ip);
         
     
                 let session = ActivationWireguardSession{
@@ -465,11 +467,13 @@ impl UserConfigWireguard{
                     .send()
                     .await
                     .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+                log::debug!("response: {:?}", _response);
 
         Ok(())
     }
 
     pub async fn stop_wireguard_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
+        log::info!("stop_wireguard_session");
         let userconfig = UserConfigWireguard::userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
         let client = reqwest::Client::new();
         let bastion = Ressource::ressource_bastion(ressource_id.clone())?;
@@ -483,6 +487,7 @@ impl UserConfigWireguard{
                     .send()
                     .await
                     .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+                log::debug!("response: {:?}", _response);
 
         Ok(())
     }
@@ -538,7 +543,7 @@ impl UserConfigSsh {
     }
 
     pub async fn start_ssh_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
-        
+        log::info!("start_ssh_session");
         let client = reqwest::Client::new();
         let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
         let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
@@ -559,19 +564,16 @@ impl UserConfigSsh {
             .send()
             .await
             .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+        log::debug!("response: {:?}", _response);
 
         return Ok(())
     }
 
     pub async fn stop_ssh_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
-        
+        log::info!("stop_ssh_session");
         let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
         let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
 
-        let session = DesactivationSshSession{
-            uuid_user: userconfig.uuid_user.clone(),
-            uuid_ressource: userconfig.uuid_ressource.clone(),
-        };
         //TODO url
         let client = reqwest::Client::new();
         let url = format!("http://bastion-internal-{}:9000//ssh/ressources/{ressource_id}/users/{user_id}",ressource.id_bastion);
@@ -580,20 +582,24 @@ impl UserConfigSsh {
             .send()
             .await
             .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+        log::debug!("response: {:?}", _res);
 
         return Ok(())
 
 }}
 
 pub async fn user_suppression(user_id: String, ressource_id: String) -> Result<HttpResponse, ApiError> {
+    log::info!("user_suppression");
     let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
 
     if ressource.rtype == "wireguard" && ressource.id_wireguard.is_some(){
+        log::debug!("wireguard: {}", ressource.id_wireguard.clone().unwrap());
 
         let _ = UserConfigWireguard::stop_wireguard_session(user_id.clone(), ressource_id.clone()).await?;
         let _ = UserConfigWireguard::userconfigwireguarddelete(user_id.clone(), ressource_id.clone())?;
     }
     else if ressource.rtype == "ssh" && ressource.id_ssh.is_some(){
+        log::debug!("ssh: {}", ressource.id_ssh.clone().unwrap());
 
         let _ = UserConfigSsh::stop_ssh_session(user_id.clone(), ressource_id.clone()).await?;
         let _ = UserConfigSsh::userconfigsshdelete(user_id.clone(), ressource_id.clone())?;
@@ -606,7 +612,7 @@ pub async fn user_suppression(user_id: String, ressource_id: String) -> Result<H
 }
 
 pub async fn ressource_suppression(bastion_id: String,ressource_id: String) -> Result<HttpResponse, ApiError>{
-
+    log::info!("ressource_suppression");
     let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
     let users: Vec<Users> = Users::find_users_ressources(ressource.id.clone())?;
     let client = reqwest::Client::new();
@@ -618,6 +624,7 @@ pub async fn ressource_suppression(bastion_id: String,ressource_id: String) -> R
 
     // supprimer la ressource de la base de donnée
     let rtype = ressource.rtype;
+    log::debug!("rtype: {}", rtype);
 
     if rtype == "wireguard" && ressource.id_wireguard.is_some(){
         let wid = ressource.id_wireguard.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
@@ -626,12 +633,15 @@ pub async fn ressource_suppression(bastion_id: String,ressource_id: String) -> R
     else if rtype == "ssh" && ressource.id_ssh.is_some(){
         let sid = ressource.id_ssh.ok_or(ApiError::new(404, "Not Found".to_string()))?.clone();
         let _ = SshRessource::delete_a_ssh_ressource(sid, bastion_id.clone())?;
+
+
         let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources");
         let _response = client
             .delete(&url)
             .send()
             .await
             .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+        log::debug!("response: {:?}", _response);
     }
     let ressource = Ressource::delete_a_ressource(ressource_id,bastion_id)?;
     Ok(HttpResponse::Ok().json(ressource))
@@ -639,6 +649,7 @@ pub async fn ressource_suppression(bastion_id: String,ressource_id: String) -> R
 }
 
 pub async fn suppression_bastion(bastion_id: String) -> Result<HttpResponse, ApiError>{
+    log::info!("suppression_bastion");
 
     let ressources: Vec<Ressource> = Ressource::find_all_ressources(bastion_id.clone())?;
 

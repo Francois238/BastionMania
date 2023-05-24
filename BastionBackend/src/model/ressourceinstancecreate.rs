@@ -11,7 +11,7 @@ pub struct RessourceInstanceCreate {
     pub id_k8s: Option<i32>,    
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize,Debug)]
 pub struct RessourceSshInstanceCreate{
     pub id: String,
     pub name: String,
