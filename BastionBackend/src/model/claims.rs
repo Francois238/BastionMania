@@ -20,7 +20,7 @@ pub struct Claims {
     exp: OffsetDateTime,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct MyToken {
     pub jwt: String,
 }
@@ -83,6 +83,8 @@ pub async fn VerifyUser(req: HttpRequest) -> Result<Uuid, ApiError> {
         jwt
     };
 
+    debug!("user token : {:?}", mytoken);
+
     let url = env::var("AUTHENTICATION_USER").map_err(|_| {
         ApiError::new(
             500,
@@ -115,6 +117,7 @@ pub async fn VerifyAdmin(req: HttpRequest) -> Result<Uuid, ApiError> {
     let token = MyToken {
         jwt
     };
+    debug!("admin token : {:?}", mytoken);
 
     let url = env::var("AUTHENTICATION_ADMIN").map_err(|_| {
         ApiError::new(
