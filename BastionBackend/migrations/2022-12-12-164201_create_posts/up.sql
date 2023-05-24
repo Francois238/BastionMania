@@ -2,9 +2,8 @@ CREATE TABLE "bastion"(
                           bastion_id TEXT PRIMARY KEY,
                           name TEXT NOT NULL,
                           subnet_cidr TEXT NOT NULL,
-                          agent_endpoint TEXT NOT NULL,
-                          pubkey TEXT NOT NULL,
-                          port INT NOT NULL,
+                          ssh_port INT NOT NULL,
+                          wireguard_port INT NOT NULL,
                           net_id INT NOT NULL
 );
 

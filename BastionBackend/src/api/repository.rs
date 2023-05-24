@@ -72,32 +72,6 @@ impl Bastion {
         Ok(bastion)
     }
 
-
-
-
-
-    pub fn update_un_bastion(
-        bastion_id: String,
-        modifications: BastionModification,
-    ) -> Result<Bastion, ApiError> {
-        let mut conn = db::connection()?;
-
-        let name = modifications.name;
-        let subnet_cidr = modifications.subnet_cidr;
-        let agent_endpoint = modifications.agent_endpoint;
-
-        let bastion = diesel::update(bastion::table)
-            .filter(bastion::bastion_id.eq(bastion_id))
-            .set((
-                bastion::name.eq(name),
-                bastion::subnet_cidr.eq(subnet_cidr),
-                bastion::agent_endpoint.eq(agent_endpoint),
-            ))
-            .get_result(&mut conn)?;
-
-        Ok(bastion)
-    }
-
     pub fn delete_un_bastion(id: String) -> Result<usize, ApiError> {
         let mut conn = db::connection()?;
 
@@ -198,14 +172,11 @@ pub fn build_client_address(ressource_id: String, user_id: String, bastion_id: S
         .filter(users::ressource_id.eq(ressource_id))
         .first(&mut conn)?;
 
-    let mut client_address = "10.10".to_string();
-    client_address.push_str(".");
-    client_address.push_str(bastion.net_id.clone().to_string().as_str());
-    client_address.push_str(".");
-    client_address.push_str(user.net_id.clone().to_string().as_str());
-    Ok(client_address.to_string())
+    let mut client_ip = format!("10.10.{}.{}", bastion.net_id.to_string(), user.net_id.to_string());
+    Ok(client_ip.to_string())
 }
 
+/*
 pub fn build_endpoint_user(bastion_ip: String, bastion_id: String) -> Result<String, ApiError> {
     let mut conn = db::connection()?;
 
@@ -238,7 +209,7 @@ pub fn get_bastion_subnet_cidr(bastion_id: String) -> Result<String, ApiError> {
         .first(&mut conn)?;
 
     Ok(bastion.subnet_cidr)
-}
+}*/
 
 
 

@@ -5,9 +5,8 @@ diesel::table! {
         bastion_id -> Text,
         name -> Text,
         subnet_cidr -> Text,
-        agent_endpoint -> Text,
-        pubkey -> Text,
-        port -> Int4,
+        ssh_port -> Int4,
+        wireguard_port -> Int4,
         net_id -> Int4,
     }
 }
