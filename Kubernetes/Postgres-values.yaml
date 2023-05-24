@@ -1,0 +1,11 @@
+# Define default db user, name, and password for PostgreSQL
+auth:
+  enablePostgresUser: true
+  postgresPassword: "ChangeMe" #TO CHANGE
+
+# The postgres helm chart use PVC "postgresql-data-claim"
+primary:
+  persistence:
+    enabled: true
+    existingClaim: "postgresql-nfs-claim"
+

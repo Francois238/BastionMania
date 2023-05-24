@@ -1,0 +1,31 @@
+[package]
+name = "bastion-ressource-controller"
+version = "0.1.0"
+edition = "2021"
+default-run = "bastion-ressource-controller"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+doc = false
+name = "bastion-ressource-controller"
+path = "src/main.rs"
+
+[[bin]]
+doc = false
+name = "gencrd"
+path = "src/gencrd.rs"
+
+
+[dependencies]
+kube = { version = "0.82.2", default-features = false, features = ["client", "rustls-tls","runtime", "derive"] }
+k8s-openapi = { version = "0.18.0", features = ["v1_26"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+tokio = { version = "1", features = ["full"] }
+schemars = "0.8.12"
+futures = "0.3"
+thiserror = "1.0"
+log = "0.4.17"
+env_logger = "0.10.0"
+

@@ -1,3 +1,4 @@
+use std::fs;
 use actix_web::{delete, post, get, web, HttpResponse, Responder};
 
 use crate::database::BastionDatabase;
@@ -6,6 +7,8 @@ use crate::ssh::user::SSHUser;
 use crate::{WireguardAgent, WireguardRessource};
 
 use log::{error, info};
+use wireguard_keys::Privkey;
+use crate::consts::WG_PRIVATE_KEY_PATH;
 use crate::wireguard::wgconfigure;
 
 
@@ -251,7 +254,22 @@ async fn set_agent(agent: web::Json<WireguardAgent>) -> HttpResponse{
         return HttpResponse::InternalServerError().body("Error saving agent");
     }
 
-    HttpResponse::Ok().body("success")
+    let bastion_private_key = match fs::read_to_string(WG_PRIVATE_KEY_PATH){
+        Ok(k) => k,
+        Err(e) => {
+            error!("Error reading private key: {}", e);
+            return HttpResponse::InternalServerError().body("Error reading private key");
+        }
+    };
+    let bastion_private_key = match Privkey::from_base64(&bastion_private_key){
+        Ok(k) => k,
+        Err(e) => {
+            error!("Error parsing private key: {}", e);
+            return HttpResponse::InternalServerError().body("Error parsing private key");
+        }
+    };
+
+    HttpResponse::Ok().body(bastion_private_key.pubkey().to_base64())
 }
 
 

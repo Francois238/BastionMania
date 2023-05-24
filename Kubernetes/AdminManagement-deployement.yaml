@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-management
+  namespace: bastion
+spec:
+  ports:
+  - port: 80 
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    pod-name: admin-management
+  type: ClusterIP
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-management
+  namespace: bastion
+  labels:
+    app: admin-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod-name: admin-management
+  template:
+    metadata:
+      labels:
+        pod-name: admin-management
+    spec:
+      containers:
+      - name: admin-management
+        image: docker.io/francois238/adminmanagement:7.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 8081
+        volumeMounts:
+          - name: mnt
+            mountPath: /home/runner/app/.env
+            subPath: fichier.properties
+      volumes:
+      - name: mnt
+        secret:
+          secretName: gestionadmin.conf

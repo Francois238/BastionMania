@@ -1,0 +1,11 @@
+apiVersion: bastionmania.fr/v1alpha1
+kind: Bastion
+metadata:
+  name: bastion-53fe1c63-4274-422f-afdf-ec44d498041e
+  namespace: bastion
+spec:
+  image: ghcr.io/bastionmania/bastionmania/bastion:dev
+  ssh_port: 40022
+  wireguard_port: 60000
+  bastion_id: "53fe1c63-4274-422f-afdf-ec44d498041e"
+  net_id: 2

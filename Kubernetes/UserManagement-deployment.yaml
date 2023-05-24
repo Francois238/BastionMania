@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-management
+  namespace: bastion
+spec:
+  ports:
+  - port: 80 
+    protocol: TCP
+    targetPort: 8082
+  selector:
+    pod-name: user-management
+  type: ClusterIP
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-management
+  namespace: bastion
+  labels:
+    app: user-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod-name: user-management
+  template:
+    metadata:
+      labels:
+        pod-name: user-management
+    spec:
+      containers:
+      - name: user-management
+        image: docker.io/francois238/usermanagement:11.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 8082
+        volumeMounts:
+          - name: mnt
+            mountPath: /home/runner/app/.env
+            subPath: fichier.properties
+      volumes:
+      - name: mnt
+        secret:
+          secretName: gestionuser.conf
