@@ -36,7 +36,7 @@ async fn verif_admin(token: web::Json<Token>) -> Result<HttpResponse, ApiError> 
     Ok(HttpResponse::Ok().json(response))
 }
 
-pub fn routes_verification(cfg: &mut web::ServiceConfig) {
+pub fn routes_jwt_verif(cfg: &mut web::ServiceConfig) {
     cfg.service(verif_user);
     cfg.service(verif_admin);
 }

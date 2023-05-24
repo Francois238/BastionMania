@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
             )
             .configure(admin::routes_admin)
             .configure(user::routes_user)
-            .configure(verification::routes_verification)
+            .configure(verification::routes_jwt_verif)
     })
     .bind(("0.0.0.0", 8080))?
     .run()
