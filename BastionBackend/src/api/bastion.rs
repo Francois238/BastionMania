@@ -4,6 +4,7 @@ use actix_web::{
     patch, post, web, HttpResponse, HttpRequest,
 };
 use base64::{engine, Engine};
+use diesel::PgSortExpressionMethods;
 use rand::{SeedableRng, RngCore};
 use std::env;
 
@@ -116,6 +117,12 @@ pub async fn create_bastion(
     let net_ids: Vec<i32> = liste_bastions.into_iter().map(|b| b.net_id).collect();
     let net_id = generate_bastion_freenetid(&net_ids);
 
+    let liste_bastions = Bastion::find_all()?;
+    let ports = liste_bastions.into_iter().map(|b| b.ssh_port).collect();
+    let ssh_port = generate_bastion_freeport(&ports);
+
+    let wireguard_port = ssh_port + 1;
+
     let mut mytoken = [0u8, 16];
 
     let mut alea = rand::rngs::StdRng::from_entropy();
@@ -129,8 +136,8 @@ pub async fn create_bastion(
     let bastion_id = bastion_id.to_string();
 
     let bastion_instance_create = BastionInstanceCreate {
-        ssh_port: bastion.ssh_port.clone(),
-        wireguard_port: bastion.wireguard_port.clone(),
+        ssh_port: ssh_port.clone(),
+        wireguard_port: wireguard_port.clone(),
         bastion_id: bastion_id.clone(),
         net_id: net_id.clone(),
     };
@@ -150,8 +157,8 @@ pub async fn create_bastion(
         bastion_id: bastion_id.clone(),
         name: bastion.bastion_name.clone(),
         subnet_cidr: bastion.subnet_cidr.clone(),
-        ssh_port: bastion.ssh_port.clone(),
-        wireguard_port: bastion.wireguard_port.clone(),
+        ssh_port: ssh_port.clone(),
+        wireguard_port: wireguard_port.clone(),
         net_id,
     };
 
