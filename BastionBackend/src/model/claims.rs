@@ -1,5 +1,6 @@
 use std::env;
 use actix_web::HttpRequest;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -74,6 +75,7 @@ pub fn extract_jwt_header(req: HttpRequest) -> Result<String, ApiError> {
 }
 
 pub async fn VerifyUser(req: HttpRequest) -> Result<Uuid, ApiError> {
+    debug!("Verification user");
 
     let jwt = extract_jwt_header(req)?;
 
@@ -89,15 +91,15 @@ pub async fn VerifyUser(req: HttpRequest) -> Result<Uuid, ApiError> {
     })?;
 
     let client = reqwest::Client::new(); //Envoie une requete au micro service user mangement pour ajouter le user dans sa BDD
-    let response = client.get(url).json(&mytoken).send().await.map_err(|_| {
+    let response = client.get(url).json(&mytoken).send().await.map_err(|e| {
         ApiError::new(
             401,
-            "unauthorized".to_string(),
+            format!("error verification authorization: {}", e)
         )
-    })?.json::<ResponseToken>().await.map_err(|_| {
+    })?.json::<ResponseToken>().await.map_err(|e| {
         ApiError::new(
             401,
-            "unauthorized".to_string(),
+            format!("error verification authorization response : {}", e)
         )
     })?;
 
@@ -107,7 +109,7 @@ pub async fn VerifyUser(req: HttpRequest) -> Result<Uuid, ApiError> {
 }
 
 pub async fn VerifyAdmin(req: HttpRequest) -> Result<Uuid, ApiError> {
-
+    debug!("Verification admin");
     let jwt = extract_jwt_header(req)?;
 
     let token = MyToken {
@@ -122,15 +124,15 @@ pub async fn VerifyAdmin(req: HttpRequest) -> Result<Uuid, ApiError> {
     })?;
 
     let client = reqwest::Client::new(); //Envoie une requete au micro service user mangement pour ajouter le user dans sa BDD
-    let response = client.get(url).json(&token).send().await.map_err(|_| {
+    let response = client.get(url).json(&token).send().await.map_err(|e| {
         ApiError::new(
             401,
-            "unauthorized".to_string(),
+            format!("error verification authorization: {}", e)
         )
-    })?.json::<ResponseToken>().await.map_err(|_| {
+    })?.json::<ResponseToken>().await.map_err(|e| {
         ApiError::new(
             401,
-            "unauthorized".to_string(),
+            format!("error verification authorization response : {}", e)
         )
     })?;
 
