@@ -442,11 +442,11 @@ pub async fn get_ressources(
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     let claims_admin : Result<Uuid, ApiError> = VerifyAdmin(req.clone()).await;
-
+    let bastion_id = bastion_id.into_inner();
     match claims_admin {
         Ok(id_admin) => {
-            let bastion_insere = Bastion::find_all()?;
-            return Ok(HttpResponse::Ok().json(bastion_insere))
+            let ressources = Ressource::find_all_ressources(bastion_id.clone())?;
+            return Ok(HttpResponse::Ok().json(ressources))
         },
         Err(ApiError) => {
             let id_user :Uuid = VerifyUser(req).await?;
@@ -459,14 +459,11 @@ pub async fn get_ressources(
                 ressources.push(ressource);
             
             
-        }
+            }
         return Ok(HttpResponse::Ok().json(ressources))
-    }
-}
-
-    let bastion_id = bastion_id.into_inner();
-    let ressources = Ressource::find_all_ressources(bastion_id)?;
-    Ok(HttpResponse::Ok().json(ressources))
+        }
+    } 
+   
 }
 
 #[delete("/bastions/{bastion_id}/ressources")]
@@ -514,7 +511,8 @@ pub async fn create_ssh_ressource(
         id: sid,
         id_bastion: bastion_id.clone(),
         name: ressource_data.name.clone(),
-        ip_machine: ressource_data.ip_machine.clone()
+        ip_machine: ressource_data.ip_machine.clone(),
+        port: ressource_data.port.clone(),
     };
     let specressource = SshRessource::create_ssh_ressources(ssh_insertion)?;
 

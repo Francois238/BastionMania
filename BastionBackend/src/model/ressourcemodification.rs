@@ -15,6 +15,7 @@ pub struct RessourceSshCreation {
     pub name: String,
     pub rtype: String,
     pub ip_machine: String,
+    pub port: i32,
 }
 
 #[derive(Serialize, Deserialize)]

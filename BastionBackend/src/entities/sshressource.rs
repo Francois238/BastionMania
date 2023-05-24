@@ -9,6 +9,7 @@ pub struct SshRessource {
     pub id_bastion: String,
     pub name: String,
     pub ip_machine: String,
+    pub port: i32,
 }
 
 #[derive(Serialize, Deserialize, AsChangeset, Insertable)]
@@ -18,4 +19,5 @@ pub struct SshRessourceInsertable {
     pub id_bastion: String,
     pub name: String,
     pub ip_machine: String,
+    pub port: i32,
 }

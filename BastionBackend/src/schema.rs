@@ -46,6 +46,7 @@ diesel::table! {
         id_bastion -> Text,
         name -> Text,
         ip_machine -> Text,
+        port -> Int4,
     }
 }
 

@@ -38,7 +38,8 @@ CREATE TABLE sshressource(
                              id SERIAL PRIMARY KEY,
                              id_bastion TEXT NOT NULL,
                              name TEXT NOT NULL,
-                             ip_machine TEXT NOT NULL
+                             ip_machine TEXT NOT NULL,
+                            port INT NOT NULL
 );
 
 CREATE TABLE k8sressource(

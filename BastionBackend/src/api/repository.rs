@@ -1,7 +1,7 @@
 use crate::entities::userconfigssh::{UserConfigSshInsertable, UserConfigSsh};
 use crate::entities::userconfigwireguard::{UserConfigWireguardInsertable, UserConfigWireguard};
-use crate::model::ressourcecredentialsssh::ActivationSshSession;
-use crate::model::ressourcecredentialwireguard::ActivationWireguardSession;
+use crate::model::ressourcecredentialsssh::{ActivationSshSession, DesactivationSshSession};
+use crate::model::ressourcecredentialwireguard::{ActivationWireguardSession, DesactivationWireguardSession};
 use crate::schema::{bastion, bastion_token, k8sressource, ressource, sshressource, users, wireguardressource, user_config_ssh, user_config_wireguard};
 use crate::api_error::ApiError;
 use crate::db;
@@ -71,6 +71,8 @@ impl Bastion {
 
         Ok(bastion)
     }
+
+
 
 
 
@@ -289,6 +291,20 @@ impl Ressource {
         Ok(users)
     }
 
+    pub fn ressource_bastion(ressource_id: String) -> Result<Bastion, ApiError> {
+        let mut conn = db::connection()?;
+
+        let ressource: Ressource = ressource::table
+            .filter(ressource::id.eq(ressource_id))
+            .first::<Ressource>(&mut conn)?;
+
+        let bastion: Bastion = bastion::table
+            .filter(bastion::bastion_id.eq(ressource.id_bastion))
+            .first::<Bastion>(&mut conn)?;
+
+        Ok(bastion)
+    }
+
     pub fn verification_appartenance(user_id: String, ressource_id: String) -> Result<bool, ApiError> {
         let mut conn = db::connection()?;
 
@@ -458,10 +474,16 @@ impl UserConfigWireguard{
     pub async fn start_wireguard_session(user_id: String, ressource_id: String) -> Result<(), ApiError>{
         let userconfig = UserConfigWireguard::userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
         let client = reqwest::Client::new();
+        let bastion = Ressource::ressource_bastion(ressource_id.clone())?;
+        let ip = format!("10.10.{}.{}", bastion.net_id.to_string(), userconfig.user_net_id.to_string());
+        
     
                 let session = ActivationWireguardSession{
+                    uuid_user: user_id.clone(),
+                    uuid_ressource: ressource_id.clone(),
                     pubkey: userconfig.pubkey.clone(),
-                    user_net_id: userconfig.user_net_id.clone(),
+                    ip: ip.clone(),
+                    subnet_cidr: userconfig.user_net_id.clone(),
                 };
                 //TODO url
                 let url = format!("??");
@@ -480,9 +502,9 @@ impl UserConfigWireguard{
         let userconfig = UserConfigWireguard::userconfigwireguardfind(user_id.clone(), ressource_id.clone())?;
         let client = reqwest::Client::new();
     
-                let session = ActivationWireguardSession{
-                    pubkey: userconfig.pubkey.clone(),
-                    user_net_id: userconfig.user_net_id.clone(),
+                let session = DesactivationWireguardSession{
+                    uuid_user: user_id.clone(),
+                    uuid_ressource: ressource_id.clone(),
                 };
                 //TODO url
                 let url = format!("??");
@@ -551,10 +573,17 @@ impl UserConfigSsh {
         
         let client = reqwest::Client::new();
         let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
+        let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+        let sshressource: SshRessource = SshRessource::find_a_ssh_ressource(ressource.id_ssh.clone().ok_or(ApiError::new(404, "Not Found".to_string()))?, ressource_id.clone())?;
 
         let session = ActivationSshSession{
-            pubkey: userconfig.pubkey.clone(),
+            uuid_user: userconfig.uuid_user.clone(),
             username: userconfig.username.clone(),
+            ip: sshressource.ip_machine.clone(),
+            port: sshressource.port.clone(),
+            users: Vec::new(),
+            
+
         };
         //TODO url
         let url = format!("??");
@@ -574,9 +603,9 @@ impl UserConfigSsh {
         let client = reqwest::Client::new();
         let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
 
-        let session = ActivationSshSession{
-            pubkey: userconfig.pubkey.clone(),
-            username: userconfig.username.clone(),
+        let session = DesactivationSshSession{
+            uuid_user: userconfig.uuid_user.clone(),
+            uuid_ressource: userconfig.uuid_ressource.clone(),
         };
         //TODO url
         let url = format!("??");
