@@ -161,7 +161,8 @@ pub async fn create_bastion(
     log::debug!("ssh_port: {:?}", ssh_port);
     log::debug!("wireguard_port: {:?}", wireguard_port);
 
-    let mut mytoken = [0u8, 16];
+    //generate a token of 64 charactars
+    let mut mytoken = [0u8; 64];
 
     let mut alea = rand::rngs::StdRng::from_entropy();
     alea.fill_bytes(&mut mytoken);
@@ -212,12 +213,12 @@ pub async fn create_bastion(
     log::debug!("bastion_token: {:?}", bastion_token);
 
     let _bastion_insere = Bastion::create(bastion_insertion)?;
-    let _bastion_token = Bastion::token_create(bastion_token)?;
+    let bastion_token = Bastion::token_create(bastion_token)?;
 
     let retour_api = RetourAPI {
         success: true,
         message: "Bastion créé".to_string(),
-        data: "ok".to_string(),
+        data: bastion_token,
     };
 
     Ok(HttpResponse::Ok().json(retour_api))
@@ -508,14 +509,14 @@ pub async fn create_wireguard_ressource(
 
 #[get("/bastions/{bastion_id}/ressources/{ressource_id}")]
 pub async fn get_a_ressource(
-    bastion_id: web::Path<String>,
-    ressource_id: web::Path<String>,
+    donnees: web::Path<(String, String)>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     info!("début de la fonction get_a_ressource");
+    let (bastion_id, ressource_id) = donnees.into_inner();
     let admin_id: Uuid = VerifyAdmin(req).await?;
 
-    let ressource = Ressource::find_a_ressource(ressource_id.into_inner())?;
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
 
     let retour_api = RetourAPI {
         success: true,
@@ -527,14 +528,14 @@ pub async fn get_a_ressource(
 
 #[delete("/bastions/{bastion_id}/ressources/{ressource_id}")]
 pub async fn delete_a_ressource(
-    bastion_id: web::Path<String>,
-    ressource_id: web::Path<String>,
+    donnees: web::Path<(String, String)>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     info!("début de la fonction delete_a_ressource");
+    let (bastion_id, ressource_id) = donnees.into_inner();
     let admin_id: Uuid = VerifyAdmin(req).await?;
-    let ressource_id = ressource_id.into_inner();
-    let bastion_id = bastion_id.into_inner();
+    let ressource_id = ressource_id.clone();
+    let bastion_id = bastion_id.clone();
     //TODO: envoyer la requete de suppression de ressource a l'intancieur
     let ressource_suppr = ressource_suppression(bastion_id, ressource_id).await?;
     log::debug!("ressource_suppr: {:?}", ressource_suppr);
@@ -866,10 +867,12 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
 
     cfg.service(get_ressources);
     cfg.service(delete_ressources);
+    cfg.service(create_ssh_ressource);
+    cfg.service(create_wireguard_ressource);
 
     cfg.service(get_a_ressource);
     cfg.service(delete_a_ressource);
-
+ 
     cfg.service(generate_ssh_access_credentials);
     cfg.service(generate_wireguard_access_credentials);
     cfg.service(start_session);
