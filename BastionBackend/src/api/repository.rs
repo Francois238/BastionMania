@@ -9,7 +9,7 @@ use crate::entities::{
 };
 use crate::model::ressourcecredentialsssh::{ActivationSshSession};
 use crate::model::ressourcecredentialwireguard::{
-    ActivationWireguardSession };
+    ActivationWireguardSession};
 
 use crate::schema::{bastion, bastion_token, k8sressource, ressource, sshressource, user_config_ssh, user_config_wireguard, users, wireguardressource};
 
@@ -64,7 +64,7 @@ impl Bastion {
                 .filter(bastion_token::bastion_id.eq(bastion_id))
                 .filter(bastion_token::token.eq(token)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(())
     }
 
@@ -149,7 +149,7 @@ impl Users {
                 .filter(users::user_id.eq(user_id))
                 .filter(users::ressource_id.eq(ressource_id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
 
         Ok(user)
     }
@@ -215,7 +215,7 @@ impl Ressource {
                 .filter(ressource::id.eq(id))
                 .filter(ressource::id_bastion.eq(id_bastion)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(ressource)
     }
 
@@ -303,7 +303,7 @@ impl WireguardRessource {
                 .filter(wireguardressource::id_bastion.eq(bastion_id))
                 .filter(wireguardressource::id.eq(id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(ressource)
     }
 }
@@ -343,7 +343,7 @@ impl SshRessource {
                 .filter(sshressource::id_bastion.eq(bastion_id))
                 .filter(sshressource::id.eq(id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(ressource)
     }
 }
@@ -383,7 +383,7 @@ impl K8sRessource {
                 .filter(k8sressource::id_bastion.eq(bastion_id))
                 .filter(k8sressource::id.eq(id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(ressource)
     }
 }
@@ -421,7 +421,7 @@ impl UserConfigWireguard {
                 .filter(user_config_wireguard::uuid_user.eq(user_id))
                 .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(())
     }
 
@@ -431,7 +431,7 @@ impl UserConfigWireguard {
             user_config_wireguard::table
                 .filter(user_config_wireguard::uuid_ressource.eq(ressource_id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(())
     }
 
@@ -530,7 +530,7 @@ impl UserConfigSsh {
                 .filter(user_config_ssh::uuid_user.eq(user_id))
                 .filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(())
     }
 
@@ -539,7 +539,7 @@ impl UserConfigSsh {
         let _userconf = diesel::delete(
             user_config_ssh::table.filter(user_config_ssh::uuid_ressource.eq(ressource_id)),
         )
-        .execute(&mut conn)?;
+            .execute(&mut conn)?;
         Ok(())
     }
 
@@ -556,7 +556,7 @@ impl UserConfigSsh {
                 .id_ssh
                 .clone()
                 .ok_or(ApiError::new(404, "Not Found".to_string()))?,
-            ressource_id.clone(),
+            bastion_id.clone(),
         )?;
         log::debug!("sshressource: {:?}", sshressource);
         let session = ActivationSshSession {
@@ -564,7 +564,7 @@ impl UserConfigSsh {
             name: sshressource.name.clone(),
             public_key: userconfig.pubkey.clone(),
         };
-        
+
         let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{ressource_id}/users");
 
         let _response = client
@@ -678,21 +678,18 @@ pub async fn suppression_bastion(bastion_id: String) -> Result<HttpResponse, Api
             let _ = user_suppression(user.user_id.clone(), ressource.id.clone()).await?;
             let _ = UserConfigSsh::userconfigsshdelete(user.user_id.clone(), ressource.id.clone())?;
             let _ = UserConfigWireguard::userconfigwireguarddelete(user.user_id.clone(), ressource.id.clone())?;
-
         }
         let rtype = ressource.rtype;
-        if rtype == "wireguard"{
+        if rtype == "wireguard" {
             let specid = ressource.id_wireguard.unwrap();
             let WireguardRessource = WireguardRessource::delete_a_wireguard_ressource(specid, bastion_id.clone())?;
-
-        }
-        else if rtype == "ssh"{
+        } else if rtype == "ssh" {
             let specid = ressource.id_ssh.unwrap();
             let SshRessource = SshRessource::delete_a_ssh_ressource(specid, bastion_id.clone())?;
         }
         let _ = Users::delete_all_users(ressource.id.clone())?;
     }
-    
+
     let _ = Ressource::delete_all_ressources(bastion_id.clone())?;
     let bastion = Bastion::delete_un_bastion(bastion_id.clone())?;
     Ok(HttpResponse::Ok().json(bastion))
