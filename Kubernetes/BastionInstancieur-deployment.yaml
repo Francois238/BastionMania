@@ -15,7 +15,7 @@ rules:
   - verbs:
       - delete
       - create
-      - list
+      - get
     resources: ["bastions"]
     apiGroups: ["bastionmania.fr"]
 ---
@@ -60,8 +60,11 @@ spec:
     spec:
       containers:
         - name: bastion-instancieur
-          image: ghcr.io/bastionmania/bastionmania/bastionresourcecontroller:dev
+          image: ghcr.io/bastionmania/bastionmania/bastioninstancieur:dev
           imagePullPolicy: Always
+          env:
+            - name: BASTION_IMAGE
+              value: ghcr.io/bastionmania/bastionmania/bastion:dev
       serviceAccountName: bastion-instancieur
 ---
 apiVersion: v1
