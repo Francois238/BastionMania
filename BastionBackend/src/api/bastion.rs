@@ -51,7 +51,10 @@ pub async fn config_my_agent(
 
     let my_bastion = Bastion::token_find(agent_ask_info.token)?;
     log::debug!("my_bastion: {:?}", my_bastion);
+
     let bastion = Bastion::find_un_bastion(my_bastion.bastion_id.to_string())?;
+    log::debug!("bastion: {:?}", bastion);
+
 
     let agent_pair = AgentPairInfo {
         endpoint: agent_ask_info.agent_host,
@@ -239,12 +242,7 @@ pub async fn find_a_bastion(
             log::debug!("non admin");
             let user_id: Uuid = VerifyUser(req).await?;
             let user_id = user_id.to_string();
-            let authorisation = Bastion::verification_appartenance(user_id, bastion_id.clone())
-                .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
-            if !authorisation {
-                log::debug!("non autorisé");
-                return Err(ApiError::new(404, "Not Found".to_string()));
-            }
+
             let bastion = Bastion::find_un_bastion(bastion_id)?;
 
             let retour_api = RetourAPI {
@@ -555,12 +553,6 @@ pub async fn generate_ssh_access_credentials(
     let user_id: Uuid = VerifyUser(req).await?;
     let (bastion_id, ressource_id) = donnees.into_inner();
     let user_id = user_id.to_string();
-    let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
-        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
-    if !authorisation {
-        log::debug!("pas sur le bastion");
-        return Err(ApiError::new(404, "Not Found".to_string()));
-    }
 
     let authorisation: bool =
         Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())
@@ -610,12 +602,6 @@ pub async fn generate_wireguard_access_credentials(
     let user_id: Uuid = VerifyUser(req).await?;
     let (bastion_id, ressource_id) = donnees.into_inner();
     let user_id = user_id.to_string();
-    let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
-        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
-    if !authorisation {
-        log::debug!("pas sur le bastion");
-        return Err(ApiError::new(404, "Not Found".to_string()));
-    }
 
     let authorisation: bool =
         Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())
@@ -658,13 +644,6 @@ pub async fn start_session(
     let user_id: Uuid = VerifyUser(req).await?;
     let (bastion_id, ressource_id) = donnees.into_inner();
     let user_id = user_id.to_string();
-    let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
-        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
-    if !authorisation {
-        log::debug!("pas sur le bastion");
-        return Err(ApiError::new(404, "Not Found".to_string()));
-    }
-
     let authorisation: bool =
         Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())
             .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
@@ -702,12 +681,6 @@ pub async fn stop_session(
     let user_id: Uuid = VerifyUser(req).await?;
     let (bastion_id, ressource_id) = donnees.into_inner();
     let user_id = user_id.to_string();
-    let authorisation = Bastion::verification_appartenance(user_id.clone(), bastion_id.clone())
-        .map_err(|_| ApiError::new(404, "Not Found".to_string()))?;
-    if !authorisation {
-        log::debug!("pas sur le bastion");
-        return Err(ApiError::new(404, "Not Found".to_string()));
-    }
 
     let authorisation: bool =
         Ressource::verification_appartenance(user_id.clone(), ressource_id.clone())

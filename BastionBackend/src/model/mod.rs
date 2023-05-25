@@ -17,6 +17,7 @@ pub mod agentproof;
 pub mod ressourcecredentialsssh;
 pub mod ressourcecredentialwireguard;
 
+
 pub use bastioninstancecreate::BastionInstanceCreate;
 pub use bastionmodification::BastionModification;
 pub use bastionmodification::BastionSuppression;
