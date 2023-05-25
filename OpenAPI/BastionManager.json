@@ -69,16 +69,7 @@
           }
         },
         "operationId": "get-bastion",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "uuid",
-            "description": "affichage différent selon user ou admin"
-          }
-        ],
+        "parameters": [],
         "description": "affiche la liste complète/d'appartenance selon si l'on est admin/user"
       },
       "post": {
@@ -153,16 +144,7 @@
           },
           "description": ""
         },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "uuid",
-            "description": "admin seulement"
-          }
-        ],
+        "parameters": [],
         "description": "création d'un bastion"
       },
       "parameters": []
@@ -242,16 +224,7 @@
           }
         },
         "operationId": "get-bastion-bastion_id",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "uuid",
-            "description": "affiche un bastion correspondant à l'URL"
-          }
-        ],
+        "parameters": [],
         "description": "affiche le bastion d'id {bastion_id}",
         "requestBody": {
           "content": {
@@ -321,16 +294,7 @@
             "description": "Internal Server Error"
           }
         },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "uuid",
-            "description": "admin seulement"
-          }
-        ],
+        "parameters": [],
         "description": "supprime le bastion"
       }
     },
@@ -559,14 +523,7 @@
         },
         "operationId": "get-bastions-bastion_id-ressources",
         "description": "affiches l'ensemble des ressources accessible par le bastion",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie"
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -621,7 +578,8 @@
               }
             }
           }
-        }
+        },
+        "description": "efface la ressource en bdd, envoie une demande d'arret de chaque session et efface les config user associées"
       }
     },
     "/bastions/{bastion_id}/ressources/create/ssh": {
@@ -689,7 +647,8 @@
               }
             }
           }
-        }
+        },
+        "description": "crée les données pour la ressource ssh et l'envoie au bastion, puis demande l'ip à contacter à l'agent"
       }
     },
     "/bastions/{bastion_id}/ressources/create/wireguard": {
@@ -757,7 +716,8 @@
               }
             }
           }
-        }
+        },
+        "description": "crée les données pour la ressource wireguard en local, mais pas de communication avec les autres API"
       }
     },
     "/bastions/{bastion_id}/ressources/{ressource_id}/getressourcecredentials/ssh": {
@@ -839,7 +799,8 @@
               }
             }
           }
-        }
+        },
+        "description": "crée les droits d'accès de l'utilisateur à la ressource ssh"
       }
     },
     "/bastions/{bastion_id}/ressources/{ressource_id}/getressourcecredentials/wireguard": {
@@ -906,7 +867,8 @@
               }
             }
           }
-        }
+        },
+        "description": "crée les droits d'accès à la ressource wireguard"
       }
     },
     "/bastions/{bastion_id}/ressources/{ressource_id}/users": {
@@ -983,7 +945,8 @@
               }
             }
           }
-        }
+        },
+        "description": "affiche tous les utilisateur du bastion"
       },
       "post": {
         "summary": "",
@@ -1043,7 +1006,8 @@
             }
           },
           "description": ""
-        }
+        },
+        "description": "crée un nouvel utilisateur "
       },
       "delete": {
         "summary": "",
@@ -1099,7 +1063,8 @@
               }
             }
           }
-        }
+        },
+        "description": "supprime tous les utilisateurs, arrête leur session et efface leur config "
       }
     },
     "/bastions/{bastion_id}/ressources/{ressource_id}/users/{user_id}": {
@@ -1184,7 +1149,8 @@
               }
             }
           }
-        }
+        },
+        "description": "affiche un user"
       },
       "delete": {
         "summary": "",
@@ -1240,7 +1206,8 @@
               }
             }
           }
-        }
+        },
+        "description": "supprime tous les utilisateur, arrête leur session et efface leur config "
       }
     },
     "/agent": {
@@ -1341,7 +1308,7 @@
             "description": "Internal Server Error"
           }
         },
-        "description": "",
+        "description": "envoie la requête de création de session au bastion",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1418,7 +1385,7 @@
             "description": "Internal Server Error"
           }
         },
-        "description": "",
+        "description": "envoie la requête d'arrêt de session au bastion",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1449,22 +1416,27 @@
         "type": "object",
         "properties": {
           "bastion_id": {
-            "type": "integer"
+            "type": "string",
+            "description": "uuid"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "pour affichage en front"
           },
           "subnet_cidr": {
             "type": "string"
           },
           "ssh_port": {
-            "type": "string"
+            "type": "string",
+            "description": "attibution dynamique"
           },
           "wireguard_port": {
-            "type": "string"
+            "type": "string",
+            "description": "attribution dynamique"
           },
           "net_id": {
-            "type": "integer"
+            "type": "integer",
+            "description": "pour définir son sous réseau"
           }
         },
         "required": [
@@ -1484,43 +1456,26 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer"
+            "type": "integer",
+            "description": "généré automatiquement en bdd"
           },
           "user_id": {
-            "type": "integer"
+            "type": "string",
+            "description": "uuid"
           },
           "ressource_id": {
-            "type": "integer"
+            "type": "string",
+            "description": "uuid"
           },
           "net_id": {
-            "type": "integer"
+            "type": "integer",
+            "description": "permet de contruire l'ip du user en le combinant avec le net_id bastion"
           }
         },
         "required": [
           "user_id",
           "ressource_id",
           "net_id"
-        ]
-      },
-      "ConfigAgent": {
-        "title": "ConfigAgent",
-        "x-stoplight": {
-          "id": "0ms8xmek5bsnl"
-        },
-        "type": "object",
-        "properties": {
-          "privkey": {
-            "type": "string",
-            "description": "de l'agent"
-          },
-          "pubkey": {
-            "type": "string",
-            "description": "du bastion"
-          }
-        },
-        "required": [
-          "privkey",
-          "pubkey"
         ]
       },
       "BastionModification": {
@@ -1546,25 +1501,6 @@
           "agent_endpoint"
         ]
       },
-      "ConfigUser": {
-        "title": "ConfigUser",
-        "x-stoplight": {
-          "id": "pafnkoi4az70m"
-        },
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "net_id": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "net_id"
-        ]
-      },
       "UserModification": {
         "title": "UserModification",
         "x-stoplight": {
@@ -1577,30 +1513,6 @@
           }
         }
       },
-      "ConfigClient": {
-        "title": "ConfigClient",
-        "x-stoplight": {
-          "id": "xaymm88bi2der"
-        },
-        "type": "object",
-        "properties": {
-          "client_private_key": {
-            "type": "string"
-          },
-          "client_address": {
-            "type": "string"
-          },
-          "bastion_public_key": {
-            "type": "string"
-          },
-          "bastion_endpoint": {
-            "type": "string"
-          },
-          "subnet_cidr": {
-            "type": "string"
-          }
-        }
-      },
       "Ressource": {
         "title": "Ressource",
         "x-stoplight": {
@@ -1609,25 +1521,32 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "uuid"
           },
           "id_bastion": {
-            "type": "string"
+            "type": "string",
+            "description": "uuid"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "pour le front"
           },
           "rtype": {
-            "type": "string"
+            "type": "string",
+            "description": "\"wireguard\" ou \"ssh\" qui doivent être rentré exactement   "
           },
           "id_wireguard": {
-            "type": "string"
+            "type": "string",
+            "description": "attribué en fonction des autres ressources du même type"
           },
           "id_ssh": {
-            "type": "string"
+            "type": "string",
+            "description": "attribué en fonction des autres ressources du même type"
           },
           "id_k8s": {
-            "type": "string"
+            "type": "string",
+            "description": "attribué en fonction des autres ressources du même type"
           }
         }
       },
