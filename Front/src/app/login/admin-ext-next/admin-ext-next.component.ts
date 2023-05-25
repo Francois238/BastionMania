@@ -22,7 +22,7 @@ export class AdminExtNextComponent {
 
       error: err => {
 
-        console.log("erreur")
+        this.router.navigate(['/login']);
       }
     })
   }

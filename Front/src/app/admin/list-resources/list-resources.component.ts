@@ -5,6 +5,8 @@ import { AdminInfo } from '../admin-info';
 import { AdminService } from '../admin.service';
 import { BastionInfo } from '../bastion-info';
 import { NewAdmin } from '../new-admin';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { RessourceInfo } from '../ressource-info';
 
 @Component({
   selector: 'app-list-resources',
@@ -25,10 +27,14 @@ export class ListResourcesComponent {
   public mailCrtl: FormControl;
   public passwordCrtl: FormControl;
 
-  public listRessources : Array<BastionInfo> = new Array<BastionInfo>();
+  public bastion! : BastionInfo;
+
+  public listRessources : Array<RessourceInfo> = new Array<RessourceInfo>();
+
+  public bastion_id : string = '';
 
 
-  constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService) { 
+  constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService,     private activRoute: ActivatedRoute) { 
 
     this.nameCrtl = new FormControl('')
     this.last_nameCrtl = new FormControl('')
@@ -57,7 +63,21 @@ export class ListResourcesComponent {
 
     })
 
-    this.getListlistRessources()
+    this.activRoute.paramMap.subscribe((params: ParamMap) => {
+      this.bastion_id = params.get('idBastion') || '';
+
+      this.adminService.get_a_bastion(this.bastion_id).subscribe({
+
+        next: (data : BastionInfo) => {
+          this.bastion = data;
+        }
+
+      });
+
+      this.getListlistRessources()
+    });
+
+   
   }
 
   ajoutRessource(){
@@ -102,9 +122,9 @@ export class ListResourcesComponent {
 
   getListlistRessources(){
 
-    this.adminService.get_list_admin().subscribe({
+    this.adminService.get_ressources(this.bastion_id).subscribe({
 
-      next: (data : AdminInfo[]) => {
+      next: (data : RessourceInfo[]) => {
         
         this.listRessources = data
 

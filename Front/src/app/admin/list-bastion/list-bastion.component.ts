@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { BastionInfo } from '../bastion-info';
 import { FormGroup, FormControl } from '@angular/forms';
-import { AdminInfo } from '../admin-info';
-import { NewAdmin } from '../new-admin';
 import { AuthenticationService } from 'src/app/login/authentication.service';
 import { AdminService } from '../admin.service';
+import { NewBastion } from '../new-bastion';
 
 @Component({
   selector: 'app-list-bastion',
@@ -14,16 +13,12 @@ import { AdminService } from '../admin.service';
 export class ListBastionComponent implements OnInit {
 
   public name: string ='';
-  public last_name: string ='';
-  public mail: string ='';
-  public password: string ='';
+  public subnet_cidr: string ='';
   public message: string ='';
-  public admin! : NewAdmin
+  public bastion! : NewBastion
   public ajoutForm: FormGroup;
   public nameCrtl: FormControl;
-  public last_nameCrtl: FormControl;
-  public mailCrtl: FormControl;
-  public passwordCrtl: FormControl;
+  public subnet_cidr_nameCrtl: FormControl;
 
   public listBastions : Array<BastionInfo> = new Array<BastionInfo>();
 
@@ -31,14 +26,10 @@ export class ListBastionComponent implements OnInit {
   constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService) { 
 
     this.nameCrtl = new FormControl('')
-    this.last_nameCrtl = new FormControl('')
-    this.mailCrtl = new FormControl('')
-    this.passwordCrtl = new FormControl('')
+    this.subnet_cidr_nameCrtl = new FormControl('')
     this.ajoutForm = new FormGroup({
         name: this.nameCrtl,
-        last_name: this.last_nameCrtl,
-        mail: this.mailCrtl,
-        password: this.passwordCrtl
+        subnet_cidr: this.subnet_cidr_nameCrtl,
 
     })
   }
@@ -46,14 +37,10 @@ export class ListBastionComponent implements OnInit {
   ngOnInit(): void {
 
     this.nameCrtl = new FormControl('')
-    this.last_nameCrtl = new FormControl('')
-    this.mailCrtl = new FormControl('')
-    this.passwordCrtl = new FormControl('')
+    this.subnet_cidr_nameCrtl = new FormControl('')
     this.ajoutForm = new FormGroup({
         name: this.nameCrtl,
-        last_name: this.last_nameCrtl,
-        mail: this.mailCrtl,
-        password: this.passwordCrtl
+        subnet_cidr: this.subnet_cidr_nameCrtl,
 
     })
 
@@ -64,27 +51,17 @@ export class ListBastionComponent implements OnInit {
     this.message = '';
 
     this.name = this.nameCrtl.value.trim();
-    this.last_name = this.last_nameCrtl.value.trim();
-    this.mail = this.mailCrtl.value.trim();
-    this.password = this.passwordCrtl.value.trim();
+    this.subnet_cidr = this.subnet_cidr_nameCrtl.value.trim();
 
-    if( this.password.length< 2){
-
-      this.message = "Le mot de passe doit contenir au moins 2 caractères"
-      return
+    this.bastion = {
+      bastion_name : this.name,
+      subnet_cidr : this.subnet_cidr
     }
 
-    this.admin = {
-      name : this.name,
-      last_name : this.last_name,
-      mail : this.mail,
-      password : this.serviceAuthentication.get_hash_password(this.password)
-    }
+    console.log("mot de passe hashe admin : " + this.bastion.bastion_name)
 
-    console.log("mot de passe hashe admin : " + this.admin.password)
-
-    this.adminService.add_admin(this.admin).subscribe({
-      next: (data : AdminInfo) => {
+    this.adminService.add_bastion(this.bastion).subscribe({
+      next: (data : BastionInfo) => {
         
         this.message="L'administrateur a bien été ajouté"
         this.getListBastion()
@@ -102,9 +79,9 @@ export class ListBastionComponent implements OnInit {
 
   getListBastion(){
 
-    this.adminService.get_list_admin().subscribe({
+    this.adminService.get_bastions().subscribe({
 
-      next: (data : AdminInfo[]) => {
+      next: (data : BastionInfo[]) => {
         
         this.listBastions = data
 

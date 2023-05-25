@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BastionInfo } from '../bastion-info';
+import { UserBastionInfo } from '../user-bastion-info';
 
 @Component({
   selector: 'app-list-user-resource-detail',
@@ -8,7 +9,7 @@ import { BastionInfo } from '../bastion-info';
 })
 export class ListUserResourceDetailComponent {
 
-  @Input() user!: BastionInfo;
+  @Input() user!: UserBastionInfo;
   @Output() newItemEvent = new EventEmitter<string>();
 
 }

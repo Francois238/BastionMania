@@ -9,7 +9,9 @@ import { RessourcesComponent } from './ressources/ressources.component';
 import { BastiondetailComponent } from './bastiondetail/bastiondetail.component';
 import { BastionsComponent } from './bastions/bastions.component';
 import {MatInputModule} from "@angular/material/input";
-import {FormsModule} from "@angular/forms";
+import {ReactiveFormsModule} from "@angular/forms";
+import { RessourceItemComponent } from './ressource-item/ressource-item.component';
+import { HeaderComponent } from './header/header.component';
 
 
 @NgModule({
@@ -19,13 +21,15 @@ import {FormsModule} from "@angular/forms";
     ProfilComponent,
     RessourcesComponent,
     BastiondetailComponent,
-    BastionsComponent
+    BastionsComponent,
+    RessourceItemComponent,
+    HeaderComponent
   ],
   imports: [
     CommonModule,
     UserRoutingModule,
     MatInputModule,
-    FormsModule
+    ReactiveFormsModule
   ]
 })
 export class UserModule { }

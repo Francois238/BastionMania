@@ -1,4 +1,21 @@
+.main-navbar{
+    padding-top: 10px;
+    background: rgb(34,34,34);
+    background: linear-gradient(180deg, 
+     rgba(34,34,34,1) 0%,
+     rgb(124, 124, 124) 30%, 
+     rgb(150, 150, 150) 40%, 
+     rgb(182, 182, 182) 50%, 
+     rgb(207, 207, 207) 60%, 
+     rgb(226, 226, 226) 75%,
+     rgb(249, 250, 250) 90%, 
+     rgb(252, 252, 252) 98%,
+     rgba(255,255,255,1) 100%);
+}
+
 .logo{
-    width: 100px;
-    height: 100px;
+    width: 200px;
+    height: 200px;
+    border-radius: 11%;
+    margin-top: 10;
 }

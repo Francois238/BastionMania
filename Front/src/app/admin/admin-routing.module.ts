@@ -22,8 +22,8 @@ const routes: Routes = [
       { path: 'profil', component: ProfilComponent },
       { path: 'users', component: ListUserComponent },
       {path: 'bastions', component: ListBastionComponent},
-      {path: 'bastions/:idBastion/resources', component: ListResourcesComponent},
-      {path: 'bastions/:idBastion/resources/:idResource/users', component: ListUserResourceComponent}
+      {path: 'bastions/:idBastion', component: ListResourcesComponent},
+      {path: 'bastions/:idBastion/:idRessource', component: ListUserResourceComponent}
     ]
   }
 ];

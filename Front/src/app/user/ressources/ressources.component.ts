@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Router} from "@angular/router";
+import {ActivatedRoute, ParamMap, Router} from "@angular/router";
+import { UserService } from '../user.service';
+import { BastionInfo } from '../bastion-info';
+import { RessourceInfo } from '../ressource-info';
+import { AuthenticationService } from 'src/app/login/authentication.service';
 
 @Component({
   selector: 'app-ressources',
@@ -8,23 +12,56 @@ import {Router} from "@angular/router";
   styleUrls: ['./ressources.component.scss']
 })
 export class RessourcesComponent {
-  constructor(private http: HttpClient, private router: Router) {
+
+
+  public bastion! : BastionInfo;
+
+  public listRessources : Array<RessourceInfo> = new Array<RessourceInfo>();
+
+  public bastion_id : string = '';
+
+
+  constructor(protected userService : UserService, protected serviceAuthentication: AuthenticationService,     private activRoute: ActivatedRoute) { 
+
   }
-  submitForm() {
-    const uploadRes = this.http.post('http://localhost:8740/user/bastions/:bastion_id/ressources/:ressource_id', {observe: 'response'});
-    uploadRes.subscribe((res: any) => {
-      console.log(res);
-      if (res.status === 200) {
-        this.loadurl()
-      }
+
+  ngOnInit(): void {
+
+
+    this.activRoute.paramMap.subscribe((params: ParamMap) => {
+      this.bastion_id = params.get('idBastion') || '';
+
+      this.userService.get_a_bastion(this.bastion_id).subscribe({
+
+        next: (data : BastionInfo) => {
+          this.bastion = data;
+        }
+
+      });
+
+      this.getListlistRessources()
     });
 
+   
+  }
+
+  
+  getListlistRessources(){
+
+    this.userService.get_ressources(this.bastion_id).subscribe({
+
+      next: (data : RessourceInfo[]) => {
+        
+        this.listRessources = data
+
+        
+      },
+      error: (e) => {
+        
+        console.error(e)
+      },
+    })
 
   }
 
-  loadurl() {
-    this.router.navigate(['/ressources/:ressource_id'])
-  }
-
-  //pas fonctionnel ne pas chercher la logique
 }

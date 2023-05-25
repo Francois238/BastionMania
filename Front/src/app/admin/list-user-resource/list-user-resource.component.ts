@@ -4,6 +4,9 @@ import { AuthenticationService } from 'src/app/login/authentication.service';
 import { AdminInfo } from '../admin-info';
 import { AdminService } from '../admin.service';
 import { NewAdmin } from '../new-admin';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { UserBastionInfo } from '../user-bastion-info';
+import { RessourceInfo } from '../ressource-info';
 
 @Component({
   selector: 'app-list-user-resource',
@@ -24,9 +27,15 @@ export class ListUserResourceComponent {
   public mailCrtl: FormControl;
   public passwordCrtl: FormControl;
 
-  public listUsers : Array<AdminInfo> = new Array<AdminInfo>();
+  public ressource!: RessourceInfo;
 
-  constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService) { 
+  public listUsers : Array<UserBastionInfo> = new Array<UserBastionInfo>();
+
+  public bastion_id : string = '';
+
+  public ressource_id : string = '';
+
+  constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService,private activRoute: ActivatedRoute) { 
 
     this.nameCrtl = new FormControl('')
     this.last_nameCrtl = new FormControl('')
@@ -55,7 +64,23 @@ export class ListUserResourceComponent {
 
     })
 
-    this.getListUser()
+    this.activRoute.paramMap.subscribe((params: ParamMap) => {
+      this.bastion_id = params.get('idBastion') || '';
+
+      this.activRoute.paramMap.subscribe((params: ParamMap) => {
+        this.ressource_id = params.get('idRessource') || '';
+
+        this.adminService.get_a_ressource(this.bastion_id, this.ressource_id).subscribe({
+          next: (data : RessourceInfo) => {
+            this.ressource = data;
+          }
+        });
+
+        this.getListUser()
+
+      });
+    });
+
   }
 
   ajoutUser(){
@@ -100,9 +125,9 @@ export class ListUserResourceComponent {
 
   getListUser(){
 
-    this.adminService.get_list_admin().subscribe({
+    this.adminService.get_users_on_ressource(this.bastion_id, this.ressource_id).subscribe({
 
-      next: (data : AdminInfo[]) => {
+      next: (data : UserBastionInfo[]) => {
         
         this.listUsers = data
 

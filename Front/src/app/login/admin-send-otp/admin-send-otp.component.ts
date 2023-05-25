@@ -39,7 +39,7 @@ export class AdminSendOtpComponent {
 
         if (data.change == false){
 
-          this.router.navigate(['/admin/profil']);
+          this.router.navigate(['/login/admin/profil']);
         }
         else{
 

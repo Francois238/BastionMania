@@ -39,7 +39,7 @@ export class UserSendOtpComponent {
 
           if (data.change == false){
 
-            this.router.navigate(['/user/profil']);
+            this.router.navigate(['/login/user/profil']);
           }
           else{
 
