@@ -256,6 +256,13 @@ impl Ressource {
 
         Ok(!users.is_empty())
     }
+
+    pub fn delete_all_ressources(id_bastion: String) -> Result<usize, ApiError> {
+        let mut conn = db::connection()?;
+        let ressource = diesel::delete(ressource::table.filter(ressource::id_bastion.eq(id_bastion)))
+            .execute(&mut conn)?;
+        Ok(ressource)
+    }
 }
 
 impl WireguardRessource {
@@ -445,8 +452,8 @@ impl UserConfigWireguard {
         log::debug!("ip: {}", ip);
 
         let session = ActivationWireguardSession {
-            id: user_id.clone(),
-            client_id: userconfig.uuid_ressource.clone(),
+            id: userconfig.uuid_ressource.clone(),
+            client_id: user_id.clone(),
             public_key: userconfig.pubkey.clone(),
             client_ip: ip.clone(),
             target_ip: bastion.subnet_cidr.clone(),
@@ -668,9 +675,27 @@ pub async fn suppression_bastion(bastion_id: String) -> Result<HttpResponse, Api
     let ressources: Vec<Ressource> = Ressource::find_all_ressources(bastion_id.clone())?;
 
     for ressource in ressources {
-        let _ = ressource_suppression(bastion_id.clone(), ressource.id.clone()).await?;
-    }
+        let users: Vec<Users> = Users::find_users_ressources(ressource.id.clone())?;
+        for user in users {
+            let _ = user_suppression(user.user_id.clone(), ressource.id.clone()).await?;
+            let _ = UserConfigSsh::userconfigsshdelete(user.user_id.clone(), ressource.id.clone())?;
+            let _ = UserConfigWireguard::userconfigwireguarddelete(user.user_id.clone(), ressource.id.clone())?;
 
+        }
+        let rtype = ressource.rtype;
+        if rtype == "wireguard"{
+            let specid = ressource.id_wireguard.unwrap();
+            let WireguardRessource = WireguardRessource::delete_a_wireguard_ressource(specid, bastion_id.clone())?;
+
+        }
+        else if rtype == "ssh"{
+            let specid = ressource.id_ssh.unwrap();
+            let SshRessource = SshRessource::delete_a_ssh_ressource(specid, bastion_id.clone())?;
+        }
+        let _ = Users::delete_all_users(ressource.id.clone())?;
+    }
+    
+    let _ = Ressource::delete_all_ressources(bastion_id.clone())?;
     let bastion = Bastion::delete_un_bastion(bastion_id.clone())?;
     Ok(HttpResponse::Ok().json(bastion))
 }
