@@ -24,7 +24,7 @@ pub struct BastionInsertable {
     pub net_id: i32, // 10.10.x.y => c'est le x
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(Queryable, Serialize, Debug )]
 pub struct BastionToken {
     pub bastion_id: String,
     pub token: String,
