@@ -49,7 +49,7 @@ impl Bastion {
         let mut conn = db::connection()?;
         let un_bastion = bastion_token::table
             .filter(bastion_token::token.eq(token))
-            .first::<BastionToken>(&mut conn)?;
+            .first(&mut conn)?;
         Ok(un_bastion)
     }
 
