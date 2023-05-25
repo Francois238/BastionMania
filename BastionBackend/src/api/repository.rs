@@ -548,6 +548,7 @@ impl UserConfigSsh {
         let client = reqwest::Client::new();
         let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
         let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+        let bastion_id = ressource.id_bastion.clone();
         let sshressource: SshRessource = SshRessource::find_a_ssh_ressource(
             ressource
                 .id_ssh
@@ -561,11 +562,8 @@ impl UserConfigSsh {
             name: sshressource.name.clone(),
             public_key: userconfig.pubkey.clone(),
         };
-        //TODO url
-        let url = format!(
-            "http://bastion-internal-{}:9000//ssh/ressources/{ressource_id}/users",
-            ressource.id_bastion.clone()
-        );
+        
+        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{ressource_id}/users");
 
         let _response = client
             .post(&url)
@@ -582,13 +580,11 @@ impl UserConfigSsh {
         log::info!("stop_ssh_session");
         let _userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
         let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+        let bastion_id = ressource.id_bastion.clone();
 
         //TODO url
         let client = reqwest::Client::new();
-        let url = format!(
-            "http://bastion-internal-{}:9000//ssh/ressources/{ressource_id}/users/{user_id}",
-            ressource.id_bastion
-        );
+        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{ressource_id}/users/{user_id}");
         let _res = client
             .delete(&url)
             .send()
@@ -657,7 +653,7 @@ pub async fn ressource_suppression(
             .clone();
         let _ = SshRessource::delete_a_ssh_ressource(sid, bastion_id.clone())?;
 
-        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources");
+        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{ressource_id}");
         let _response = client
             .delete(&url)
             .send()
