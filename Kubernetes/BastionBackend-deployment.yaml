@@ -36,9 +36,11 @@ spec:
             - name: FIRST_USER_NET_ID
               value: "2"
             - name: AUTHENTICATION_USER
-              value: "http://authentification/verification/user"
+              value: "http://authentication/verification/user"
             - name: AUTHENTICATION_ADMIN
-              value: "http://authentification/verification/admin"
+              value: "http://authentication/verification/admin"
+            - name: RUST_LOG
+              value: "DEBUG"
           imagePullPolicy: Always
           ports:
             - name: http
