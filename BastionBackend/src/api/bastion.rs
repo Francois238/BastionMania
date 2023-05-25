@@ -5,8 +5,9 @@ use rand::{RngCore, SeedableRng};
 
 
 use crate::api_error::ApiError;
+use crate::model::retourwireguardconfig::ConfigWireguardRetour;
 use crate::services::{
-    generate_bastion_freenetid, generate_bastion_freeport, 
+    generate_bastion_freenetid, generate_bastion_freeport, generate_user_freenetid, 
 };
 use crate::{
     api::*,
@@ -416,7 +417,7 @@ pub async fn create_ssh_ressource(
         id_k8s: kid,
     };
 
-    let url2 = format!("http://bastion-internal-{bastion_id}:9000//wireguard/public_key");
+    let url2 = format!("http://bastion-internal-{bastion_id}:9000/wireguard/public_key");
     let agent_response = client
         .get(&url2)
         .send()
@@ -424,7 +425,7 @@ pub async fn create_ssh_ressource(
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
     log::debug!("agent_response: {:?}", agent_response);
 
-    let bastion_ip = agent_response
+    let pubkey = agent_response
         .text()
         .await
         .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
@@ -433,7 +434,7 @@ pub async fn create_ssh_ressource(
     let retour_api = RetourAPI {
         success: true,
         message: "ressource ssh créée".to_string(),
-        data: bastion_ip,
+        data: pubkey,
     };
 
     Ok(HttpResponse::Ok().json(retour_api))
@@ -596,7 +597,7 @@ pub async fn generate_wireguard_access_credentials(
     wireguarddata: web::Json<RessourceCredentialsWireguard>,
 ) -> Result<HttpResponse, ApiError> {
     info!("début de la fonction generate_wireguard_access_credentials");
-    let _client = reqwest::Client::new();
+    let client = reqwest::Client::new();
 
     //TODO url
     let user_id: Uuid = VerifyUser(req).await?;
@@ -609,13 +610,39 @@ pub async fn generate_wireguard_access_credentials(
     if !authorisation {
         log::debug!("pas sur la ressource");
         return Err(ApiError::new(404, "Not Found".to_string()));
-    }
+    }/*
+    let ports = liste_bastions.into_iter().map(|b| b.ssh_port).collect();
+    let ssh_port = generate_bastion_freeport(&ports);*/
+    let users = Users::find_users_ressources(ressource_id.clone())?;
+    let bastion = Bastion::find_un_bastion(bastion_id.clone())?;
+    let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+    let wid = ressource.id_wireguard.unwrap();
+    let specressource = WireguardRessource::find_a_wireguard_ressource(wid.clone(), bastion_id.clone())?;
+    
+
+    let net_ids = users.into_iter().map(|u| u.net_id).collect();   
+    let net_id = generate_user_freenetid(&net_ids);
+
+    let ip = format!("10.0.{}.{}", bastion.net_id, net_id);
+
+    let url2 = format!("http://bastion-internal-{bastion_id}:9000/wireguard/public_key");
+    let agent_response = client
+        .get(&url2)
+        .send()
+        .await
+        .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
+    log::debug!("agent_response: {:?}", agent_response);
+
+    let pubkey = agent_response
+        .text()
+        .await
+        .map_err(|e| ApiError::new(500, format!("Error: {}", e)))?;
 
     let wireguardcredentials = UserConfigWireguardInsertable {
         uuid_user: user_id.clone(),
         uuid_ressource: ressource_id.clone(),
         pubkey: wireguarddata.pubkey.clone(),
-        user_net_id: wireguarddata.user_net_id.clone(),
+        user_net_id: net_id.clone(),
     };
     log::debug!("wireguardcredentials: {:?}", wireguardcredentials);
 
@@ -623,12 +650,13 @@ pub async fn generate_wireguard_access_credentials(
     let retour_api = RetourAPI {
         success: true,
         message: "configuration enregistrée".to_string(),
-        data: UserConfigWireguardInsertable {
-            uuid_user: user_id.clone(),
-            uuid_ressource: ressource_id.clone(),
-            pubkey: wireguarddata.pubkey.clone(),
-            user_net_id: wireguarddata.user_net_id.clone(),
-        },
+        data: ConfigWireguardRetour{
+            bastion_pubkey: pubkey,
+            user_ip: ip,
+            ressource_ip: specressource.target_ip,
+            port_wireguard: bastion.wireguard_port,
+
+        }
     };
 
     Ok(HttpResponse::Ok().json(retour_api))
