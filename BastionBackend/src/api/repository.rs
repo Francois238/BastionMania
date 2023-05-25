@@ -445,8 +445,8 @@ impl UserConfigWireguard {
         log::debug!("ip: {}", ip);
 
         let session = ActivationWireguardSession {
-            id: user_id.clone(),
-            client_id: userconfig.uuid_ressource.clone(),
+            id: userconfig.uuid_ressource.clone(),
+            client_id: user_id.clone(),
             public_key: userconfig.pubkey.clone(),
             client_ip: ip.clone(),
             target_ip: bastion.subnet_cidr.clone(),
