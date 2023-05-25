@@ -547,7 +547,9 @@ impl UserConfigSsh {
         log::info!("start_ssh_session");
         let client = reqwest::Client::new();
         let userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
+        log::debug!("userconfig: {:?}", userconfig);
         let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
+        log::debug!("ressource: {:?}", ressource);
         let bastion_id = ressource.id_bastion.clone();
         let sshressource: SshRessource = SshRessource::find_a_ssh_ressource(
             ressource
@@ -556,7 +558,7 @@ impl UserConfigSsh {
                 .ok_or(ApiError::new(404, "Not Found".to_string()))?,
             ressource_id.clone(),
         )?;
-
+        log::debug!("sshressource: {:?}", sshressource);
         let session = ActivationSshSession {
             id: user_id.clone(),
             name: sshressource.name.clone(),
