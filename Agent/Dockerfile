@@ -19,7 +19,7 @@ RUN cargo build --release
 
 FROM debian:11.7-slim
 
-RUN apt update && apt install wireguard-tools -y && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install wireguard-tools iproute2 -y && rm -rf /var/lib/apt/lists/*
 
 EXPOSE ${PORT}
 
