@@ -23,13 +23,49 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Bastion"
+                  "type": "object",
+                  "x-examples": {
+                    "example-1": {
+                      "success": true,
+                      "message": "liste bastions",
+                      "data": "bastions"
+                    }
+                  },
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Bastion"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "success": true,
+                      "message": "liste bastions",
+                      "data": "bastions"
+                    }
+                  }
                 }
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "operationId": "get-bastion",
@@ -39,7 +75,7 @@
               "type": "string"
             },
             "in": "cookie",
-            "name": "id",
+            "name": "uuid",
             "description": "affichage différent selon user ou admin"
           }
         ],
@@ -63,15 +99,48 @@
                       "type": "string"
                     },
                     "data": {
-                      "$ref": "#/components/schemas/ConfigAgent"
+                      "type": "string"
+                    }
+                  },
+                  "x-examples": {
+                    "example-1": {
+                      "success": true,
+                      "message": "bastion créé",
+                      "data": "ok"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "success": true,
+                      "message": "bastion créé",
+                      "data": "ok"
                     }
                   }
                 }
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -90,7 +159,7 @@
               "type": "string"
             },
             "in": "cookie",
-            "name": "id",
+            "name": "uuid",
             "description": "admin seulement"
           }
         ],
@@ -119,12 +188,57 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Bastion"
+                },
+                "examples": {
+                  "example-1": {}
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Bastion"
+                    }
+                  }
+                },
+                "examples": {}
+              },
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Bastion"
+                    }
+                  }
                 }
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "operationId": "get-bastion-bastion_id",
@@ -134,358 +248,11 @@
               "type": "string"
             },
             "in": "cookie",
-            "name": "id",
+            "name": "uuid",
             "description": "affiche un bastion correspondant à l'URL"
           }
         ],
-        "description": "affiche le bastion d'id {bastion_id}"
-      },
-      "patch": {
-        "summary": "",
-        "operationId": "patch-bastion-bastion_id",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Bastion"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BastionModification"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "id",
-            "description": "admin seulement"
-          }
-        ],
-        "description": "modifie le bastion"
-      },
-      "delete": {
-        "summary": "",
-        "operationId": "delete-bastion-bastion_id",
-        "responses": {
-          "200": {
-            "description": "\"supprimé\""
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "id",
-            "description": "admin seulement"
-          }
-        ],
-        "description": "supprime le bastion"
-      }
-    },
-    "/bastions/{bastion_id}/users": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "bastion_id",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Your GET endpoint",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Users"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "operationId": "get-bastion-bastion_id-users",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "id",
-            "description": "admin seulement"
-          }
-        ],
-        "description": "affiche la liste d'utilisateur sur le bastion"
-      },
-      "post": {
-        "summary": "",
-        "operationId": "post-bastion-bastion_id-users",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/ConfigUser"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserModification"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "id",
-            "description": "admin seulement"
-          }
-        ],
-        "description": "ajout d'un utilisateur au bastion"
-      }
-    },
-    "/bastions/{bastion_id}/users/{user_id}": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "bastion_id",
-          "in": "path",
-          "required": true
-        },
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "user_id",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Your GET endpoint",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Users"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "operationId": "get-bastion-bastion_id-users-user_id",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "id",
-            "description": "admin seulement"
-          }
-        ],
-        "description": "affiche la description d'un utilisateur"
-      },
-      "delete": {
-        "summary": "",
-        "operationId": "delete-bastion-bastion_id-users-user_id",
-        "responses": {
-          "200": {
-            "description": "\"supprimé\""
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "id",
-            "description": "admin seulement"
-          }
-        ],
-        "description": "supprime l'accés de l'utilisateur"
-      }
-    },
-    "/bastions/{bastion_id}/users/{user_id}/generate_wireguard": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "bastion_id",
-          "in": "path",
-          "required": true
-        },
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "user_id",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "post": {
-        "summary": "",
-        "operationId": "post-bastions-bastion_id-users-user_id-generate_wireguard",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/ConfigClient"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "cookie",
-            "name": "id",
-            "description": "pour utilisateur uniquement"
-          }
-        ]
-      }
-    },
-    "/bastions/{bastion_id}/ressources": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "bastion_id",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Your GET endpoint",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Ressource"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "operationId": "get-bastions-bastion_id-ressources",
-        "description": "affiches l'ensemble des ressources accessible par le bastion"
-      },
-      "post": {
-        "summary": "",
-        "operationId": "post-bastions-bastion_id-ressources",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Ressource"
-                }
-              }
-            }
-          }
-        },
-        "description": "crée une nouvelle ressource",
+        "description": "affiche le bastion d'id {bastion_id}",
         "requestBody": {
           "content": {
             "application/json": {
@@ -497,31 +264,74 @@
             "application/xml": {
               "schema": {
                 "type": "object",
-                "properties": {}
-              }
-            },
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              }
-            },
-            "text/html": {
-              "schema": {
-                "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "type": {
+                  "bastion_id": {
                     "type": "string"
                   }
                 }
               }
             }
-          },
-          "description": ""
+          }
         }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastion-bastion_id",
+        "responses": {
+          "200": {
+            "description": "\"supprimé\"",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "success": true,
+                      "message": "bastion supprimé",
+                      "data": "supprimé"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie",
+            "name": "uuid",
+            "description": "admin seulement"
+          }
+        ],
+        "description": "supprime le bastion"
       }
     },
     "/bastions/{bastion_id}/ressources/{ressource_id}": {
@@ -548,27 +358,1084 @@
         "tags": [],
         "responses": {
           "200": {
-            "description": "supprimé"
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Ressource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "operationId": "get-bastions-bastion_id-ressources-ressource_id",
-        "description": "affiche une ressource"
+        "description": "affiche une ressource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "",
         "operationId": "delete-bastions-bastion_id-ressources-ressource_id",
         "responses": {
           "200": {
-            "description": "supprimé"
+            "description": "supprimé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
-        "description": "enlève la ressource en bdd"
+        "description": "enlève la ressource en bdd",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ressource"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Ressource"
+                    }
+                  }
+                }
+              },
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Ressource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Ressource"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-bastions-bastion_id-ressources",
+        "description": "affiches l'ensemble des ressources accessible par le bastion",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "cookie"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bastion_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastions-bastion_id-ressources",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bastion_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/create/ssh": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources-create-ssh",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Ressource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "string"
+                  },
+                  "ressource_data": {
+                    "$ref": "#/components/schemas/RessourceSshCreation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/create/wireguard": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources-create-wireguard",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Ressource"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "string"
+                  },
+                  "ressource_data": {
+                    "$ref": "#/components/schemas/RessourceWireguardCreation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/{ressource_id}/getressourcecredentials/ssh": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources-ressource_id-getressourcecredentials-ssh",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserConfigSshInsertable"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "sshdata": {
+                    "$ref": "#/components/schemas/RessourceCredentialsSsh"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/{ressource_id}/getressourcecredentials/wireguard": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources-ressource_id-getressourcecredentials-wireguard",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserConfigWireguardInsertable"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "wireguarddata": {
+                    "$ref": "#/components/schemas/RessourceCredentialsWireguard"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/{ressource_id}/users": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "operationId": "get-bastions-bastion_id-ressources-ressource_id-users",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources-ressource_id-users",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "user": {
+                    "$ref": "#/components/schemas/UsersCreation"
+                  }
+                }
+              }
+            }
+          },
+          "description": ""
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastions-bastion_id-ressources-ressource_id-users",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/{ressource_id}/users/{user_id}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "user_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "operationId": "get-bastions-bastion_id-ressources-ressource_id-users-user_id",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "",
+        "operationId": "delete-bastions-bastion_id-ressources-ressource_id-users-user_id",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agent": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "bastion_public_key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "operationId": "get-agent",
+        "description": "",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentAskPairInfo"
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/bastions/{bastion_id}/ressources/{ressource_id}/startsession": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources-ressource_id-startsession",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "description": "",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bastions/{bastion_id}/ressources/{ressource_id}/stopsession": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "bastion_id",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "ressource_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "",
+        "operationId": "post-bastions-bastion_id-ressources-ressource_id-stopsession",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "description": "",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "donnees": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -581,7 +1448,7 @@
         },
         "type": "object",
         "properties": {
-          "id": {
+          "bastion_id": {
             "type": "integer"
           },
           "name": {
@@ -590,26 +1457,22 @@
           "subnet_cidr": {
             "type": "string"
           },
-          "agent_endpoint": {
+          "ssh_port": {
             "type": "string"
           },
-          "pubkey": {
+          "wireguard_port": {
             "type": "string"
-          },
-          "port": {
-            "type": "integer"
           },
           "net_id": {
             "type": "integer"
           }
         },
         "required": [
-          "id",
+          "bastion_id",
           "name",
           "subnet_cidr",
-          "agent_endpoint",
-          "pubkey",
-          "port",
+          "ssh_port",
+          "wireguard_port",
           "net_id"
         ]
       },
@@ -626,11 +1489,8 @@
           "user_id": {
             "type": "integer"
           },
-          "bastion_id": {
+          "ressource_id": {
             "type": "integer"
-          },
-          "wireguard": {
-            "type": "boolean"
           },
           "net_id": {
             "type": "integer"
@@ -638,8 +1498,7 @@
         },
         "required": [
           "user_id",
-          "bastion_id",
-          "wireguard",
+          "ressource_id",
           "net_id"
         ]
       },
@@ -758,7 +1617,7 @@
           "name": {
             "type": "string"
           },
-          "type": {
+          "rtype": {
             "type": "string"
           },
           "id_wireguard": {
@@ -772,27 +1631,6 @@
           }
         }
       },
-      "Session": {
-        "title": "Session",
-        "x-stoplight": {
-          "id": "lzh3o37p0313i"
-        },
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "id_ressource": {
-            "type": "string"
-          },
-          "id_user": {
-            "type": "string"
-          },
-          "temps_fin": {
-            "type": "integer"
-          }
-        }
-      },
       "WireguardRessource": {
         "title": "WireguardSession",
         "x-stoplight": {
@@ -800,10 +1638,16 @@
         },
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "id_bastion": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
-          "target_cidr": {
+          "target_ip": {
             "type": "string"
           }
         }
@@ -815,11 +1659,20 @@
         },
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "id_bastion": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
           "ip_machine": {
             "type": "string"
+          },
+          "port": {
+            "type": "integer"
           }
         }
       },
@@ -830,6 +1683,12 @@
         },
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "id_bastion": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -837,7 +1696,152 @@
             "type": "string"
           }
         }
+      },
+      "AgentAskPairInfo": {
+        "title": "AgentAskPairInfo",
+        "x-stoplight": {
+          "id": "8kz5yb1nfcxyc"
+        },
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "public_key": {
+            "type": "string"
+          },
+          "agent_host": {
+            "type": "string"
+          }
+        }
+      },
+      "RessourceWireguardCreation": {
+        "title": "RessourceWireguardCreation",
+        "x-stoplight": {
+          "id": "jj9z6ulnh7647"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rtype": {
+            "type": "string"
+          },
+          "target_ip": {
+            "type": "string"
+          }
+        }
+      },
+      "RessourceSshCreation": {
+        "title": "RessourceSshCreation",
+        "x-stoplight": {
+          "id": "30myo59v6e2hy"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rtype": {
+            "type": "string"
+          },
+          "ip_machine": {
+            "type": "string"
+          },
+          "port": {
+            "type": "string"
+          }
+        }
+      },
+      "RessourceCredentialsSsh": {
+        "title": "RessourceCredentialsSsh",
+        "x-stoplight": {
+          "id": "2ur5pqzps49ia"
+        },
+        "type": "object",
+        "properties": {
+          "pubkey": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "UserConfigSshInsertable": {
+        "title": "UserConfigSshInsertable",
+        "x-stoplight": {
+          "id": "qkavi1tew00bc"
+        },
+        "type": "object",
+        "properties": {
+          "uuid_user": {
+            "type": "string"
+          },
+          "uuid_ressource": {
+            "type": "string"
+          },
+          "pubkey": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "RessourceCredentialsWireguard": {
+        "title": "RessourceCredentialsWireguard",
+        "x-stoplight": {
+          "id": "2oq4j9jlmjzzx"
+        },
+        "type": "object",
+        "properties": {
+          "pubkey": {
+            "type": "string"
+          },
+          "user_net_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "UserConfigWireguardInsertable": {
+        "title": "UserConfigWireguardInsertable",
+        "x-stoplight": {
+          "id": "0ekl9gxcl42gu"
+        },
+        "type": "object",
+        "properties": {
+          "uuid_user": {
+            "type": "string"
+          },
+          "uuid_ressource": {
+            "type": "string"
+          },
+          "pubkey": {
+            "type": "string"
+          },
+          "user_net_id": {
+            "type": "string"
+          }
+        }
+      },
+      "UsersCreation": {
+        "title": "UsersCreation",
+        "x-stoplight": {
+          "id": "n1c4vs7mtc24t"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ressource_id": {
+            "type": "string"
+          }
+        }
       }
-    }
+    },
+    "securitySchemes": {}
   }
 }
