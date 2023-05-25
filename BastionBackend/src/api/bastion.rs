@@ -653,7 +653,7 @@ pub async fn generate_wireguard_access_credentials(
 
     Ok(HttpResponse::Ok().json(retour_api))
 }
-#[post("/bastions/{bastion_id}/ressources/{ressource_id}")]
+#[post("/bastions/{bastion_id}/ressources/{ressource_id}/startsession")]
 pub async fn start_session(
     req: HttpRequest,
     donnees: web::Path<(String, String)>,
@@ -696,7 +696,7 @@ pub async fn start_session(
     Ok(HttpResponse::Ok().json(retour_api))
 }
 
-#[post("/bastions/{bastion_id}/ressources/{ressource_id}")]
+#[post("/bastions/{bastion_id}/ressources/{ressource_id}/stopsession")]
 pub async fn stop_session(
     req: HttpRequest,
     donnees: web::Path<(String, String)>,
