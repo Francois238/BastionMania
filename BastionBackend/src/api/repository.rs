@@ -47,6 +47,7 @@ impl Bastion {
 
     pub fn token_find(token: String) -> Result<BastionToken, ApiError> {
         let mut conn = db::connection()?;
+        log::debug!("Searching token: {}", token);
         let un_bastion = bastion_token::table
             .filter(bastion_token::token.eq(token))
             .first(&mut conn)?;
