@@ -184,7 +184,7 @@ pub async fn create_bastion(
 
     // envoyer la requete de creation de bastion a l'intancieur
     let _client = reqwest::Client::new();
-    let url = format!("http://bastion-instancieur/create/");
+    let url = format!("http://bastion-instancieur/create");
     let response = _client
         .post(&url)
         .json(&bastion_instance_create)
@@ -874,4 +874,11 @@ pub fn routes_bastion(cfg: &mut web::ServiceConfig) {
     cfg.service(generate_wireguard_access_credentials);
     cfg.service(start_session);
     cfg.service(stop_session);
+
+    cfg.service(get_user);
+    cfg.service(create_user);
+    cfg.service(delete_users);
+
+    cfg.service(get_a_user);
+    cfg.service(delete_user);
 }
