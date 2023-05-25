@@ -10,7 +10,7 @@ pub struct AgentAskPairInfo {
 
 #[derive(Serialize, Deserialize)]
 pub struct AgentPairInfo{
-    pub agent_host: String,
+    pub endpoint: String,
     pub public_key: String,
     pub target_cidr: String,
 }
