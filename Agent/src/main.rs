@@ -45,7 +45,7 @@ fn main() {
             .add_root_certificate(certificate)
             .build().expect("Unable to build client");
         log::info!("Initiating pairing with bastion");
-        let res = client.post(&format!("https://{}/api/bastion-management/agent", config.bm_host))
+        let res = client.post(&format!("https://{}/api/agent", config.bm_host))
             .json(&pair_config)
             .send()
             .expect("Unable to send request");
