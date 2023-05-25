@@ -15,6 +15,7 @@ rules:
   - verbs:
       - delete
       - create
+      - list
     resources: ["bastions"]
     apiGroups: ["bastionmania.fr"]
 ---
