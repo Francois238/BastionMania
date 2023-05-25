@@ -457,17 +457,13 @@ pub async fn create_wireguard_ressource(
     let sid = None;
     let kid = None;
     let ressources = Ressource::find_all_ressources(bastion_id.clone())?;
-    let mut wid = 0;
 
-    for ressource in ressources {
-        if ressource.id_wireguard.is_some() {
-            if ressource.id_wireguard > Some(wid) {
-                wid = ressource.id_wireguard.unwrap();
-                log::debug!("wid: {:?}", wid);
-            }
-        }
-    }
-    wid = wid + 1;
+    let max_wid = ressources.into_iter()
+        .filter(|ressource| ressource.id_wireguard.is_some())
+        .map(|ressource| ressource.id_wireguard.unwrap())
+        .max().unwrap_or(0);
+
+    let wid = max_wid + 1;
     log::debug!("wid: {:?}", wid);
 
     let wiregard_insertion = WireguardRessourceInsertable {
