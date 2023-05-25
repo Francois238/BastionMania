@@ -13,8 +13,6 @@ spec:
   type: ClusterIP
 
 ---
-
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,8 +32,8 @@ spec:
     spec:
       containers:
       - name: authentication
-        image: "docker.io/francois238/authentication:23.0"
-        imagePullPolicy: IfNotPresent
+        image: "ghcr.io/bastionmania/bastionmania/authentification:dev"
+        imagePullPolicy: Always
         ports:
         - name: http
           protocol: TCP
@@ -48,5 +46,7 @@ spec:
       - name: mnt
         secret:
           secretName: authentication.conf
+      imagePullSecrets:
+        - name: repogithub
 
 
