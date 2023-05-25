@@ -3,7 +3,7 @@ use diesel::{AsChangeset, Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 
 
-#[derive(Queryable, Serialize, Deserialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct UserConfigSsh {
     pub id: i32,
     pub uuid_user: String,
