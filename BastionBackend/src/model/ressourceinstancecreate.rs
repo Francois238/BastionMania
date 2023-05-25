@@ -15,7 +15,7 @@ pub struct RessourceInstanceCreate {
 pub struct RessourceSshInstanceCreate{
     pub id: String,
     pub name: String,
-    pub ip_machine: String,
+    pub ip: String,
     pub port: i32,
     pub users: Vec<String>,
 }

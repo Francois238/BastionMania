@@ -1,9 +1,13 @@
 FROM rust:1.69.0 as build
 
 WORKDIR /app
-COPY Cargo.* /app/
-COPY src/ /app/src
+RUN cargo new BastionManager --vcs none
+WORKDIR /app/BastionManager
 
+COPY Cargo.toml Cargo.lock ./
+RUN cargo build --release
+
+COPY src/ ./src
 RUN cargo build --release
 
 FROM ubuntu:23.04
@@ -16,7 +20,7 @@ RUN  apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && useradd -m runner 
 
-COPY --from=build /app/target/release/BastionManager /home/runner/app/BastionManager
+COPY --from=build /app/BastionManager/target/release/BastionManager /home/runner/app/BastionManager
 
 RUN chown -R runner:runner /home/runner/app/
 

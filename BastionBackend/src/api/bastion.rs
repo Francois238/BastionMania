@@ -369,20 +369,18 @@ pub async fn create_ssh_ressource(
     let ressources = Ressource::find_all_ressources(bastion_id.clone())?;
     let mut sid = 0;
 
-    for ressource in ressources {
-        if ressource.id_ssh.is_some() {
-            if ressource.id_ssh > Some(sid) {
-                sid = ressource.id_ssh.unwrap();
-            }
-        }
-        sid = sid + 1;
-    }
+    let max_sid = ressources.into_iter()
+        .filter(|ressource| ressource.id_ssh.is_some())
+        .map(|ressource| ressource.id_ssh.unwrap())
+        .max().unwrap_or(0);
+
+    let sid = max_sid + 1;
     
 
     let ressource_request = RessourceSshInstanceCreate {
         id: uuid.clone(),
         name: ressource_data.name.clone(),
-        ip_machine: ressource_data.ip_machine.clone(),
+        ip: ressource_data.ip_machine.clone(),
         port: ressource_data.port.clone(),
         users: Vec::new(),
     };
