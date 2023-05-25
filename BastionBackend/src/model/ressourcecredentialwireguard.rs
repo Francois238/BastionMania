@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct RessourceCredentialsWireguard {
     pub pubkey: String,  
-    pub user_net_id: i32,
+    
 }
 #[derive(Serialize, Deserialize)]
 pub struct ConfigWireguardInstanceCreate {
@@ -17,7 +17,7 @@ pub struct ConfigWireguardInstanceCreate {
 #[derive(Serialize, Deserialize)]
 pub struct ActivationWireguardSession{
     pub id: String,
-    pub id_client: String,
+    pub client_id: String,
     pub public_key: String,
     pub client_ip: String,
     pub target_ip: String,

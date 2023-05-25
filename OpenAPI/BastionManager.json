@@ -1207,7 +1207,7 @@
             }
           }
         },
-        "description": "supprime tous les utilisateur, arrête leur session et efface leur config "
+        "description": "supprime un utilisateur, arrête sa session et efface sa config "
       }
     },
     "/agent": {

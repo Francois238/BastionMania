@@ -8,7 +8,7 @@ pub struct WireguardRessource {
     pub id: i32,
     pub id_bastion: String,
     pub name: String,
-    pub target_cidr: String,
+    pub target_ip: String,
 }
 
 #[derive(Serialize, Deserialize, AsChangeset, Insertable)]

@@ -446,7 +446,7 @@ impl UserConfigWireguard {
 
         let session = ActivationWireguardSession {
             id: user_id.clone(),
-            id_client: userconfig.uuid_ressource.clone(),
+            client_id: userconfig.uuid_ressource.clone(),
             public_key: userconfig.pubkey.clone(),
             client_ip: ip.clone(),
             target_ip: bastion.subnet_cidr.clone(),
