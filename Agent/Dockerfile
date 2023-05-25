@@ -4,7 +4,10 @@ ARG PORT=60469
 FROM rust:1.69-slim AS builder
 
 WORKDIR /usr/src
-RUN cargo new bastion-mania-agent --vcs none
+RUN cargo new bastion-mania-agent --vcs none \
+    && apt update  \
+    && apt install libssl-dev pkg-config -y  \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /usr/src/bastion-mania-agent
 
 COPY Cargo.toml Cargo.lock ./
@@ -14,7 +17,7 @@ COPY src ./src
 RUN cargo build --release
 
 
-FROM ubuntu:22.04
+FROM debian:11.7-slim
 
 RUN apt update && apt install wireguard-tools -y && rm -rf /var/lib/apt/lists/*
 
