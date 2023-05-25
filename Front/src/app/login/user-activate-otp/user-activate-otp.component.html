@@ -1,24 +1,22 @@
-<div class="mx-auto col-12 main-navbar">
+<div class="row col-12 main-navbar">
   <div class="col-4 mx-auto">
 
     <h3 class="mb-5 text-center">Activer la double authentification</h3>
 
     <div class="mx-auto w-25">
-      <div class="text-center">
 
-        <button type="submit" class="btn btn-outline-secondary" (click)="getOtp()">Obtenir l'otp</button>
+      <button type="submit" class="btn btn-outline-secondary" (click)="getOtp()">Obtenir l'otp</button>
 
-        <div ngIf="code" class="mt-5">
+      <div *ngIf="code" class="mt-5">
 
-          <a href={{code}} target="_blank"><button class="btn btn-outline-secondary mt-1" type="button">Voir QR code</button></a><br>
+        <a href={{code}} target="_blank"><button class="btn btn-outline-secondary mt-1" type="button">Voir QR code</button></a>
 
-          <input type="button" class="btn btn-outline-secondary mt-5" value="J'ai enregistré le code" (click)="nextPage()"/>
-        </div>
+        <input type="button" class="btn  btn-outline-secondary mt-5" value="J'ai enregistré le code" (click)="nextPage()"/>
       </div>
 
   </div>
 
-  <div class="mt-5 text-center"ngIf="error">{{ error }}</div>
+  <div class="mt-5 text-center" *ngIf="error">{{ error }}</div>
 
   </div>
 </div>

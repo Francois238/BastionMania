@@ -7,11 +7,9 @@ import { AdminExtNextComponent } from './admin-ext-next/admin-ext-next.component
 import { AdminSendOtpComponent } from './admin-send-otp/admin-send-otp.component';
 import { AdminActivateOtpComponent } from './admin-activate-otp/admin-activate-otp.component';
 import { UserSendOtpComponent } from './user-send-otp/user-send-otp.component';
-import { UserActivateOtpComponent } from './user-activate-otp/user-activate-otp.component';
 import { UserExtNextComponent } from './user-ext-next/user-ext-next.component';
 import { InstallationComponent } from './installation/installation.component';
-import { ProfilUserComponent } from './profil-user/profil-user.component';
-import { ProfilAdminComponent } from './profil-admin/profil-admin.component';
+import { UserActivateOtpComponent } from './user-activate-otp/user-activate-otp.component';
 
 const routes: Routes = [
   { path: 'admin', component: AdminComponent },
@@ -19,13 +17,12 @@ const routes: Routes = [
   { path: 'admin/otp', component: AdminSendOtpComponent },
   { path: 'admin/activate_otp', component: AdminActivateOtpComponent },
   { path: 'installation', component: InstallationComponent},
-  { path: '', component: UserComponent},
   { path: 'extern/next', component: UserExtNextComponent},
   { path: 'otp', component: UserSendOtpComponent},
-  { path: 'activate_otp', component: UserActivateOtpComponent},
-  { path: 'admin/profil', component: ProfilAdminComponent},
-  { path: 'user/profil', component: ProfilUserComponent},
- 
+  { path: 'activate_otp', component: UserActivateOtpComponent },
+  { path: '', component: UserComponent},
+
+
 ];
 
 @NgModule({

@@ -22,7 +22,7 @@ export class UserService {
 
   /****gestion du token ********/
   public validate_token(): boolean{
-      
+
     let token = this.authenticationService.get_token();
 
     if (token == '') {
@@ -31,11 +31,11 @@ export class UserService {
 
     let data= jwt_decode(token) as Jwt;
 
-    if (data.complete_authentication == false) {
+    if (data.admin == false) {
       //this.router.navigate(['/login']);
       return false;
-      
-    }  
+
+    }
 
     return true;
 

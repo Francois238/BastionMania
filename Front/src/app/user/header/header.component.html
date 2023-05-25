@@ -1,17 +1,17 @@
 <header class="container-fluid main-navbar">
     <!--START Bootstrap navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  
+
       <img src="assets/img/logo_bastion_mania.png" class="img-fluid mx-auto d-block logo" alt="Responsive image">
       <a class="navbar-brand" href="#">Bastion Mania</a>
-  
+
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item {{activeBastion}}">
             <a class="nav-link" (click)="on_click_bastion()" routerLink="/user/bastions">Bastions</a>
           </li>
           <li class="nav-item {{activeProfil}}">
-            <a class="nav-link" (click)="on_click_profil()" routerLink="/login/user/profil">Profil</a>
+            <a class="nav-link" (click)="on_click_profil()" routerLink="/user/profil">Profil</a>
           </li>
         </ul>
       </div>

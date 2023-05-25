@@ -18,8 +18,6 @@ import { UserActivateOtpComponent } from './user-activate-otp/user-activate-otp.
 import { UserSendOtpComponent } from './user-send-otp/user-send-otp.component';
 import { UserExtNextComponent } from './user-ext-next/user-ext-next.component';
 import { InstallationComponent } from './installation/installation.component';
-import { ProfilUserComponent } from './profil-user/profil-user.component';
-import { ProfilAdminComponent } from './profil-admin/profil-admin.component';
 
 
 @NgModule({
@@ -33,9 +31,7 @@ import { ProfilAdminComponent } from './profil-admin/profil-admin.component';
     UserActivateOtpComponent,
     UserSendOtpComponent,
     UserExtNextComponent,
-    InstallationComponent,
-    ProfilUserComponent,
-    ProfilAdminComponent,
+    InstallationComponent
   ],
   imports: [
     CommonModule,

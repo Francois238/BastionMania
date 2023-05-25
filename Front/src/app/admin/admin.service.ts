@@ -26,29 +26,29 @@ export class AdminService {
 
   baseUrlUser = 'https://bastionmania.intra/api/user-management/';
 
-  baseUrlBastion = 'https://bastionmania.intra/api/bastion-management/'; 
+  baseUrlBastion = 'https://bastionmania.intra/api/bastion-management/';
 
   constructor(private http: HttpClient, protected router: Router, protected authenticationService: AuthenticationService) { }
 
 /****gestion du token ********/
   public validate_token(): boolean{
-      
+
       let token = this.authenticationService.get_token();
-  
+
       if (token == '') {
         return false;
       }
 
       let data= jwt_decode(token) as Jwt;
 
-      if (data.admin == false || data.complete_authentication == false) {
+      if (data.admin == true) {
         //this.router.navigate(['/login']);
         return false;
-        
-      }  
+
+      }
 
       return true;
-  
+
   }
 
   /********Gestion des Admins*******/
@@ -132,50 +132,50 @@ export class AdminService {
     public get_list_user() : Observable<UserInfo[]>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = {'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlUser +`users`;
       return this.http.get<UserInfo[]>(url, {headers})
-  
+
     }
 
     public get_user_mail(mail: string) : Observable<UserInfo[]>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = {'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlUser +`users` + `?mail=${mail}`;
       return this.http.get<UserInfo[]>(url, {headers})
 
     }
-  
+
     public add_user(admin : NewUser) : Observable<UserInfo>{
-  
+
       const token = this.authenticationService.get_token();
-  
+
       const headers = { 'content-type': 'application/json',
       'Authorization': 'Bearer ' + token};
-  
+
       const body=JSON.stringify(admin);
-  
-  
+
+
       const url = this.baseUrlUser + 'users';
       return this.http.post<UserInfo>(url, body ,{headers})
-  
+
     }
 
 
     public delete_user(id : string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = { 'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlUser + 'users/' + id;
       return this.http.delete<any>(url, {headers})
-  
+
     }
 
     /****************************************/
@@ -185,49 +185,49 @@ export class AdminService {
     public get_bastions() : Observable<BastionInfo[]>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = {'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion +`bastions`;
       return this.http.get<BastionInfo[]>(url, {headers})
-  
+
     }
 
     public get_a_bastion(bastion_id: string) : Observable<BastionInfo>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = {'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion +`bastions/${bastion_id}`;
       return this.http.get<BastionInfo>(url, {headers})
-  
+
     }
 
     public add_bastion(bastion : NewBastion) : Observable<BastionInfo>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = { 'content-type': 'application/json',
       'Authorization': 'Bearer ' + token};
-  
+
       const body=JSON.stringify(bastion);
-  
+
 
       const url = this.baseUrlBastion + 'bastions';
       return this.http.post<BastionInfo>(url, body ,{headers})
-  
+
     }
 
     public delete_bastion(id : string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = { 'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion + 'bastions/' + id;
       return this.http.delete<any>(url, {headers})
-  
+
     }
 
 
@@ -236,34 +236,34 @@ export class AdminService {
     public get_ressources(bastion_id: string) : Observable<RessourceInfo[]>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = {'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion +`bastions/${bastion_id}/resources`;
       return this.http.get<RessourceInfo[]>(url, {headers})
-  
+
     }
 
     public get_a_ressource(bastion_id: string, ressource_id: string) : Observable<RessourceInfo>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = {'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion +`bastions/${bastion_id}/resources${ressource_id}`;
       return this.http.get<RessourceInfo>(url, {headers})
-  
+
     }
 
     public delete_ressource(bastion_id : string, ressource_id: string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = { 'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion + `bastions/${bastion_id}/resources/${ressource_id}`;
       return this.http.delete<any>(url, {headers})
-  
+
     }
 
 
@@ -271,23 +271,23 @@ export class AdminService {
     public get_users_on_ressource(bastion_id: string, ressource_id: string) : Observable<UserBastionInfo[]>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = {'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion +`bastions/${bastion_id}/resources/${ressource_id}/users`;
       return this.http.get<UserBastionInfo[]>(url, {headers})
-  
+
     }
 
     public delete_user_on_ressource(bastion_id : string, ressource_id: string, user_id: string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
-  
+
       const headers = { 'Authorization': 'Bearer ' + token};
-  
+
       const url = this.baseUrlBastion + `bastions/${bastion_id}/resources/${ressource_id}/users/${user_id}`;
       return this.http.delete<any>(url, {headers})
-  
+
     }
 
 

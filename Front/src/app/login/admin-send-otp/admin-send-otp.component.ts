@@ -34,26 +34,26 @@ export class AdminSendOtpComponent {
 
     this.serviceAuthentication.admin_send_otp(this.otpSent).subscribe({
       next: (data: InfoLogin)=> {
-  
+
         this.serviceAuthentication.set_info_login(data);
 
         if (data.change == false){
 
-          this.router.navigate(['/login/admin/profil']);
+          this.router.navigate(['/admin/profil']);
         }
         else{
 
           this.router.navigate(['/admin/menu']);
         }
-  
+
         },
-  
+
         error: err => {
-  
+
           if(err.status <500){
             this.message = err.error.message;
           }
-  
+
           else{
             this.message = 'Erreur interne';
           }
