@@ -453,7 +453,7 @@ impl UserConfigWireguard {
         };
         //TODO url
         let url = format!(
-            "http://bastion-internal-{}:9000/wireguards/configs",
+            "http://bastion-internal-{}:9000/wireguard/configs",
             bastion.bastion_id.clone()
         );
 
