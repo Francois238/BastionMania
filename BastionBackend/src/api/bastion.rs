@@ -375,8 +375,9 @@ pub async fn create_ssh_ressource(
                 sid = ressource.id_ssh.unwrap();
             }
         }
+        sid = sid + 1;
     }
-    sid = sid + 1;
+    
 
     let ressource_request = RessourceSshInstanceCreate {
         id: uuid.clone(),
