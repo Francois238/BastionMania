@@ -225,8 +225,20 @@
                     "description": "username of user on machine"
                   },
                   "public_key": {
-                    "type": "string",
-                    "description": "ssh public key of user to access bastion"
+                    "type": "object",
+                    "description": "ssh public key of user to access bastion",
+                    "required": [
+                      "algo",
+                      "key"
+                    ],
+                    "properties": {
+                      "algo": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    }
                   }
                 },
                 "required": [
