@@ -102,13 +102,19 @@ async fn add_ssh_ressource(ressource: web::Json<SSHRessource>) -> HttpResponse {
 
     let res = ressource
         .realise()
-        .map_err(|e| HttpResponse::InternalServerError().body(e));
+        .map_err(|e| {
+            log::error!("Error realising ressource: {}", e);
+            HttpResponse::InternalServerError().body(e)
+        });
     if let Err(e) = res {
         return e;
     }
     let res = ressource
         .save()
-        .map_err(|e| HttpResponse::InternalServerError().body(e));
+        .map_err(|e| {
+            log::error!("Error saving ressource: {}", e);
+            HttpResponse::InternalServerError().body(e)
+        });
     if let Err(e) = res {
         return e;
     }
