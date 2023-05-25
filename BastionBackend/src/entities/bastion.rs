@@ -26,13 +26,15 @@ pub struct BastionInsertable {
 
 #[derive(Queryable, Serialize, Debug )]
 pub struct BastionToken {
-    pub bastion_id: String,
     pub token: String,
+    pub bastion_id: String,
+    
 }
 
 #[derive(Serialize, Deserialize, AsChangeset, Insertable, Debug)]
 #[table_name = "bastion_token"]
 pub struct BastionTokenInsertable {
-    pub bastion_id: String,
     pub token: String,
+    pub bastion_id: String,
+    
 }
