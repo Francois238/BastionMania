@@ -54,7 +54,7 @@ pub async fn config_my_agent(
     let bastion = Bastion::find_un_bastion(my_bastion.bastion_id.to_string())?;
 
     let agent_pair = AgentPairInfo {
-        agent_host: agent_ask_info.agent_host,
+        endpoint: agent_ask_info.agent_host,
         public_key: agent_ask_info.public_key,
         target_cidr: bastion.subnet_cidr,
     };
