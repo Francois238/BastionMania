@@ -19,8 +19,25 @@ pub struct ConfigSshInstanceCreate {
 pub struct ActivationSshSession{
     pub id: String,
     pub name: String,
-    pub public_key: String,
+    pub public_key: SSHPublicKey,
     
+}
+#[derive(Serialize, Deserialize)]
+pub struct SSHPublicKey{
+    pub algo: String,
+    pub key: String,
+}
+
+impl SSHPublicKey{
+    pub fn from_string(key: String) -> SSHPublicKey{
+        let mut key = key.split(" ");
+        let algo = key.next().unwrap().to_string();
+        let key = key.next().unwrap().to_string();
+        SSHPublicKey{
+            algo,
+            key,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]

@@ -7,7 +7,7 @@ use crate::entities::{
     K8sRessourceInsertable, Ressource, RessourceInsertable, SshRessource, SshRessourceInsertable,
     Users, UsersModification, WireguardRessource, WireguardRessourceInsertable,
 };
-use crate::model::ressourcecredentialsssh::{ActivationSshSession};
+use crate::model::ressourcecredentialsssh::{ActivationSshSession, SSHPublicKey};
 use crate::model::ressourcecredentialwireguard::{
     ActivationWireguardSession};
 
@@ -562,7 +562,7 @@ impl UserConfigSsh {
         let session = ActivationSshSession {
             id: user_id.clone(),
             name: sshressource.name.clone(),
-            public_key: userconfig.pubkey.clone(),
+            public_key: SSHPublicKey::from_string(userconfig.pubkey.clone()),
         };
 
         let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{ressource_id}/users");
