@@ -583,10 +583,11 @@ impl UserConfigSsh {
         let _userconfig = UserConfigSsh::userconfigsshfind(user_id.clone(), ressource_id.clone())?;
         let ressource = Ressource::find_a_ressource(ressource_id.clone())?;
         let bastion_id = ressource.id_bastion.clone();
+        let resource_name = ressource.name.clone();
 
         //TODO url
         let client = reqwest::Client::new();
-        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{ressource_id}/users/{user_id}");
+        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{resource_name}/users/{user_id}");
         let _res = client
             .delete(&url)
             .send()
