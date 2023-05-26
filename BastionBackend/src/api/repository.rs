@@ -561,11 +561,11 @@ impl UserConfigSsh {
         log::debug!("sshressource: {:?}", sshressource);
         let session = ActivationSshSession {
             id: user_id.clone(),
-            name: sshressource.name.clone(),
+            name: userconfig.username.clone(),
             public_key: SSHPublicKey::from_string(userconfig.pubkey.clone()),
         };
-
-        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{ressource_id}/users");
+        let resource_name = ressource.name.clone();
+        let url = format!("http://bastion-internal-{bastion_id}:9000/ssh/ressources/{resource_name}/users");
 
         let _response = client
             .post(&url)
