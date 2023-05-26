@@ -1,0 +1,29 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "restrict-kong"
+  namespace: "bastion"
+spec:
+  endpointSelector:
+    matchLabels:
+      pod-name: kong
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            "k8s:io.kubernetes.pod.namespace": kube-system
+        - matchLabels:
+            pod-name: front
+        - matchLabels:
+            pod-name: admin-management
+        - matchLabels:
+            pod-name: authentication
+        - matchLabels:
+            pod-name: user-management
+        - matchLabels:
+            app: bastionbackend
+    - toCIDR:
+       - 10.10.40.30/32
+  ingress:
+    - fromEntities:
+      - world
