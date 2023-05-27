@@ -150,7 +150,7 @@ async fn authentication_ext_next(session: Session) -> Result<HttpResponse, ApiEr
         println!("SESSION value: {}", token);
         // modify the session state
 
-        let claims = Claims::verify_admin_session_complete(&token)?;
+        let claims = Claims::verify_user_session_complete(&token)?;
 
         let user = User::find_by_mail(claims.mail)?;
 
