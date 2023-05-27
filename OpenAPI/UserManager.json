@@ -10,11 +10,96 @@
   },
   "servers": [
     {
-      "url": "http://auth/api/v1",
+      "url": "https://bastionmania.intra/api/user-management",
+      "description": "external"
+    },
+    {
+      "url": "http://usermanagement.bastion",
       "description": "internal"
     }
   ],
   "paths": {
+    "/users": {
+      "post": {
+        "summary": "Create New User",
+        "operationId": "post-user",
+        "responses": {
+          "200": {
+            "description": "User Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Missing Required Information"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Email Already Taken"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserEnroll"
+              },
+              "examples": {}
+            }
+          },
+          "description": "Post the necessary fields for the API to create a new user."
+        },
+        "description": "Create a new user.",
+        "parameters": []
+      },
+      "parameters": [],
+      "get": {
+        "summary": "",
+        "operationId": "get-users",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "description": "Get all users",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "mail",
+            "description": "renvoyer la liste des users qui match avec le mail (ou debut ou fin du mail)"
+          }
+        ]
+      }
+    },
     "/users/{userId}": {
       "parameters": [
         {
@@ -121,77 +206,6 @@
         "description": ""
       }
     },
-    "/users": {
-      "post": {
-        "summary": "Create New User",
-        "operationId": "post-user",
-        "responses": {
-          "200": {
-            "description": "User Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "400": {
-            "description": "Missing Required Information"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "409": {
-            "description": "Email Already Taken"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserEnroll"
-              },
-              "examples": {}
-            }
-          },
-          "description": "Post the necessary fields for the API to create a new user."
-        },
-        "description": "Create a new user.",
-        "parameters": []
-      },
-      "parameters": [],
-      "get": {
-        "summary": "",
-        "operationId": "get-users",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          }
-        },
-        "description": "Get all users"
-      }
-    },
     "/users/{userId}/otp": {
       "parameters": [
         {
@@ -216,19 +230,28 @@
         }
       }
     },
-    "/logout": {
-      "get": {
-        "summary": "Your GET endpoint",
-        "tags": [],
+    "/extern/users": {
+      "post": {
+        "summary": "",
+        "operationId": "post-extern-users",
         "responses": {
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
+          "401": {
+            "description": "Unauthorized"
           }
         },
-        "operationId": "get-logout"
+        "description": "Ajouter automatiquement un utilisateur s'il n'existe pas lorsqu'il se connecte avec le SSO",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPostAuthentication"
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -241,7 +264,7 @@
         "x-internal": true,
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "description": "Unique identifier for the given user."
           },
           "name": {
@@ -289,6 +312,27 @@
           "mail",
           "password"
         ]
+      },
+      "UserPostAuthentication": {
+        "title": "UserPostAuthentication",
+        "x-stoplight": {
+          "id": "58yty9e63trvx"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "claims": {
+            "type": "string"
+          }
+        }
       }
     },
     "securitySchemes": {},
