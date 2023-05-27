@@ -9,33 +9,30 @@ spec:
     protocol: TCP
     targetPort: 8081
   selector:
-    pod-name: admin-management
+    app: admin-management
   type: ClusterIP
 
 ---
-
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: admin-management
   namespace: bastion
-  labels:
-    app: admin-management
 spec:
   replicas: 1
   selector:
     matchLabels:
-      pod-name: admin-management
+      app: admin-management
   template:
     metadata:
       labels:
-        pod-name: admin-management
+        app: admin-management
     spec:
       containers:
       - name: admin-management
-        image: docker.io/francois238/adminmanagement:7.0
-        imagePullPolicy: IfNotPresent
+        image: "ghcr.io/bastionmania/bastionmania/adminmanagement:dev"
+        imagePullPolicy: Always
         ports:
         - name: http
           protocol: TCP
@@ -48,3 +45,5 @@ spec:
       - name: mnt
         secret:
           secretName: gestionadmin.conf
+      imagePullSecrets:
+        - name: repogithub

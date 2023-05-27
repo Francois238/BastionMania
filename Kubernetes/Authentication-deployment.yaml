@@ -9,26 +9,26 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    pod-name: authentication
+    app: authentication
   type: ClusterIP
 
 ---
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: authentication
   namespace: bastion
-  labels:
-    app: authentication
 spec:
   replicas: 1
   selector:
     matchLabels:
-      pod-name: authentication
+      app: authentication
   template:
     metadata:
       labels:
-        pod-name: authentication
+        app: authentication
     spec:
       containers:
       - name: authentication

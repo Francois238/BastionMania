@@ -6,12 +6,12 @@ Pour installer un serveur NFS, lancez sur le serveur les commandes suivantes :
 Créer un répertoire sur le serveur : `sudo mkdir -p /data/volume/` puis `sudo chown nobody:nogroup /data/volume/`  
 Il faut maintenant rendre possible le partage de ce dossier :  
 Entrez `sudo nano /etc/exports` ou avec un autre éditeur puis ajouter à la fin de ce fichier :  
-`/data/volume 192.168.250.0/24(rw,sync,no_subtree_check,no_root_squash) 10.10.40.0/24(rw,sync,no_subtree_check,no_root_squash)`  
+`10.10.40.0/24(rw,sync,no_subtree_check,no_root_squash)` (10.10.40.0/24 correspond à votre sous-réseau de worker, à adapter si différent) 
 Puis redémarrer le serveur NFS : `sudo systemctl restart nfs-kernel-server`  
   
 Sur les workers du cluster, reproduisez les étapes suivantes :  
-`sudo apt update` puis `sudo apt install nfs-kernel-server`  
-Créer un répertoire : `sudo mkdir /volume/data` puis `chmod 777 -R /data`  
+`sudo apt update` puis `sudo apt install nfs-common`  
+Créer un répertoire : `sudo mkdir /data/volume/` puis `chmod 777 -R /data`  
 Faite `sudo mount ip_server_nfs:/data/volume /data/volume`  
 
 
