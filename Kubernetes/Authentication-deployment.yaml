@@ -40,7 +40,7 @@ spec:
           containerPort: 8080
         volumeMounts:
           - name: mnt
-            mountPath: /home/runner/app/.env
+            mountPath: /.env
             subPath: fichier.properties
       volumes:
       - name: mnt
