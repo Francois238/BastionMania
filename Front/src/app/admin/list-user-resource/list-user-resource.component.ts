@@ -106,6 +106,9 @@ export class ListUserResourceComponent implements OnInit {
                 this.message="L'utilisateur a bien été ajouté"
   
                 this.getListUser()
+              },
+              error: (e) => {
+                this.message="L'utilisateur n'a pas pu être ajouté"
               }
             })
           }
