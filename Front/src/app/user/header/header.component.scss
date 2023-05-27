@@ -1,34 +1,43 @@
 .logo{
-    height:50px;
-    width:50px;
+  width: 45px;
+  height: 45px;
+  border-radius: 11%;
+  margin-left: 10px;
+}
+
+  // main navbar css
+  .navbar{
+    color:#fff;
+    padding:16px !important;
+    background: rgb(34,34,34);
+    background: linear-gradient(90deg, 
+     rgba(34,34,34,1) 2%,
+     rgb(106, 106, 106) 30%, 
+     rgb(150, 150, 150) 45%, 
+     rgb(182, 182, 182) 55%, 
+     rgb(207, 207, 207) 65%, 
+     rgb(226, 226, 226) 75%,
+     rgb(249, 250, 250) 93%, 
+     rgba(255,255,255,1) 100%);
+    }
+    a.navbar-brand{
+      color:#fff;
+      font-size:26px;
+      font-weight:bold;
+      &:hover{
+        color:#fff;
+      }
+    }
+    .nav-item > a{
+      color:#fff !important;
+      transition:all .3s ease;
+    }
+    .nav-item > a:hover,.nav-item.active > a{
+      color:#339999 !important;
+
+    }
+
+  button.navbar-toggler{
+    background-color:#fff;
   }
-  
-    // main navbar css
-    .main-navbar{
-      background-color:#333;
-      .navbar{
-        background-color:#333 !important;
-        color:#fff;
-        padding:16px !important;
-      }
-      a.navbar-brand{
-        color:#fff;
-        font-size:26px;
-        font-weight:bold;
-        &:hover{
-          color:#fff;
-        }
-      }
-      .nav-item > a{
-        color:#fff !important;
-        transition:all .3s ease;
-      }
-      .nav-item > a:hover,.nav-item.active > a{
-        color:#339999 !important;
-        
-      }
-    }
-    button.navbar-toggler{
-      background-color:#fff;
-    }
-   
+ 

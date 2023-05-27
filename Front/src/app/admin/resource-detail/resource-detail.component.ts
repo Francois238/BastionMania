@@ -28,7 +28,7 @@ export class ResourceDetailComponent {
 
   supprimer(){
 
-    this.adminService.delete_ressource(this.ressource.bastion_id,this.ressource.id).subscribe({
+    this.adminService.delete_a_ressource(this.ressource.id_bastion,this.ressource.id).subscribe({
 
       next: (data : any) => {
         
@@ -47,7 +47,7 @@ export class ResourceDetailComponent {
 
   getDetail(){
 
-    this.router.navigate([`/admin/bastions/${this.ressource.bastion_id}/${this.ressource.id}`]);
+    this.router.navigate([`/admin/bastions/${this.ressource.id_bastion}/${this.ressource.id}`]);
   }
 
 

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../authentication.service';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-admin-ext-next',
@@ -22,7 +23,9 @@ export class AdminExtNextComponent {
 
       error: err => {
 
-        this.router.navigate(['/login']);
+        timer(3000).subscribe({ next: () => { this.router.navigate(['/login']);}
+          
+        });
       }
     })
   }

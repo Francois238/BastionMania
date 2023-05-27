@@ -1,0 +1,93 @@
+
+<div class="row mt-3 col-12">
+    <div class="col-6 mx-auto">
+
+      <h3 class="mb-5 text-center">Votre ressource</h3>
+
+
+
+      <!-- Button trigger modal -->
+<button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" data-bs-toggle="modal" data-bs-target="#ajoutRessourceSSH">
+    Générer mon accès SSH
+  </button> <br>
+  
+  <!-- Modal SSH -->
+  <div class="modal fade" id="ajoutRessourceSSH" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutRessourceSSHLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="ajoutRessourceSSHLabel">Générer mon accès SSH</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form (ngSubmit)="sendSSHKey()" [formGroup]="ajoutSSHForm">
+              <div class="mb-3">
+                <label for="pubkeySSH" class="form-label">Ma clé publique SSH</label>
+                <input formControlName="pubkeySSH" class="form-control" id="pubkeySSH">
+              </div>
+              <button type="submit" class="btn btn-outline-secondary">Générer</button>
+            </form>
+    
+            <div class="mt-5 text-center" *ngIf="messageSSH">{{ messageSSH }}</div>
+            <div class="mt-5 text-center" *ngIf="infoSsh">
+                <textarea id="csr" rows="10" cols="50" [textContent]="infoSsh"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Fin modal creation ressource SSH-->
+
+
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" data-bs-toggle="modal" data-bs-target="#ajoutRessourceWireguard">
+        Générer mon accès Wireguard
+      </button> <br>
+      
+      <!-- Modal Wireguard -->
+      <div class="modal fade" id="ajoutRessourceWireguard" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutRessourceWireguardLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="ajoutRessourceWireguardLabel">Ajouter une Ressource Wireguard</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form (ngSubmit)="sendWireguardKey()" [formGroup]="ajoutWireguardForm">
+                  <div class="mb-3">
+                    <label for="pubkeyWireguard" class="form-label">nom</label>
+                    <input formControlName="pubkeyWireguard" class="form-control" id="pubkeyWireguard">
+                  </div>
+                  <button type="submit" class="btn  btn-outline-secondary">Générer</button>
+                </form>
+        
+                <div class="mt-5 text-center" *ngIf="messageWireguard">{{ messageWireguard }}</div>
+                <div class="mt-5 text-center" *ngIf="infoWireguard">
+                    <textarea id="csr" rows="10" cols="50" [textContent]="infoWireguard"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--Fin modal creation ressource SSH-->
+
+      <button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" (click)="start_session">
+        Démarrer la session
+      </button> <br>
+  
+      <button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" (click)="stop_session">
+        Arrêter la session
+      </button> <br>
+
+    </div>
+</div>
+
+

@@ -61,7 +61,7 @@ export class ListBastionComponent implements OnInit {
     console.log("mot de passe hashe admin : " + this.bastion.bastion_name)
 
     this.adminService.add_bastion(this.bastion).subscribe({
-      next: (data : BastionInfo) => {
+      next: (data : any) => {
         
         this.message="L'administrateur a bien été ajouté"
         this.getListBastion()
@@ -81,9 +81,9 @@ export class ListBastionComponent implements OnInit {
 
     this.adminService.get_bastions().subscribe({
 
-      next: (data : BastionInfo[]) => {
+      next: (data : any) => {
         
-        this.listBastions = data
+        this.listBastions = data.data 
 
         
       },

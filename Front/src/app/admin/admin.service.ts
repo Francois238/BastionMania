@@ -16,6 +16,9 @@ import { BastionInfo } from './bastion-info';
 import { UserBastionInfo } from './user-bastion-info';
 import { NewBastion } from './new-bastion';
 import { RessourceInfo } from './ressource-info';
+import { NewRessourceSshCreation } from './new-ressource-ssh-creation';
+import { NewRessourceWireguardCreation } from './new-ressource-wireguard-creation';
+import { NewUserBastion } from './new-user-bastion';
 
 @Injectable({
   providedIn: 'root'
@@ -182,29 +185,18 @@ export class AdminService {
     /********Gestion des bastions************/
     /****************************************/
 
-    public get_bastions() : Observable<BastionInfo[]>{
+    public get_bastions() : Observable<any>{
 
       const token = this.authenticationService.get_token();
 
       const headers = {'Authorization': 'Bearer ' + token};
 
       const url = this.baseUrlBastion +`bastions`;
-      return this.http.get<BastionInfo[]>(url, {headers})
+      return this.http.get<any>(url, {headers})
 
     }
 
-    public get_a_bastion(bastion_id: string) : Observable<BastionInfo>{
-
-      const token = this.authenticationService.get_token();
-
-      const headers = {'Authorization': 'Bearer ' + token};
-
-      const url = this.baseUrlBastion +`bastions/${bastion_id}`;
-      return this.http.get<BastionInfo>(url, {headers})
-
-    }
-
-    public add_bastion(bastion : NewBastion) : Observable<BastionInfo>{
+    public add_bastion(bastion : NewBastion) : Observable<any>{
 
       const token = this.authenticationService.get_token();
 
@@ -215,9 +207,22 @@ export class AdminService {
 
 
       const url = this.baseUrlBastion + 'bastions';
-      return this.http.post<BastionInfo>(url, body ,{headers})
+      return this.http.post<any>(url, body ,{headers})
 
     }
+
+    public get_a_bastion(bastion_id: string) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = {'Authorization': 'Bearer ' + token};
+
+      const url = this.baseUrlBastion +`bastions/${bastion_id}`;
+      return this.http.get<any>(url, {headers})
+
+    }
+
+
 
     public delete_bastion(id : string) : Observable<any>{
 
@@ -233,59 +238,140 @@ export class AdminService {
 
 
 
-    public get_ressources(bastion_id: string) : Observable<RessourceInfo[]>{
+    public get_ressources(bastion_id: string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
 
       const headers = {'Authorization': 'Bearer ' + token};
 
-      const url = this.baseUrlBastion +`bastions/${bastion_id}/resources`;
-      return this.http.get<RessourceInfo[]>(url, {headers})
+      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources`;
+      return this.http.get<any>(url, {headers})
 
     }
 
-    public get_a_ressource(bastion_id: string, ressource_id: string) : Observable<RessourceInfo>{
-
-      const token = this.authenticationService.get_token();
-
-      const headers = {'Authorization': 'Bearer ' + token};
-
-      const url = this.baseUrlBastion +`bastions/${bastion_id}/resources${ressource_id}`;
-      return this.http.get<RessourceInfo>(url, {headers})
-
-    }
-
-    public delete_ressource(bastion_id : string, ressource_id: string) : Observable<any>{
+    public delete_ressources(bastion_id : string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
 
       const headers = { 'Authorization': 'Bearer ' + token};
 
-      const url = this.baseUrlBastion + `bastions/${bastion_id}/resources/${ressource_id}`;
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources`;
       return this.http.delete<any>(url, {headers})
 
     }
 
 
-
-    public get_users_on_ressource(bastion_id: string, ressource_id: string) : Observable<UserBastionInfo[]>{
+    public get_a_ressource(bastion_id: string, ressource_id: string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
 
       const headers = {'Authorization': 'Bearer ' + token};
 
-      const url = this.baseUrlBastion +`bastions/${bastion_id}/resources/${ressource_id}/users`;
-      return this.http.get<UserBastionInfo[]>(url, {headers})
+      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources${ressource_id}`;
+      return this.http.get<any>(url, {headers})
 
     }
 
-    public delete_user_on_ressource(bastion_id : string, ressource_id: string, user_id: string) : Observable<any>{
+    public delete_a_ressource(bastion_id : string, ressource_id: string) : Observable<any>{
 
       const token = this.authenticationService.get_token();
 
       const headers = { 'Authorization': 'Bearer ' + token};
 
-      const url = this.baseUrlBastion + `bastions/${bastion_id}/resources/${ressource_id}/users/${user_id}`;
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/${ressource_id}`;
+      return this.http.delete<any>(url, {headers})
+
+    }
+
+
+    public create_ssh_ressource(bastion_id : string, ressource : NewRessourceSshCreation) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = { 'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token};
+
+      const body=JSON.stringify(ressource);
+
+
+      const url = this.baseUrlBastion + `bastions${bastion_id}/ressources/create/ssh`;
+      return this.http.post<any>(url, body ,{headers})
+
+    }
+
+    public create_wireguard_ressource(bastion_id : string, ressource : NewRessourceWireguardCreation) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = { 'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token};
+
+      const body=JSON.stringify(ressource);
+
+
+      const url = this.baseUrlBastion + `bastions${bastion_id}/ressources/create/wireguard`;
+      return this.http.post<any>(url, body ,{headers})
+
+    }
+
+
+
+    public get_users_on_ressource(bastion_id: string, ressource_id: string) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = {'Authorization': 'Bearer ' + token};
+
+      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}/users`;
+      return this.http.get<any>(url, {headers})
+
+    }
+
+    public create_user_on_ressource(bastion_id : string, ressource_id: string, ressource : NewUserBastion) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = { 'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token};
+
+      const body=JSON.stringify(ressource);
+
+
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/${ressource_id}/users`;
+      return this.http.post<any>(url, body ,{headers})
+
+    }
+
+    public delete_users_on_ressource(bastion_id : string, ressource_id: string, user_id: string) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = { 'Authorization': 'Bearer ' + token};
+
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/${ressource_id}/users`;
+      return this.http.delete<any>(url, {headers})
+
+    }
+
+
+    public get_a_user_on_ressource(bastion_id: string, ressource_id: string, user_id: string) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = {'Authorization': 'Bearer ' + token};
+
+      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}/users/${user_id}`;
+      return this.http.get<any>(url, {headers})
+
+    }
+
+    public delete_a_user_on_a_ressource(bastion_id : string, ressource_id: string, user_id: string) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = { 'Authorization': 'Bearer ' + token};
+
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/${ressource_id}/users/${user_id}`;
       return this.http.delete<any>(url, {headers})
 
     }

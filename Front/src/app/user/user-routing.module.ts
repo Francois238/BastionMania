@@ -5,6 +5,8 @@ import { MenuComponent } from './menu/menu.component';
 import {BastionsComponent} from "./bastions/bastions.component";
 import {BastiondetailComponent} from "./bastiondetail/bastiondetail.component";
 import { ProfilComponent } from './profil/profil.component';
+import { RessourcesComponent } from './ressources/ressources.component';
+import { RessourcePageComponent } from './ressource-page/ressource-page.component';
 
 const routes: Routes = [
   {
@@ -15,7 +17,8 @@ const routes: Routes = [
       { path: 'menu', component: MenuComponent },
       { path: 'profil', component: ProfilComponent },
       { path: 'bastions', component: BastionsComponent },
-      { path: 'bastions/:bastion_id', component: BastiondetailComponent },
+      { path: 'bastions/:idBastion', component: RessourcesComponent },
+      { path: 'bastions/:idBastion/:idRessource', component: RessourcePageComponent },
     ]
   }
 ];

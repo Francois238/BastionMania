@@ -2,6 +2,18 @@
 
     <div class="row mt-3 col-12">
         <div class="col-6 mx-auto">
+
+          <div class="row col-12">
+            <div class="col-8 mx-auto">
+                <h1 class=" w-100 text-center">Detail de la ressource</h1>
+        
+                <p class="  w-100">id : </p><br>
+                <p class="  w-100">Nom : </p><br>
+                <p class=" w-100 ">Type : </p><br>
+
+            </div>
+
+          </div>
     
           <h3 class="mb-5 text-center">Gestion des utilisateur sur cette ressource</h3>
     
@@ -17,28 +29,24 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="ajoutUserLabel">Ajouter une Ressource</h1>
+              <h1 class="modal-title fs-5" id="ajoutUserLabel">Ajouter un utilisateur</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form (ngSubmit)="ajoutUser()" [formGroup]="ajoutForm">
                     <div class="mb-3">
-                    <label for="last_name" class="form-label">Nom</label>
-                    <input formControlName="last_name" class="form-control" id="last_name">
-                    </div>
-                    <div class="mb-3">
-                    <label for="name" class="form-label">Prénom</label>
-                    <input formControlName="name" class="form-control" id="name">
-                    </div>
-                    <div class="mb-3">
                         <label for="mail" class="form-label">Mail</label>
                         <input formControlName="mail" class="form-control" id="mail">
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input formControlName="password" type="password" class="form-control" id="password">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Ajouter le bastion</button>
+                      <label for="ressource_id" class="form-label">ressource Id</label>
+                      <input formControlName="ressource_id" class="form-control" id="ressource_id">
+                  </div>
+                  <div class="mb-3">
+                    <label for="net_id" class="form-label">Net Id</label>
+                    <input formControlName="net_id" class="form-control" id="net_id">
+                </div>
+                    <button type="submit" class="btn btn-outline-secondary">Ajouter l'utilisateur</button>
                 </form>
         
                 <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
@@ -64,6 +72,10 @@
         <div class="col-6 h-100  mb-0 border border-primary" >
             <span class="d-block p-2 titre">Mail</span>
         </div>
+
+        <div class="col-6 h-100  mb-0 border border-primary" >
+          <span class="d-block p-2 titre">Net Id</span>
+      </div>
     
         <div class="col-3 h-100 mb-0" >
     
@@ -71,10 +83,10 @@
       
       </div>
     
-      <ng-container *ngIf="listUsers.length > 0">
-        <ng-container *ngFor="let item of listUsers">
+      <ng-container *ngIf="listUsersBastion.length > 0">
+        <ng-container *ngFor="let item of listUsersBastion">
       
-          <app-list-user-resource-detail [user]="item" (newItemEvent)="refreshList($event)"></app-list-user-resource-detail> 
+          <app-list-user-resource-detail [userBastion]="item" (newItemEvent)="refreshList($event)"></app-list-user-resource-detail> 
         </ng-container>
       </ng-container>
       

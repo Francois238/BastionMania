@@ -12,6 +12,7 @@ import {MatInputModule} from "@angular/material/input";
 import {ReactiveFormsModule} from "@angular/forms";
 import { RessourceItemComponent } from './ressource-item/ressource-item.component';
 import { HeaderComponent } from './header/header.component';
+import { RessourcePageComponent } from './ressource-page/ressource-page.component';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { HeaderComponent } from './header/header.component';
     BastiondetailComponent,
     BastionsComponent,
     RessourceItemComponent,
-    HeaderComponent
+    HeaderComponent,
+    RessourcePageComponent
   ],
   imports: [
     CommonModule,

@@ -8,6 +8,8 @@ import { Observable, map } from 'rxjs';
 import { Password } from './password';
 import { BastionInfo } from './bastion-info';
 import { RessourceInfo } from './ressource-info';
+import { RessourceCredentialSsh } from './ressource-credential-ssh';
+import { RessourceCredentialWireguard } from './ressource-credential-wireguard';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +21,19 @@ export class UserService {
   baseUrlUser = 'https://bastionmania.intra/api/user-management/';
 
   baseUrlBastion = 'https://bastionmania.intra/api/bastion-management/';
+
+  ressource!: RessourceInfo;
+
+  /***********Gestion Ressource*************/
+    public set_ressource(ressource: RessourceInfo){
+      sessionStorage.setItem('ressource', JSON.stringify(ressource));
+    }
+  
+  
+    public get_ressource(): RessourceInfo {
+  
+      return JSON.parse(sessionStorage.getItem('ressource') || '{}');
+    }
 
   /****gestion du token ********/
   public validate_token(): boolean{
@@ -106,22 +121,62 @@ public get_ressources(bastion_id: string) : Observable<RessourceInfo[]>{
 
   const headers = {'Authorization': 'Bearer ' + token};
 
-  const url = this.baseUrlBastion +`bastions/${bastion_id}/resources`;
+  const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources`;
   return this.http.get<RessourceInfo[]>(url, {headers})
 
 }
 
-public get_a_ressource(bastion_id: string, ressource_id: string) : Observable<RessourceInfo>{
+
+public generate_ssh_access(bastion_id: string, ressource_id: string, ssh: RessourceCredentialSsh) : Observable<any>{
 
   const token = this.authenticationService.get_token();
 
   const headers = {'Authorization': 'Bearer ' + token};
 
-  const url = this.baseUrlBastion +`bastions/${bastion_id}/resources${ressource_id}`;
-  return this.http.get<RessourceInfo>(url, {headers})
+  const body=JSON.stringify(ssh);
+
+  const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}/getressourcecredentials/ssh`;
+  return this.http.post<any>(url, body, {headers})
 
 }
 
+public generate_wireguard_access(bastion_id: string, ressource_id: string, wireguard: RessourceCredentialWireguard) : Observable<any>{
 
+  const token = this.authenticationService.get_token();
+
+  const headers = {'Authorization': 'Bearer ' + token};
+
+  const body=JSON.stringify(wireguard);
+
+  const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}/getressourcecredentials/wireguard`;
+  return this.http.post<any>(url, body, {headers})
+
+}
+
+public start_session(bastion_id: string, ressource_id: string): Observable<any> {
+
+  const token = this.authenticationService.get_token();
+
+  const headers = {'Authorization': 'Bearer ' + token};
+
+
+  const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}/startsession`;
+
+  return this.http.post<any>(url,null, {headers});
+
+}
+
+public stop_session(bastion_id: string, ressource_id: string): Observable<any> {
+
+  const token = this.authenticationService.get_token();
+
+  const headers = {'Authorization': 'Bearer ' + token};
+
+
+  const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}/stopsession`;
+
+  return this.http.post<any>(url,null, {headers});
+
+}
 
 }

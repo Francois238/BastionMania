@@ -14,6 +14,13 @@ export class HeaderComponent {
 
   constructor() {}
 
+  menu(){
+    this.activeAdmin = "";
+    this.activeUser = "";
+    this.activeBastion = "";
+    this.activeProfil = "";
+  }
+
   on_click_admin() {
     this.activeAdmin = "active";
     this.activeUser = "";

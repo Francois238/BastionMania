@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { AuthenticationService } from 'src/app/login/authentication.service';
 import { AdminInfo } from '../admin-info';
@@ -7,60 +7,56 @@ import { NewAdmin } from '../new-admin';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { UserBastionInfo } from '../user-bastion-info';
 import { RessourceInfo } from '../ressource-info';
+import { UserInfo } from '../user-info';
+import { NewUserBastion } from '../new-user-bastion';
 
 @Component({
   selector: 'app-list-user-resource',
   templateUrl: './list-user-resource.component.html',
   styleUrls: ['./list-user-resource.component.scss']
 })
-export class ListUserResourceComponent {
+export class ListUserResourceComponent implements OnInit {
 
-  public name: string ='';
-  public last_name: string ='';
-  public mail: string ='';
-  public password: string ='';
   public message: string ='';
-  public admin! : NewAdmin
+
   public ajoutForm: FormGroup;
-  public nameCrtl: FormControl;
-  public last_nameCrtl: FormControl;
   public mailCrtl: FormControl;
-  public passwordCrtl: FormControl;
+  public ressource_idCrtl: FormControl;
+  public net_idCrtl: FormControl;
 
+  public userBastion!: NewUserBastion;
   public ressource!: RessourceInfo;
-
-  public listUsers : Array<UserBastionInfo> = new Array<UserBastionInfo>();
 
   public bastion_id : string = '';
 
   public ressource_id : string = '';
 
+  public user!: UserInfo;
+
+  public listUsersBastion : Array<UserBastionInfo> = new Array<UserBastionInfo>();
+
   constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService,private activRoute: ActivatedRoute) { 
 
-    this.nameCrtl = new FormControl('')
-    this.last_nameCrtl = new FormControl('')
     this.mailCrtl = new FormControl('')
-    this.passwordCrtl = new FormControl('')
+    this.ressource_idCrtl = new FormControl('')
+    this.net_idCrtl = new FormControl('')
     this.ajoutForm = new FormGroup({
-        name: this.nameCrtl,
-        last_name: this.last_nameCrtl,
         mail: this.mailCrtl,
-        password: this.passwordCrtl
+        ressource_id: this.ressource_idCrtl,
+        net_id: this.net_idCrtl
 
     })
   }
 
   ngOnInit(): void {
 
-    this.nameCrtl = new FormControl('')
-    this.last_nameCrtl = new FormControl('')
     this.mailCrtl = new FormControl('')
-    this.passwordCrtl = new FormControl('')
+    this.ressource_idCrtl = new FormControl('')
+    this.net_idCrtl = new FormControl('')
     this.ajoutForm = new FormGroup({
-        name: this.nameCrtl,
-        last_name: this.last_nameCrtl,
         mail: this.mailCrtl,
-        password: this.passwordCrtl
+        ressource_id: this.ressource_idCrtl,
+        net_id: this.net_idCrtl
 
     })
 
@@ -86,40 +82,41 @@ export class ListUserResourceComponent {
   ajoutUser(){
     this.message = '';
 
-    this.name = this.nameCrtl.value.trim();
-    this.last_name = this.last_nameCrtl.value.trim();
-    this.mail = this.mailCrtl.value.trim();
-    this.password = this.passwordCrtl.value.trim();
+    let mail = this.mailCrtl.value.trim() as string;
+    let user_ressource_id = this.ressource_idCrtl.value.trim() as string;
+    let net_id= this.net_idCrtl.value.trim() as number;
 
-    if( this.password.length< 2){
+    this.adminService.get_user_mail(mail).subscribe({
+      next: (data : UserInfo[]) => {
 
-      this.message = "Le mot de passe doit contenir au moins 2 caractères"
-      return
-    }
+        if( data.length == 1){
+          this.user= data[0];
 
-    this.admin = {
-      name : this.name,
-      last_name : this.last_name,
-      mail : this.mail,
-      password : this.serviceAuthentication.get_hash_password(this.password)
-    }
+          this.userBastion = {
+            user_id: this.user.id,
+            ressource_id: user_ressource_id,
+            net_id: net_id
 
-    console.log("mot de passe hashe admin : " + this.admin.password)
+          }
 
-    this.adminService.add_admin(this.admin).subscribe({
-      next: (data : AdminInfo) => {
-        
-        this.message="L'administrateur a bien été ajouté"
-        this.getListUser()
+          this.adminService.create_user_on_ressource(this.bastion_id, this.ressource_id, this.userBastion).subscribe({
 
-        
-      },
-      error: (e) => {
-        
-        console.error(e)
-        this.message = "Impossible d'ajouter l'administrateur"
+            next: (data : any) => {
+                
+                this.message="L'utilisateur a bien été ajouté"
+  
+                this.getListUser()
+              }
+            })
+          }
+
+          else{
+            this.message="L'utilisateur n'existe pas"
+          }
       }
-  })
+
+    });
+
 
   }
 
@@ -127,9 +124,9 @@ export class ListUserResourceComponent {
 
     this.adminService.get_users_on_ressource(this.bastion_id, this.ressource_id).subscribe({
 
-      next: (data : UserBastionInfo[]) => {
+      next: (data : any) => {
         
-        this.listUsers = data
+        this.listUsersBastion = data.data
 
         
       },
@@ -146,4 +143,8 @@ export class ListUserResourceComponent {
     this.getListUser()
   }
 
+
+
 }
+
+

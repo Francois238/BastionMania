@@ -11,6 +11,11 @@ export class HeaderComponent {
   activeProfil = "";
 
   constructor() {}
+
+  menu(){
+    this.activeBastion = "";
+    this.activeProfil = "";
+  }
   on_click_bastion() {
 
     this.activeBastion = "active";
