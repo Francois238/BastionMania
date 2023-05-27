@@ -28,7 +28,7 @@ export class AdminDetailComponent {
 
     this.adminService.delete_admin(this.admin.id).subscribe({
 
-      next: (data : number) => {
+      next: (data : any) => {
         
         this.message="L'administrateur a bien été supprimé"
         this.newItemEvent.emit("delete");

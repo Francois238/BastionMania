@@ -1,0 +1,72 @@
+<body>
+
+    <div class="row mt-3 col-12">
+        <div class="col-6 mx-auto">
+    
+          <h3 class="mb-5 text-center">Gestion des Bastions</h3>
+    
+    
+    
+          <!-- Button trigger modal -->
+    <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutBastion">
+        Ajouter un bastion
+      </button>
+      
+      <!-- Modal -->
+      <div class="modal fade" id="ajoutBastion" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutBastionLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="ajoutBastionLabel">Ajouter un bastion</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form (ngSubmit)="ajoutBastion()" [formGroup]="ajoutForm">
+                    <div class="mb-3">
+                    <label for="name" class="form-label">Nom du bastion</label>
+                    <input formControlName="name" class="form-control" id="name">
+                    </div>
+                    <div class="mb-3">
+                    <label for="subnet_cidr" class="form-label">Subnet cidr</label>
+                    <input formControlName="subnet_cidr" class="form-control" id="subnet_cidr">
+                    </div>
+                    <button type="submit" class="btn btn-outline-secondary">Ajouter le bastion</button>
+                </form>
+        
+                <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class= "d-flex align-items-center text-center justify-content-center mb-3" style="height: 40px">
+    
+        <div class="col-4 h-100 mb-0 carte border-secondary border-bottom">
+          <span class="d-block p-2 ">Nom du bastion</span>
+      
+        </div>
+    
+        <div class="col-3 h-100 mb-0" >
+    
+          </div>
+
+          <div class="col-3 h-100 mb-0" >
+    
+          </div>
+      
+      </div>
+    
+      <ng-container *ngIf="listBastions.length > 0">
+        <ng-container *ngFor="let item of listBastions">
+      
+          <app-bastion-detail [bastion]="item" (newItemEvent)="refreshList($event)"></app-bastion-detail> 
+        </ng-container>
+      </ng-container>
+      
+    
+        </div>
+    </div>
+    

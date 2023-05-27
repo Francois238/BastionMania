@@ -1,0 +1,50 @@
+<body>
+
+  <div class="row mt-3 col-12">
+      <div class="col-6 mx-auto">
+
+        <div class="row col-12">
+          <div class="col-8 mx-auto">
+              <h1 class=" w-100 text-center">Detail du bastion</h1>
+      
+              <p class="  w-100">Nom : </p><br>
+              <p class=" w-100 ">Subnet CIDR : </p><br>
+              <p class="  w-100 ">SSH port : {{bastion.ssh_port}}</p><br>
+              <p class=" w-100 ">Wireguard port : {{bastion.wireguard_port}}</p><br>
+              <p class=" w-100 ">Net Id : {{bastion.net_id}}</p><br>
+
+          </div>
+
+        </div>
+  
+        <h3 class="mb-5 text-center">Mes ressources</h3>
+    
+  
+    <div class= "d-flex align-items-center text-center justify-content-center mb-3" style="height: 40px">
+  
+      <div class="col-4 h-100 mb-0 carte border-secondary border-bottom">
+        <span class="d-block p-2 ">Nom</span>
+    
+      </div>
+    
+      <div class="col-4 h-100  mb-0  border-secondary border-bottom" >
+        <span class="d-block p-2 titre">Protocol</span>
+      </div>
+  
+      <div class="col-3 h-100 mb-0" >
+  
+        </div>
+    
+    </div>
+  
+    <ng-container *ngIf="listRessources.length > 0">
+      <ng-container *ngFor="let item of listRessources">
+    
+        <app-ressource-item [ressource]="item"></app-ressource-item> 
+      </ng-container>
+    </ng-container>
+    
+  
+      </div>
+  </div>
+  

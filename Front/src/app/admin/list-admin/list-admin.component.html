@@ -1,4 +1,4 @@
-<app-header></app-header>
+<body>
 
 <div class="row mt-3 col-12">
     <div class="col-6 mx-auto">
@@ -8,7 +8,7 @@
 
 
       <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutAdmin">
+<button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutAdmin">
     Ajouter un administrateur
   </button>
   
@@ -38,7 +38,7 @@
                     <label for="password" class="form-label">Password</label>
                     <input formControlName="password" type="password" class="form-control" id="password">
                 </div>
-                <button type="submit" class="btn btn-primary">Ajouter l'administrateur</button>
+                <button type="submit" class="btn btn-outline-secondary">Ajouter l'administrateur</button>
             </form>
     
             <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
@@ -52,21 +52,16 @@
 
   <div class= "d-flex align-items-center text-center justify-content-center mb-3" style="height: 40px">
 
-    <div class="col-2 h-100 mb-0 carte border border-primary">
-      <span class="d-block p-2 ">id</span>
-  
-    </div>
-  
-    <div class="col-3 h-100 mb-0 carte border border-primary">
+    <div class="col-4 h-100 mb-0 carte border-secondary border-bottom ">
       <span class="d-block p-2 ">Nom</span>
   
     </div>
   
-    <div class="col-3 h-100  mb-0  border border-primary" >
+    <div class="col-4 h-100  mb-0  border-secondary border-bottom" >
       <span class="d-block p-2 titre">Prénom</span>
     </div>
 
-    <div class="col-5 h-100  mb-0 border border-primary" >
+    <div class="col-6 h-100  mb-0 border-secondary border-bottom" >
         <span class="d-block p-2 titre">Mail</span>
     </div>
 
