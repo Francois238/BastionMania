@@ -33,9 +33,9 @@ export class BastionsComponent {
 
     this.userService.get_bastions().subscribe({
 
-      next: (data : BastionInfo[]) => {
+      next: (data : any) => {
         
-        this.listBastions = data
+        this.listBastions = data.data as BastionInfo[]
 
         
       },

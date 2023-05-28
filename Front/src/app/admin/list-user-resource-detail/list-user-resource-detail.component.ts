@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BastionInfo } from '../bastion-info';
 import { UserBastionInfo } from '../user-bastion-info';
 import { AdminService } from '../admin.service';
@@ -11,7 +11,7 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
   templateUrl: './list-user-resource-detail.component.html',
   styleUrls: ['./list-user-resource-detail.component.scss']
 })
-export class ListUserResourceDetailComponent {
+export class ListUserResourceDetailComponent implements OnInit{
 
   @Input() userBastion!: UserBastionInfo;
   @Output() newItemEvent = new EventEmitter<string>();
@@ -36,7 +36,11 @@ export class ListUserResourceDetailComponent {
       });
     });
 
-    this.getMailUser(this.userBastion)
+    
+  }
+
+  ngOnInit(): void {
+    this.getMailUser()
   }
 
 
@@ -65,18 +69,17 @@ export class ListUserResourceDetailComponent {
 
   }
 
-  getMailUser(user: UserBastionInfo){
+  getMailUser(){
 
-    this.adminService.get_user_mail(user.user_id).subscribe({
+    console.log("je vais chercher le mail de : ")
+    console.log(this.userBastion.user_id)
 
-        next: (data : UserInfo[]) => {
+    this.adminService.get_a_user(this.userBastion.user_id).subscribe({
 
-          if(data.length == 0) return
+        next: (data : UserInfo) => {
 
-          else if (data.length == 1){
-            this.user = data[0]
-
-          }
+            this.user = data
+            console.log(this.user.mail)
 
         }
       })

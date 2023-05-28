@@ -7,9 +7,8 @@
             <div class="col-8 mx-auto">
                 <h1 class=" w-100 text-center">Detail de la ressource</h1>
         
-                <p class="  w-100">id : </p><br>
-                <p class="  w-100">Nom : </p><br>
-                <p class=" w-100 ">Type : </p><br>
+                <p class="  w-100">Nom : {{ressource.name}}</p><br>
+                <p class=" w-100 ">Type : {{ressource.rtype}}</p><br>
 
             </div>
 
@@ -38,14 +37,7 @@
                         <label for="mail" class="form-label">Mail</label>
                         <input formControlName="mail" class="form-control" id="mail">
                     </div>
-                    <div class="mb-3">
-                      <label for="ressource_id" class="form-label">ressource Id</label>
-                      <input formControlName="ressource_id" class="form-control" id="ressource_id">
-                  </div>
-                  <div class="mb-3">
-                    <label for="net_id" class="form-label">Net Id</label>
-                    <input formControlName="net_id" class="form-control" id="net_id">
-                </div>
+
                     <button type="submit" class="btn btn-outline-secondary">Ajouter l'utilisateur</button>
                 </form>
         

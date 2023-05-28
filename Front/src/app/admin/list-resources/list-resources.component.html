@@ -6,8 +6,8 @@
             <div class="col-8 mx-auto">
                 <h1 class=" w-100 text-center">Detail du bastion</h1>
         
-                <p class="  w-100">Nom : </p><br>
-                <p class=" w-100 ">Subnet CIDR : </p><br>
+                <p class="  w-100">Nom : {{bastion.name}}</p><br>
+                <p class=" w-100 ">Subnet CIDR : {{bastion.subnet_cidr}}</p><br>
                 <p class="  w-100 ">SSH port : {{bastion.ssh_port}}</p><br>
                 <p class=" w-100 ">Wireguard port : {{bastion.wireguard_port}}</p><br>
                 <p class=" w-100 ">Net Id : {{bastion.net_id}}</p><br>
@@ -19,11 +19,13 @@
           <h3 class="mb-5 text-center">Gestion des Ressources</h3>
     
     
-    
+  <div class="col-lg-6 text-center mx-auto">
+
           <!-- Button trigger modal -->
-    <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutRessourceSSH">
+    <button type="button" class="btn btn-outline-secondary mb-5" data-bs-toggle="modal" data-bs-target="#ajoutRessourceSSH">
         Ajouter une ressource SSH sur ce bastion
       </button>
+
       
       <!-- Modal SSH -->
       <div class="modal fade" id="ajoutRessourceSSH" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutRessourceSSHLabel" aria-hidden="true">
@@ -50,7 +52,10 @@
                   <button type="submit" class="btn btn-outline-secondary">Ajouter la ressource SSH</button>
                 </form>
         
-                <div class="mt-5 text-center" *ngIf="messageSSH">{{ messageSSH }}</div>
+                <div class="mt-5 text-center" *ngIf="messageSSH" >
+                  <textarea id="w3review" name="w3review" rows="5" cols="40" [innerText]="messageSSH"> </textarea>
+                </div>
+                <div class="mt-5 text-center" *ngIf="error">{{ error }}</div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -61,12 +66,12 @@
 
       <!--Fin modal creation ressource SSH-->
 
-    
+
           <!-- Button trigger modal -->
-          <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutRessourceWireguard">
+          <button type="button" class="btn btn-outline-secondary mb-5" data-bs-toggle="modal" data-bs-target="#ajoutRessourceWireguard">
             Ajouter une ressource Wireguard sur ce bastion
           </button>
-          
+
           <!-- Modal Wireguard -->
           <div class="modal fade" id="ajoutRessourceWireguard" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutRessourceWireguardLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -98,7 +103,7 @@
           </div>
     
           <!--Fin modal creation ressource SSH-->
-    
+  </div>
       <div class= "d-flex align-items-center text-center justify-content-center mb-3" style="height: 40px">
     
         <div class="col-4 h-100 mb-0 carte border-secondary border-bottom">
@@ -111,6 +116,10 @@
         </div>
     
         <div class="col-3 h-100 mb-0" >
+    
+          </div>
+
+          <div class="col-3 h-100 mb-0" >
     
           </div>
       

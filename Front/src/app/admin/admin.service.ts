@@ -19,6 +19,7 @@ import { RessourceInfo } from './ressource-info';
 import { NewRessourceSshCreation } from './new-ressource-ssh-creation';
 import { NewRessourceWireguardCreation } from './new-ressource-wireguard-creation';
 import { NewUserBastion } from './new-user-bastion';
+import { ConfigureAgent } from './configure-agent';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class AdminService {
 
   baseUrlUser = 'https://bastionmania.intra/api/user-management/';
 
-  baseUrlBastion = 'https://bastionmania.intra/api/bastion-management/';
+  baseUrlBastion = 'https://bastionmania.intra/api/';
 
   constructor(private http: HttpClient, protected router: Router, protected authenticationService: AuthenticationService) { }
 
@@ -143,6 +144,17 @@ export class AdminService {
 
     }
 
+    public get_a_user(id : string) : Observable<UserInfo>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = {'Authorization': 'Bearer ' + token};
+
+      const url = this.baseUrlUser +`users/${id}`;
+      return this.http.get<UserInfo>(url, {headers})
+
+    }
+
     public get_user_mail(mail: string) : Observable<UserInfo[]>{
 
       const token = this.authenticationService.get_token();
@@ -184,6 +196,20 @@ export class AdminService {
     /****************************************/
     /********Gestion des bastions************/
     /****************************************/
+
+    public configure_agent(agent : ConfigureAgent) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = { 'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token};
+
+      const body=JSON.stringify(agent);
+
+
+      const url = this.baseUrlBastion + `agent`;
+      return this.http.post<any>(url, body ,{headers})
+    }
 
     public get_bastions() : Observable<any>{
 
@@ -267,7 +293,7 @@ export class AdminService {
 
       const headers = {'Authorization': 'Bearer ' + token};
 
-      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources${ressource_id}`;
+      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}`;
       return this.http.get<any>(url, {headers})
 
     }
@@ -294,7 +320,7 @@ export class AdminService {
       const body=JSON.stringify(ressource);
 
 
-      const url = this.baseUrlBastion + `bastions${bastion_id}/ressources/create/ssh`;
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/create/ssh`;
       return this.http.post<any>(url, body ,{headers})
 
     }
@@ -309,7 +335,7 @@ export class AdminService {
       const body=JSON.stringify(ressource);
 
 
-      const url = this.baseUrlBastion + `bastions${bastion_id}/ressources/create/wireguard`;
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/create/wireguard`;
       return this.http.post<any>(url, body ,{headers})
 
     }

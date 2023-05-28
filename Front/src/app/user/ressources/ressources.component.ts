@@ -33,8 +33,8 @@ export class RessourcesComponent {
 
       this.userService.get_a_bastion(this.bastion_id).subscribe({
 
-        next: (data : BastionInfo) => {
-          this.bastion = data;
+        next: (data : any) => {
+          this.bastion = data.data as BastionInfo 
         }
 
       });
@@ -50,9 +50,9 @@ export class RessourcesComponent {
 
     this.userService.get_ressources(this.bastion_id).subscribe({
 
-      next: (data : RessourceInfo[]) => {
+      next: (data : any) => {
         
-        this.listRessources = data
+        this.listRessources = data.data as RessourceInfo[]
 
         
       },

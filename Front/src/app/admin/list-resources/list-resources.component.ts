@@ -41,6 +41,8 @@ export class ListResourcesComponent implements OnInit {
 
   public bastion_id : string = '';
 
+  public error='';
+
 
   constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService,     private activRoute: ActivatedRoute) { 
 
@@ -90,8 +92,8 @@ export class ListResourcesComponent implements OnInit {
 
       this.adminService.get_a_bastion(this.bastion_id).subscribe({
 
-        next: (data : any) => {
-          this.bastion = data.data;
+        next: (data : BastionInfo) => {
+          this.bastion = data;
         }
 
       });
@@ -104,10 +106,13 @@ export class ListResourcesComponent implements OnInit {
 
   ajoutRessourceSSH(){
     this.messageSSH = '';
+    this.error = '';
 
     let nameSSH = this.nameSSHCrtl.value.trim() as string;
     let ip_machine = this.ip_machineCrtl.value.trim() as string;
-    let port = this.portCrtl.value.trim() as number;
+    let portString = this.portCrtl.value.trim() as string;
+
+    let port = parseInt(portString)
 
     this.newSSH = {
       name : nameSSH,
@@ -119,9 +124,12 @@ export class ListResourcesComponent implements OnInit {
     console.log("nom ressource ssh : " + this.newSSH.name)
 
     this.adminService.create_ssh_ressource(this.bastion_id,this.newSSH).subscribe({
-      next: (data : AdminInfo) => {
+      next: (data : any) => {
+
+        let public_key = data.data as string;
         
-        this.messageSSH="La ressource a bien été ajouté"
+        this.messageSSH="Clé publique : " + public_key
+
         this.getListlistRessources()
 
         
@@ -138,6 +146,7 @@ export class ListResourcesComponent implements OnInit {
 
   ajoutRessourceWireguard(){
     this.messageWiresguard = '';
+    this.error = '';
 
     let nameWireguard = this.nameWireguardCrtl.value.trim() as string;
     let target_ip = this.target_ipCrtl.value.trim() as string;
@@ -154,7 +163,7 @@ export class ListResourcesComponent implements OnInit {
     this.adminService.create_wireguard_ressource(this.bastion_id,this.newWireguard).subscribe({
       next: (data : any) => {
         
-        this.messageWiresguard="La ressource a bien été ajouté"
+        this.messageWiresguard="La ressource a bien été ajouté";
         this.getListlistRessources()
 
         
@@ -172,9 +181,9 @@ export class ListResourcesComponent implements OnInit {
 
     this.adminService.get_ressources(this.bastion_id).subscribe({
 
-      next: (data : any) => {
+      next: (data : RessourceInfo[]) => {
         
-        this.listRessources = data.data
+        this.listRessources = data
 
         
       },

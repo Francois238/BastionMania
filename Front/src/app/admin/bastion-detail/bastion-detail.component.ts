@@ -30,14 +30,14 @@ export class BastionDetailComponent {
 
       next: (data : any) => {
         
-        this.message="L'administrateur a bien été supprimé"
+        this.message="Le bastion a bien été supprimé"
         this.newItemEvent.emit("delete");
 
         
       },
       error: (e) => {
         
-        this.message="Impossible de supprimer l'administrateur"
+        this.message="Impossible de supprimer le bastion"
       },
     })
 
