@@ -32,14 +32,14 @@ export class ResourceDetailComponent {
 
       next: (data : any) => {
         
-        this.message="L'administrateur a bien été supprimé"
+        this.message="La ressource a bien été supprimée"
         this.newItemEvent.emit("delete");
 
         
       },
       error: (e) => {
         
-        this.message="Impossible de supprimer l'administrateur"
+        this.message="Impossible de supprimer la ressource"
       },
     })
 

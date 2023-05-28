@@ -15,7 +15,7 @@
   
   
         <div class="col-3 h-100  mb-0" >
-          <button type="button" class="titre btn btn-danger w-100 h-100"  data-bs-toggle="modal" (click)="openWindowCustomClass(supprimerAdmin)">supprimer</button>
+          <button type="button" class="titre btn btn-danger w-100 h-100"  data-bs-toggle="modal" (click)="openWindowCustomClass(supprimerUser)">supprimer</button>
         </div>
     
     </div>
@@ -23,7 +23,7 @@
   
     
   <!-- Debut de la modal pour la suppression-->
-  <ng-template #supprimerAdmin let-modal>
+  <ng-template #supprimerUser let-modal>
       <div class="modal-header">
           <h1 class="modal-title fs-5 text-center" id="supprimerUser">Confirmation</h1>
         <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>

@@ -28,13 +28,17 @@
                     </div>
                     <div class="mb-3">
                     <label for="subnet_cidr" class="form-label">Subnet cidr</label>
-                    <input formControlName="subnet_cidr" class="form-control" id="subnet_cidr">
+                    <input formControlName="subnet_cidr" class="form-control" id="subnet_cidr" placeholder="10.10.10.0/24">
                     </div>
                     <button type="submit" class="btn btn-outline-secondary">Ajouter le bastion</button>
                 </form>
         
-                <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
-            </div>
+                <div class="mt-5 text-center" *ngIf="message" >
+                  <textarea id="w3review" name="w3review" rows="5" cols="40" [innerText]="message"> </textarea>
+                </div>
+                <div class="mt-5 text-center" *ngIf="error">{{ error }}</div>
+              </div>
+                <div class="mt-5 text-center" *ngIf="error">{{ error }}</div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>

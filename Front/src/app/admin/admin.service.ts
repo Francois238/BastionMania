@@ -29,7 +29,7 @@ export class AdminService {
 
   baseUrlUser = 'https://bastionmania.intra/api/user-management/';
 
-  baseUrlBastion = 'https://bastionmania.intra/api/bastion-management/';
+  baseUrlBastion = 'https://bastionmania.intra/api/';
 
   constructor(private http: HttpClient, protected router: Router, protected authenticationService: AuthenticationService) { }
 
@@ -140,6 +140,17 @@ export class AdminService {
 
       const url = this.baseUrlUser +`users`;
       return this.http.get<UserInfo[]>(url, {headers})
+
+    }
+
+    public get_a_user(id : string) : Observable<UserInfo>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = {'Authorization': 'Bearer ' + token};
+
+      const url = this.baseUrlUser +`users/${id}`;
+      return this.http.get<UserInfo>(url, {headers})
 
     }
 
@@ -267,7 +278,7 @@ export class AdminService {
 
       const headers = {'Authorization': 'Bearer ' + token};
 
-      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources${ressource_id}`;
+      const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources/${ressource_id}`;
       return this.http.get<any>(url, {headers})
 
     }
@@ -294,7 +305,7 @@ export class AdminService {
       const body=JSON.stringify(ressource);
 
 
-      const url = this.baseUrlBastion + `bastions${bastion_id}/ressources/create/ssh`;
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/create/ssh`;
       return this.http.post<any>(url, body ,{headers})
 
     }
@@ -309,7 +320,7 @@ export class AdminService {
       const body=JSON.stringify(ressource);
 
 
-      const url = this.baseUrlBastion + `bastions${bastion_id}/ressources/create/wireguard`;
+      const url = this.baseUrlBastion + `bastions/${bastion_id}/ressources/create/wireguard`;
       return this.http.post<any>(url, body ,{headers})
 
     }

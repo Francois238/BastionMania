@@ -1,6 +1,6 @@
 <div class="mx-auto col-12 main-navbar">
 
-    <img src="assets/img/logobm.png" class="img-fluid mx-auto d-block logo mb-3" alt="Responsive image">
+    <img src="assets/img/logo_bastion_mania.png" class="img-fluid mx-auto d-block logo mb-3" alt="Responsive image">
 
     <h1 class="text-center mb-5">Bienvenue sur Bastion Mania</h1>
 </div>
@@ -25,14 +25,15 @@
                     </div>
                     <div class="col-lg-6 login-btm login-button mx-auto">
                         <button type="submit" class="btn btn-outline-secondary mb-3 ">LOGIN</button>
-                        <button (click)="loginExtern()" class="btn btn-outline-secondary  mb-3">Se connecter avec le SSO</button>
+                        <button (click)="loginExtern()" class="btn btn-outline-secondary  mb-3">Se connecter avec Keycloak</button>
                     </div>
                 </div>
         </form>
 
         <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
-
+        
 
     </div>
 </div>
+
    

@@ -103,14 +103,13 @@ export class RessourcePageComponent implements OnInit {
       username: this.user.mail
     }
 
+    console.log(creationSsh.pubkey);
+
     this.userService.generate_ssh_access(this.bastion_id, this.ressource_id, creationSsh).subscribe({
 
       next: (data) => {
         this.messageSSH = "Votre accès a bien été créé";
 
-        this.ressourceCredentialSsh = data.data;
-
-        this.infoSsh = `Cle publique du bastion : ${this.ressourceCredentialSsh.pubkey}}`
       },
       error: (err) => {
         this.messageSSH = "Impossible de créer votre accès";
@@ -130,12 +129,14 @@ export class RessourcePageComponent implements OnInit {
       pubkey: pubkeyWireguard,
     }
 
+    console.log(creationWireguard.pubkey);
+
     this.userService.generate_wireguard_access(this.bastion_id, this.ressource_id, creationWireguard).subscribe({
 
       next: (data) => {
         this.messageWireguard = "Votre accès a bien été créé";
         this.ressourceCredentialWireguard = data.data;
-        this.infoWireguard = `Cle publique du bastion : ${this.ressourceCredentialWireguard.bastion_pubkey}\nPort : ${this.ressourceCredentialWireguard.port_wireguard}\n`
+        this.infoWireguard = `Cle publique du bastion : ${this.ressourceCredentialWireguard.bastion_pubkey} <br/>Port : ${this.ressourceCredentialWireguard.port_wireguard}`
       },
       error: (err) => {
         this.messageWireguard = "Impossible de créer votre accès";

@@ -4,6 +4,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { AuthenticationService } from 'src/app/login/authentication.service';
 import { AdminService } from '../admin.service';
 import { NewBastion } from '../new-bastion';
+import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-list-bastion',
@@ -19,6 +20,8 @@ export class ListBastionComponent implements OnInit {
   public ajoutForm: FormGroup;
   public nameCrtl: FormControl;
   public subnet_cidr_nameCrtl: FormControl;
+
+  public error='';
 
   public listBastions : Array<BastionInfo> = new Array<BastionInfo>();
 
@@ -49,6 +52,7 @@ export class ListBastionComponent implements OnInit {
 
   ajoutBastion(){
     this.message = '';
+    this.error = '';
 
     this.name = this.nameCrtl.value.trim();
     this.subnet_cidr = this.subnet_cidr_nameCrtl.value.trim();
@@ -58,12 +62,12 @@ export class ListBastionComponent implements OnInit {
       subnet_cidr : this.subnet_cidr
     }
 
-    console.log("mot de passe hashe admin : " + this.bastion.bastion_name)
+    console.log("nom du bastion: " + this.bastion.bastion_name)
 
     this.adminService.add_bastion(this.bastion).subscribe({
       next: (data : any) => {
         
-        this.message="L'administrateur a bien été ajouté"
+        this.message="Le bastion a bien été ajouté\n Voici le token: " + data.data.token
         this.getListBastion()
 
         
@@ -71,7 +75,7 @@ export class ListBastionComponent implements OnInit {
       error: (e) => {
         
         console.error(e)
-        this.message = "Impossible d'ajouter l'administrateur"
+        this.error = "Impossible d'ajouter le bastion"
       }
   })
 
@@ -81,9 +85,13 @@ export class ListBastionComponent implements OnInit {
 
     this.adminService.get_bastions().subscribe({
 
-      next: (data : any) => {
+      next: (data : BastionInfo[]) => {
+
         
-        this.listBastions = data.data 
+        
+        this.listBastions = data
+
+        console.log("liste des bastions: " + this.listBastions)
 
         
       },

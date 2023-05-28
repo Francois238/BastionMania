@@ -9,6 +9,7 @@ import { UserBastionInfo } from '../user-bastion-info';
 import { RessourceInfo } from '../ressource-info';
 import { UserInfo } from '../user-info';
 import { NewUserBastion } from '../new-user-bastion';
+import { ListUserBastionReceived } from '../list-user-bastion-received';
 
 @Component({
   selector: 'app-list-user-resource',
@@ -21,8 +22,6 @@ export class ListUserResourceComponent implements OnInit {
 
   public ajoutForm: FormGroup;
   public mailCrtl: FormControl;
-  public ressource_idCrtl: FormControl;
-  public net_idCrtl: FormControl;
 
   public userBastion!: NewUserBastion;
   public ressource!: RessourceInfo;
@@ -38,12 +37,8 @@ export class ListUserResourceComponent implements OnInit {
   constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService,private activRoute: ActivatedRoute) { 
 
     this.mailCrtl = new FormControl('')
-    this.ressource_idCrtl = new FormControl('')
-    this.net_idCrtl = new FormControl('')
     this.ajoutForm = new FormGroup({
         mail: this.mailCrtl,
-        ressource_id: this.ressource_idCrtl,
-        net_id: this.net_idCrtl
 
     })
   }
@@ -51,12 +46,8 @@ export class ListUserResourceComponent implements OnInit {
   ngOnInit(): void {
 
     this.mailCrtl = new FormControl('')
-    this.ressource_idCrtl = new FormControl('')
-    this.net_idCrtl = new FormControl('')
     this.ajoutForm = new FormGroup({
         mail: this.mailCrtl,
-        ressource_id: this.ressource_idCrtl,
-        net_id: this.net_idCrtl
 
     })
 
@@ -67,12 +58,13 @@ export class ListUserResourceComponent implements OnInit {
         this.ressource_id = params.get('idRessource') || '';
 
         this.adminService.get_a_ressource(this.bastion_id, this.ressource_id).subscribe({
-          next: (data : RessourceInfo) => {
-            this.ressource = data;
+          next: (data : any) => {
+            this.ressource = data.data as RessourceInfo;
+            this.getListUser()
           }
         });
 
-        this.getListUser()
+        
 
       });
     });
@@ -83,8 +75,6 @@ export class ListUserResourceComponent implements OnInit {
     this.message = '';
 
     let mail = this.mailCrtl.value.trim() as string;
-    let user_ressource_id = this.ressource_idCrtl.value.trim() as string;
-    let net_id= this.net_idCrtl.value.trim() as number;
 
     this.adminService.get_user_mail(mail).subscribe({
       next: (data : UserInfo[]) => {
@@ -93,9 +83,8 @@ export class ListUserResourceComponent implements OnInit {
           this.user= data[0];
 
           this.userBastion = {
-            user_id: this.user.id,
-            ressource_id: user_ressource_id,
-            net_id: net_id
+            id: this.user.id,
+            ressource_id: this.ressource_id,
 
           }
 
@@ -127,9 +116,11 @@ export class ListUserResourceComponent implements OnInit {
 
     this.adminService.get_users_on_ressource(this.bastion_id, this.ressource_id).subscribe({
 
-      next: (data : any) => {
+      next: (data : ListUserBastionReceived) => {
         
-        this.listUsersBastion = data.data
+        this.listUsersBastion = data.data as UserBastionInfo[];
+
+        console.log(this.listUsersBastion[0].user_id)
 
         
       },

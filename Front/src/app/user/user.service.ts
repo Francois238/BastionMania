@@ -20,7 +20,7 @@ export class UserService {
 
   baseUrlUser = 'https://bastionmania.intra/api/user-management/';
 
-  baseUrlBastion = 'https://bastionmania.intra/api/bastion-management/';
+  baseUrlBastion = 'https://bastionmania.intra/api/';
 
   ressource!: RessourceInfo;
 
@@ -93,36 +93,36 @@ public change_password(password : Password): Observable<any> {
 /***********Gestion Bastion*************/
 /***************************************/
 
-public get_bastions() : Observable<BastionInfo[]>{
+public get_bastions() : Observable<any>{
 
   const token = this.authenticationService.get_token();
 
   const headers = {'Authorization': 'Bearer ' + token};
 
   const url = this.baseUrlBastion +`bastions`;
-  return this.http.get<BastionInfo[]>(url, {headers})
+  return this.http.get<any>(url, {headers})
 
 }
 
-public get_a_bastion(bastion_id: string) : Observable<BastionInfo>{
+public get_a_bastion(bastion_id: string) : Observable<any>{
 
   const token = this.authenticationService.get_token();
 
   const headers = {'Authorization': 'Bearer ' + token};
 
   const url = this.baseUrlBastion +`bastions/${bastion_id}`;
-  return this.http.get<BastionInfo>(url, {headers})
+  return this.http.get<any>(url, {headers})
 
 }
 
-public get_ressources(bastion_id: string) : Observable<RessourceInfo[]>{
+public get_ressources(bastion_id: string) : Observable<any>{
 
   const token = this.authenticationService.get_token();
 
   const headers = {'Authorization': 'Bearer ' + token};
 
   const url = this.baseUrlBastion +`bastions/${bastion_id}/ressources`;
-  return this.http.get<RessourceInfo[]>(url, {headers})
+  return this.http.get<any>(url, {headers})
 
 }
 

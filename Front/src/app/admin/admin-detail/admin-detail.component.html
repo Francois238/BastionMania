@@ -21,23 +21,23 @@
     </div>
 
 
-
+    
   <!-- Debut de la modal pour la suppression-->
   <ng-template #supprimerAdmin let-modal>
-      <div class="modal-header">
-          <h1 class="modal-title fs-5 text-center" id="supprimerUser">Confirmation</h1>
-        <button type="button" class="btn btn-secondary" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-      </div>
+    <div class="modal-header">
+        <h1 class="modal-title fs-5 text-center" id="supprimerAdmin">Confirmation</h1>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
 
-     <div class="modal-body">
-          <p>Voulez-vous supprimer {{admin.name}} {{admin.last_name}} ?</p>
-          <button type="button" class="titre btn btn-danger w-100 h-50"  (click)="supprimer()">Supprimer</button>
+   <div class="modal-body">
+        <p>Voulez-vous supprimer {{admin.name}} {{admin.last_name}} ?</p>
+        <button type="button" class="titre btn btn-danger w-100 h-50"  (click)="supprimer()">supprimer</button>
+            
+            
+        <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="modal.dismiss('Cross click')">Close</button>
 
-
-          <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="modal.dismiss('Cross click')">Close</button>
-
-      </div>
-    </ng-template>
+    </div>
+  </ng-template>

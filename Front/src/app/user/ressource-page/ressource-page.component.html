@@ -23,15 +23,12 @@
             <form (ngSubmit)="sendSSHKey()" [formGroup]="ajoutSSHForm">
               <div class="mb-3">
                 <label for="pubkeySSH" class="form-label">Ma clé publique SSH</label>
-                <input formControlName="pubkeySSH" class="form-control" id="pubkeySSH">
+                <textarea formControlName="pubkeySSH"  rows="6" cols="40" class="form-control" id="pubkeySSH"></textarea>
               </div>
               <button type="submit" class="btn btn-outline-secondary">Générer</button>
             </form>
     
             <div class="mt-5 text-center" *ngIf="messageSSH">{{ messageSSH }}</div>
-            <div class="mt-5 text-center" *ngIf="infoSsh">
-                <textarea id="csr" rows="10" cols="50" [textContent]="infoSsh"></textarea>
-            </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -59,15 +56,15 @@
             <div class="modal-body">
                 <form (ngSubmit)="sendWireguardKey()" [formGroup]="ajoutWireguardForm">
                   <div class="mb-3">
-                    <label for="pubkeyWireguard" class="form-label">nom</label>
-                    <input formControlName="pubkeyWireguard" class="form-control" id="pubkeyWireguard">
+                    <label for="pubkeyWireguard" class="form-label">Ma cmé publique Wireguard</label>
+                    <textarea formControlName="pubkeyWireguard" rows="4" cols="40" class="form-control" id="pubkeyWireguard"></textarea>
                   </div>
                   <button type="submit" class="btn  btn-outline-secondary">Générer</button>
                 </form>
         
                 <div class="mt-5 text-center" *ngIf="messageWireguard">{{ messageWireguard }}</div>
                 <div class="mt-5 text-center" *ngIf="infoWireguard">
-                    <textarea id="csr" rows="10" cols="50" [textContent]="infoWireguard"></textarea>
+                    <textarea id="csr" rows="6" cols="40" [textContent]="infoWireguard"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -79,11 +76,11 @@
 
       <!--Fin modal creation ressource SSH-->
 
-      <button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" (click)="start_session">
+      <button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" (click)="start_session()">
         Démarrer la session
       </button> <br>
   
-      <button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" (click)="stop_session">
+      <button type="button" class="btn btn-outline-secondary mx-auto btn-lg mt-5 w-100" (click)="stop_session()">
         Arrêter la session
       </button> <br>
 
