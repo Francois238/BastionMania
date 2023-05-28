@@ -19,6 +19,7 @@ import { RessourceInfo } from './ressource-info';
 import { NewRessourceSshCreation } from './new-ressource-ssh-creation';
 import { NewRessourceWireguardCreation } from './new-ressource-wireguard-creation';
 import { NewUserBastion } from './new-user-bastion';
+import { ConfigureAgent } from './configure-agent';
 
 @Injectable({
   providedIn: 'root'
@@ -195,6 +196,20 @@ export class AdminService {
     /****************************************/
     /********Gestion des bastions************/
     /****************************************/
+
+    public configure_agent(agent : ConfigureAgent) : Observable<any>{
+
+      const token = this.authenticationService.get_token();
+
+      const headers = { 'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token};
+
+      const body=JSON.stringify(agent);
+
+
+      const url = this.baseUrlBastion + `agent`;
+      return this.http.post<any>(url, body ,{headers})
+    }
 
     public get_bastions() : Observable<any>{
 
