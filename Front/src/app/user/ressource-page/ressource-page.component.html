@@ -56,7 +56,7 @@
             <div class="modal-body">
                 <form (ngSubmit)="sendWireguardKey()" [formGroup]="ajoutWireguardForm">
                   <div class="mb-3">
-                    <label for="pubkeyWireguard" class="form-label">Ma cmé publique Wireguard</label>
+                    <label for="pubkeyWireguard" class="form-label">Ma clé publique Wireguard</label>
                     <textarea formControlName="pubkeyWireguard" rows="4" cols="40" class="form-control" id="pubkeyWireguard"></textarea>
                   </div>
                   <button type="submit" class="btn  btn-outline-secondary">Générer</button>

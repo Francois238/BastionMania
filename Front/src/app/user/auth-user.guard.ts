@@ -13,11 +13,11 @@ export class AuthUserGuard {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     
-   /* let ok = this.userService.validate_token();
+   let ok = this.userService.validate_token();
 
     if (!ok) {
       this.router.navigate(['/login']);
-      }*/
+      }
     return true;
   }
   

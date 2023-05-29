@@ -21,10 +21,6 @@ export class ListBastionComponent implements OnInit {
   public nameCrtl: FormControl;
   public subnet_cidr_nameCrtl: FormControl;
 
-  public agentForm: FormGroup;
-  public tokenCrtl: FormControl;
-  public public_keyCrtl: FormControl;
-  public agent_hostCrtl: FormControl;
 
   public error='';
 
@@ -41,15 +37,6 @@ export class ListBastionComponent implements OnInit {
 
     })
 
-    this.tokenCrtl = new FormControl('')
-    this.public_keyCrtl = new FormControl('')
-    this.agent_hostCrtl = new FormControl('')
-    this.agentForm = new FormGroup({
-        token: this.tokenCrtl,
-        public_key: this.public_keyCrtl,
-        agent_host: this.agent_hostCrtl,
-
-    })
   }
 
   ngOnInit(): void {
@@ -62,44 +49,10 @@ export class ListBastionComponent implements OnInit {
 
     })
 
-    this.tokenCrtl = new FormControl('')
-    this.public_keyCrtl = new FormControl('')
-    this.agent_hostCrtl = new FormControl('')
-    this.agentForm = new FormGroup({
-        token: this.tokenCrtl,
-        public_key: this.public_keyCrtl,
-        agent_host: this.agent_hostCrtl,
-
-    })
 
     this.getListBastion()
   }
 
-  configureAgent(){
-
-    this.message = '';
-
-    let token = this.tokenCrtl.value.trim() as string;
-    let public_key = this.public_keyCrtl.value.trim() as string;
-    let agent_host = this.agent_hostCrtl.value.trim() as string;
-
-    let agentSend = {
-      token : token,
-      public_key : public_key,
-      agent_host : agent_host
-  }
-
-    
-
-    this.adminService.configure_agent(agentSend).subscribe({
-      next: (data : any) => {
-          
-          this.message="L'agent a bien été configuré"
-          
-        }
-    })
-
-}
 
   ajoutBastion(){
     this.message = '';
