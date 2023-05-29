@@ -5,8 +5,7 @@
     
           <h3 class="mb-5 text-center">Gestion des Bastions</h3>
     
-    
-  <div class="col-lg-6 text-center mx-auto">
+  
           <!-- Button trigger modal -->
     <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#ajoutBastion">
         Ajouter un bastion
@@ -44,51 +43,6 @@
           </div>
         </div>
       </div>
-
-
-                <!-- Button trigger modal -->
-    <button type="button" class="btn btn-outline-secondary mx-auto mb-5" data-bs-toggle="modal" data-bs-target="#configureAgent">
-      Configurer un agent
-    </button>
-
-
-          <!-- Modal -->
-          <div class="modal fade" id="configureAgent" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="configureAgentLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h1 class="modal-title fs-5" id="configureAgentLabel">Configurer l'agent</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form (ngSubmit)="configureAgent()" [formGroup]="agentForm">
-                        <div class="mb-3">
-                        <label for="token" class="form-label">Token</label>
-                        <input formControlName="token" class="form-control" id="token">
-                        </div>
-                        <div class="mb-3">
-                        <label for="public_key" class="form-label">Public key</label>
-                        <textarea formControlName="public_key" class="form-control" rows="6" cols="40" id="public_key"></textarea>
-                        </div>
-                        <div class="mb-3">
-                          <label for="agent_host" class="form-label">Agent host</label>
-                          <input formControlName="agent_host" class="form-control" id="agent_host">
-                          </div>
-                        <button type="submit" class="btn btn-outline-secondary">Configurer l'agent</button>
-                    </form>
-            
-                    <div class="mt-5 text-center" *ngIf="message" >
-                      <textarea id="w3review" name="w3review" rows="5" cols="40" [innerText]="message"> </textarea>
-                    </div>
-                    <div class="mt-5 text-center" *ngIf="error">{{ error }}</div>
-                  </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-  </div>
 
       <div class= "d-flex align-items-center text-center justify-content-center mb-3" style="height: 40px">
     

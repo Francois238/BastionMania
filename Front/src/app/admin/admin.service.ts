@@ -45,7 +45,7 @@ export class AdminService {
 
       let data= jwt_decode(token) as Jwt;
 
-      if (data.admin == true) {
+      if (data.admin == false) {
         //this.router.navigate(['/login']);
         return false;
 
@@ -197,19 +197,6 @@ export class AdminService {
     /********Gestion des bastions************/
     /****************************************/
 
-    public configure_agent(agent : ConfigureAgent) : Observable<any>{
-
-      const token = this.authenticationService.get_token();
-
-      const headers = { 'content-type': 'application/json',
-      'Authorization': 'Bearer ' + token};
-
-      const body=JSON.stringify(agent);
-
-
-      const url = this.baseUrlBastion + `agent`;
-      return this.http.post<any>(url, body ,{headers})
-    }
 
     public get_bastions() : Observable<any>{
 

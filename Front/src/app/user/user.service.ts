@@ -48,11 +48,11 @@ export class UserService {
 
     if (data.admin == false) {
       //this.router.navigate(['/login']);
-      return false;
+      return true;
 
     }
 
-    return true;
+    return false;
 
 }
 
@@ -131,7 +131,8 @@ public generate_ssh_access(bastion_id: string, ressource_id: string, ssh: Ressou
 
   const token = this.authenticationService.get_token();
 
-  const headers = {'Authorization': 'Bearer ' + token};
+  const headers = { 'content-type': 'application/json',
+  'Authorization': 'Bearer ' + token}
 
   const body=JSON.stringify(ssh);
 
@@ -144,7 +145,8 @@ public generate_wireguard_access(bastion_id: string, ressource_id: string, wireg
 
   const token = this.authenticationService.get_token();
 
-  const headers = {'Authorization': 'Bearer ' + token};
+  const headers = { 'content-type': 'application/json',
+  'Authorization': 'Bearer ' + token}
 
   const body=JSON.stringify(wireguard);
 
