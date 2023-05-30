@@ -3,13 +3,13 @@
 ## Description
 
 Cette API gère les données rentrées depuis le front et par les autres API.
-Elle stocke en base de donnée les informations des bastions, des ressources et des utilisateurs.
+Elle stocke en base de données les informations des bastions, des ressources et des utilisateurs.
 Elle permet ensuite de récupérer ces informations pour les afficher sur le front, ou de les envoyer aux autres API.
 
 ## Installation
 
 il faut mettre en place une base de donnée postgresql, lui donner un nom, ainsi qu'un utilisateur et son mot de passe.
-ces données seront à renseigner dans la varible d'environnement DATABASE_URL, du format suivant :
+ces données seront à renseigner dans la variable d'environnement DATABASE_URL, du format suivant :
 
 ```bash
 DATABASE_URL=postgresql://user:password@host:port/database
