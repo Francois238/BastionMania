@@ -26,7 +26,7 @@ stringData:
     KEY_JWT="Secret du JWT"
 ```  
   
-Faite `kubectl -f Config-Admin.yaml`  
+Faites `kubectl -f Config-Admin.yaml`  
   
 Voici le fichier de déploiement du micro-service, appelez le Admin-deployment.yaml :  
 ```
@@ -82,5 +82,5 @@ spec:
         - name: repogithub
 ```  
   
-Faite ensuite `kubectl apply -f Admin-deployment.yaml`.  
+Faites ensuite `kubectl apply -f Admin-deployment.yaml`.  
 Le micro-service est déployé sur votre cluster.
