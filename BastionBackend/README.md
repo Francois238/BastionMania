@@ -29,4 +29,4 @@ AUTHENTICATION_USER
 AUTHENTICATION_ADMIN
 ```
 
-FIRST_PORT est le premier port disponible pour les bastions, FIRST_NET_ID est le premier id de réseau disponible pour les bastions, FIRST_USER_NET_ID est le premier id de réseau disponible pour les utilisateurs, AUTHENTICATION_USER garde l'UUID de l'utilisateur actuel, et AUTHENTICATION_ADMIN garde l'UUID de l'administrateur actuel.
+FIRST_PORT est le premier port disponible pour les bastions, FIRST_NET_ID est le premier id de réseau disponible pour les bastions, FIRST_USER_NET_ID est le premier id de réseau disponible pour les utilisateurs, AUTHENTICATION_USER est l'endpoint de verification d'un user sur l'API d'authentification, et AUTHENTICATION_ADMIN est l'endpoint de verification d'un admin sur l'API d'authentification.
