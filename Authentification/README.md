@@ -1,6 +1,8 @@
 # Micro service de l'authentification
 
-Lorqu'un utilisateur ou un administrateur s'est authentifié en rentrant son login/mot de passe + 2FA ou a utilisé le SSO, le service insère un JWT dans le header Authorization de la réponse : `Authorization: Bearer <JWT>`.  
+## Description 
+
+Lorsqu'un utilisateur ou un administrateur s'est authentifié en rentrant son login/mot de passe + 2FA ou a utilisé le SSO, le service insère un JWT dans le header Authorization de la réponse : `Authorization: Bearer <JWT>`.  
   
  
 Les variables d'environnement nécessaires pour faire fonctionner le service sont :  
@@ -12,6 +14,7 @@ Les variables d'environnement nécessaires pour faire fonctionner le service son
 `REDIRECT_URL_USER="https://bastionmania.intra/login/extern/next"`  
 `URL_USER_MANAGEMENT="http://user-management:80/extern/users"`  
   
+## Installation  
  
 Avec PasswordOfBastion le mot de passe de l'utilisateut bastion de la base de données créé lors de la création de celle-ci.  
 Le secret du JWT doit être une chaine aléatoire sur un minimum de 32 octets.  
