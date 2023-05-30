@@ -1,4 +1,5 @@
-# Micro-service pour la gestion des utilisateurs
+# Micro-service pour la gestion des utilisateurs  
+## Description  
   
  Ce service s'occupe de la gestion des utilisateurs de Bastion Mania.  
    
@@ -6,6 +7,8 @@
  `DATABASE_URL=postgres://bastion:PasswordOfBastion@postgresqlnfs:5432/gestion_user`  
  `KEY_JWT="Secret du JWT"`  
  `AUTHENTICATION_URL=http://authentication:80/`  
+   
+ ## Installation
    
   Avec PasswordOfBastion le mot de créé lors de l'installation de la base de données.  
   Le secret du JWT doit être identique à celui du service authentication (chaine de caractères sur au moins 32 octets générée aléatoirement).  
@@ -24,7 +27,7 @@ stringData:
     KEY_JWT="Secret du JWT"
 ```  
   
-Faite `kubectl -f Config-User.yaml`  
+Faites `kubectl -f Config-User.yaml`  
   
 Voici le fichier de déploiement du micro-service, appelez le User-deployment.yaml :  
 ```
@@ -80,5 +83,5 @@ spec:
         - name: repogithub
 ```  
   
-Faite ensuite `kubectl apply -f User-deployment.yaml`.  
+Faites ensuite `kubectl apply -f User-deployment.yaml`.  
 Le micro-service est déployé sur votre cluster.
