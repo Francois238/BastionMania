@@ -1,4 +1,5 @@
-# Micro-service pour la gestion des administrateurs
+# Micro-service pour la gestion des administrateurs  
+## Description  
   
  Ce service s'occupe de la gestion des administrateurs de Bastion Mania.  
    
@@ -6,6 +7,8 @@
  `DATABASE_URL=postgres://bastion:PasswordOfBastion@postgresqlnfs:5432/gestion_admin`  
  `KEY_JWT="Secret du JWT"`  
  `AUTHENTICATION_URL=http://authentication:80/`  
+   
+  ## Installation  
    
   Avec PasswordOfBastion le mot de créé lors de l'installation de la base de données.  
   Le secret du JWT doit être identique à celui du service authentication (chaine de caractères sur au moins 32 octets générée aléatoirement).    
