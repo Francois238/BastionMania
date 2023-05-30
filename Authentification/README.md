@@ -2,18 +2,20 @@
 
 ## Description 
 
-Lorsqu'un utilisateur ou un administrateur s'est authentifié en rentrant son login/mot de passe + 2FA ou a utilisé le SSO, le service insère un JWT dans le header Authorization de la réponse : `Authorization: Bearer <JWT>`.  
+Lorsqu'un utilisateur ou un administrateur s'est authentifié en rentrant son login/mot de passe + 2FA ou a utilisé le SSO, le service insère un JWT dans le header Authorization de la réponse : `Authorization: Bearer <JWT>`. Ce service valide également la validité et les droits associés à un JWT pour chaque requête émise par un utilisateur ou un administrateur.
   
  
 Les variables d'environnement nécessaires pour faire fonctionner le service sont :  
-`DATABASE_URL=postgres://bastion:PasswordOfBastion@postgresqlnfs:5432/authentication`  
-`KEY_JWT="Secret du JWT"`  
-`KEY_BDD="Secret sur 32 octets"`  
-`NONCE="Secret sur 12 octets"`  
-`REDIRECT_URL_ADMIN="https://bastionmania.intra/login/admin/extern/next"`  
-`REDIRECT_URL_USER="https://bastionmania.intra/login/extern/next"`  
-`URL_USER_MANAGEMENT="http://user-management:80/extern/users"`  
-  
+```
+DATABASE_URL=postgres://bastion:PasswordOfBastion@postgresqlnfs:5432/authentication  
+KEY_JWT="Secret du JWT"  
+KEY_BDD="Secret sur 32 octets"  
+NONCE="Secret sur 12 octets"  
+REDIRECT_URL_ADMIN="https://bastionmania.intra/login/admin/extern/next"
+REDIRECT_URL_USER="https://bastionmania.intra/login/extern/next" 
+URL_USER_MANAGEMENT="http://user-management:80/extern/users"  
+ ```  
+
 ## Installation  
  
 Avec PasswordOfBastion le mot de passe de l'utilisateut bastion de la base de données créé lors de la création de celle-ci.  
@@ -39,7 +41,7 @@ stringData:
     URL_USER_MANAGEMENT="http://user-management:80/extern/users"
 ```  
   
-Faite `kubectl -f Config-Authentication.yaml`  
+Faites `kubectl -f Config-Authentication.yaml`  
   
 Voici le fichier de déploiement du micro-service, appelez le Authentication.yaml :  
   
@@ -96,5 +98,5 @@ spec:
         - name: repogithub
 ```  
   
-Faite ensuite `kubectl apply -f Authentication.yaml`.  
+Faites ensuite `kubectl apply -f Authentication.yaml`.  
 Le micro-service est déployé sur votre cluster.
