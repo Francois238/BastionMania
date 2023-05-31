@@ -1,0 +1,15 @@
+# README 3 : LOGS 3
+
+Ceci est le README de la troisieme solution que notre equipe envisage d'adopter et presentee a la slide 79
+
+# Etat des lieux
+
+Nous ne devons pas chercher comment collecter les logs pour un docker host avec plusieurs containers running. Nous devons chercher comment le faire pour un cluster kubernetes avec plusieurs pods.     
+Les logs API seront sur le STDIN. Mais les logs SSH ne seront pas sur le STDIN.
+
+# I installer Fluentbit
+
+Nous avons realise l'installation de fluentbit selon la documentation officielle (https://docs.fluentbit.io/manual/installation/getting-started-with-fluent-bit)[https://docs.fluentbit.io/manual/installation/getting-started-with-fluent-bit].  
+Cependant nous avons rencontre l'erreur suivante: helm upgrade --install fluent-bit fluent/fluent-bit
+Error: Kubernetes cluster unreachable: Get "https://10.10.40.4:6443/version": dial tcp 10.10.40.4:6443: connect: connection refused  
+Nous n'avons pas eu assez de temps pour la debugger.
