@@ -32,11 +32,31 @@ Un administrateur peut ajouter des ressources wireguard ou ssh, ssh donne un acc
 Un admin doit ensuite ajouter un utilisateur sur une ressource pour que l'utilisateur puisse la voire dans sa liste de bastion.
 
 ### Transmission credential user
+#### Wireguard
+Il faut entrer sa clé publique wireguard
+#### SSH
+Il faut entrer sa clé publique SSH et le nom d'utilisateur sur la machine cible
 
 ### Activation session
-
+On peut activer la session
 ### stop session
+On peut stoper la session
 
 ### accès ressources
 #### wireguard
+Le X c'est le net_id du bastion, le Y c'est le net_id de l'utilisateur sur le bastion
+```
+[Interface]
+PrivateKey = iP28K7Gttd1CiTpBlICbDfXD2hedTh9CXatDg79KnEk=
+Address = 10.10.X.Y/32
+
+[Peer]
+PublicKey = 9GfcvZVpXI2U61RjgQgppi6MoS3pBFNB0ARdJq8BfCA=
+AllowedIPs = 10.222.40.2/32
+Endpoint = 10.10.40.26:30001
+```
 #### SSH
+Il faut ajouter au ssh-agent la clé privé pour atteindre la machine distante
+```bash
+ssh ressourcename@bastionip -p bastionport -A -i cle_privé_pour_bastion
+```
