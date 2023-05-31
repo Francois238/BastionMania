@@ -24,11 +24,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      pod-name: authentication
+      app: authentication
   template:
     metadata:
       labels:
-        pod-name: authentication
+        app: authentication
+        need-dns: "true"
     spec:
       containers:
       - name: authentication

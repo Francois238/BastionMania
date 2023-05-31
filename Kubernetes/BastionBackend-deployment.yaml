@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: bastionbackend
+        need-dns: "true"
     spec:
       containers:
         - name: bastionbackend

@@ -38,11 +38,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      pod-name: kong
+      app: kong
   template:
     metadata:
       labels:
-        pod-name: kong
+        app: kong
+        need-dns: "true"
     spec:
       containers:
       - name: kong
