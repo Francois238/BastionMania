@@ -41,6 +41,7 @@ spec:
     metadata:
       labels:
         app: kong
+        need-dns: "true"
     spec:
       containers:
       - name: kong

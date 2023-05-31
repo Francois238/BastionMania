@@ -14,7 +14,6 @@ spec:
 
 ---
 
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,10 +28,11 @@ spec:
     metadata:
       labels:
         app: admin-management
+        need-dns: "true"
     spec:
       containers:
       - name: admin-management
-        image: "ghcr.io/bastionmania/bastionmania/adminmanagement:dev"
+        image: ghcr.io/bastionmania/bastionmania/adminmanagement:dev
         imagePullPolicy: Always
         ports:
         - name: http

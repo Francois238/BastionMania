@@ -29,6 +29,7 @@ spec:
     metadata:
       labels:
         app: user-management
+        need-dns: "true"
     spec:
       containers:
       - name: user-management

@@ -29,6 +29,7 @@ spec:
     metadata:
       labels:
         app: authentication
+        need-dns: "true"
     spec:
       containers:
       - name: authentication
