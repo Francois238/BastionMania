@@ -49,7 +49,7 @@ export class InstallationComponent {
     this.password = this.password.trim();
 
     if (this.last_name== '' || this.name=='' || this.mail == '' || this.password =='') {
-      this.message = "IL y a un champ vide";
+      this.message = "Il y a un champ vide";
 
     }
 

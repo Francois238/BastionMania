@@ -1,48 +1,43 @@
-<div class= "d-flex align-items-center text-center justify-content-center " style="height: 40px">
+<div class= "d-flex align-items-center text-center justify-content-center mb-1" style="height: 40px">
 
-    <div class="col-2 h-100  border  mb-0">
-      <span class="d-block p-2 ">{{admin.id}}  </span>
-  
+  <div class="col-4 h-100 mb-0 border-secondary border-bottom border-opacity-25">
+    <span class="d-block p-2 ">{{admin.last_name}}  </span>
+
+  </div>
+
+  <div class="col-4 h-100 mb-0 border-secondary border-bottom border-opacity-25">
+    <span class="d-block p-2 titre">{{admin.name}}</span>
+  </div>
+
+  <div class="col-6 h-100 mb-0 border-secondary border-bottom border-opacity-25">
+      <span class="d-block p-2 titre">{{admin.mail}}</span>
     </div>
-    
-      <div class="col-3 h-100  border  mb-0">
-        <span class="d-block p-2 ">{{admin.last_name}}  </span>
-    
-      </div>
-    
-      <div class="col-3 h-100  border  mb-0" >
-        <span class="d-block p-2 titre">{{admin.name}}</span>
-      </div>
-  
-      <div class="col-5 h-100  border  mb-0" >
-          <span class="d-block p-2 titre">{{admin.mail}}</span>
+
+
+        <div class="col-3 h-100 mb-0" >
+          <button type="button" class="titre btn btn-danger w-100 h-100"  data-bs-toggle="modal" (click)="openWindowCustomClass(supprimerAdmin)">Supprimer</button>
         </div>
-  
-  
-        <div class="col-3 h-100  border  mb-0" >
-          <button type="button" class="titre btn btn-danger w-100 h-100"  data-bs-toggle="modal" (click)="openWindowCustomClass(supprimerAdmin)">supprimer</button>
-        </div>
-    
+
     </div>
-  
-  
+
+
     
   <!-- Debut de la modal pour la suppression-->
   <ng-template #supprimerAdmin let-modal>
-      <div class="modal-header">
-          <h1 class="modal-title fs-5 text-center" id="supprimerUser">Confirmation</h1>
-        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
-      </div>
-  
-     <div class="modal-body">
-          <p>Voulez-vous supprimer {{admin.name}} {{admin.last_name}} ?</p>
-          <button type="button" class="titre btn btn-danger w-100 h-50"  (click)="supprimer()">supprimer</button>
-              
-              
-          <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="modal.dismiss('Cross click')">Close</button>
-  
-      </div>
-    </ng-template>
+    <div class="modal-header">
+        <h1 class="modal-title fs-5 text-center" id="supprimerAdmin">Confirmation</h1>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+
+   <div class="modal-body">
+        <p>Voulez-vous supprimer {{admin.name}} {{admin.last_name}} ?</p>
+        <button type="button" class="titre btn btn-danger w-100 h-50"  (click)="supprimer()">supprimer</button>
+            
+            
+        <div class="mt-5 text-center" *ngIf="message">{{ message }}</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="modal.dismiss('Cross click')">Close</button>
+
+    </div>
+  </ng-template>

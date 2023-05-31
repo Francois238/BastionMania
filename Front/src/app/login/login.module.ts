@@ -31,7 +31,7 @@ import { InstallationComponent } from './installation/installation.component';
     UserActivateOtpComponent,
     UserSendOtpComponent,
     UserExtNextComponent,
-    InstallationComponent,
+    InstallationComponent
   ],
   imports: [
     CommonModule,

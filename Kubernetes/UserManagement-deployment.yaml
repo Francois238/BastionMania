@@ -9,7 +9,7 @@ spec:
     protocol: TCP
     targetPort: 8082
   selector:
-    pod-name: user-management
+    app: user-management
   type: ClusterIP
 
 ---
@@ -20,8 +20,6 @@ kind: Deployment
 metadata:
   name: user-management
   namespace: bastion
-  labels:
-    app: user-management
 spec:
   replicas: 1
   selector:
@@ -35,7 +33,7 @@ spec:
     spec:
       containers:
       - name: user-management
-        image: ghcr.io/bastionmania/bastionmania/usermanagement:dev
+        image: "ghcr.io/bastionmania/bastionmania/usermanagement:dev"
         imagePullPolicy: Always
         ports:
         - name: http
@@ -43,9 +41,11 @@ spec:
           containerPort: 8082
         volumeMounts:
           - name: mnt
-            mountPath: /home/runner/app/.env
+            mountPath: /.env
             subPath: fichier.properties
       volumes:
       - name: mnt
         secret:
           secretName: gestionuser.conf
+      imagePullSecrets:
+        - name: repogithub

@@ -1,0 +1,138 @@
+
+    <div class="row mt-3 col-12">
+        <div class="col-6 mx-auto">
+
+          <div class="row col-12">
+            <div class="col-8 mx-auto">
+                <h1 class=" w-100 text-center">Detail du bastion</h1>
+        
+                <p class="  w-100">Nom : {{bastion.name}}</p><br>
+                <p class=" w-100 ">Subnet CIDR : {{bastion.subnet_cidr}}</p><br>
+                <p class="  w-100 ">SSH port : {{bastion.ssh_port}}</p><br>
+                <p class=" w-100 ">Wireguard port : {{bastion.wireguard_port}}</p><br>
+                <p class=" w-100 ">Net Id : {{bastion.net_id}}</p><br>
+
+            </div>
+
+          </div>
+    
+          <h3 class="mb-5 text-center">Gestion des Ressources</h3>
+    
+    
+  <div class="col-lg-6 text-center mx-auto">
+
+          <!-- Button trigger modal -->
+    <button type="button" class="btn btn-outline-secondary mb-5" data-bs-toggle="modal" data-bs-target="#ajoutRessourceSSH">
+        Ajouter une ressource SSH sur ce bastion
+      </button>
+
+      
+      <!-- Modal SSH -->
+      <div class="modal fade" id="ajoutRessourceSSH" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutRessourceSSHLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="ajoutRessourceSSHLabel">Ajouter une Ressource SSH</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form (ngSubmit)="ajoutRessourceSSH()" [formGroup]="ajoutSSHForm">
+                  <div class="mb-3">
+                    <label for="nameSSH" class="form-label">nom</label>
+                    <input formControlName="nameSSH" class="form-control" id="nameSSH">
+                  </div>
+                  <div class="mb-3">
+                    <label for="ip_machine" class="form-label">IP de la machine</label>
+                    <input formControlName="ip_machine" class="form-control" id="ip_machine">
+                  </div>
+                  <div class="mb-3">
+                    <label for="port" class="form-label">Port</label>
+                    <input formControlName="port" class="form-control" id="port">
+                    </div>
+                  <button type="submit" class="btn btn-outline-secondary">Ajouter la ressource SSH</button>
+                </form>
+        
+                <div class="mt-5 text-center" *ngIf="messageSSH" >
+                  <textarea id="w3review" name="w3review" rows="5" cols="40" [innerText]="messageSSH"> </textarea>
+                </div>
+                <div class="mt-5 text-center" *ngIf="error">{{ error }}</div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--Fin modal creation ressource SSH-->
+
+
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-outline-secondary mb-5" data-bs-toggle="modal" data-bs-target="#ajoutRessourceWireguard">
+            Ajouter une ressource Wireguard sur ce bastion
+          </button>
+
+          <!-- Modal Wireguard -->
+          <div class="modal fade" id="ajoutRessourceWireguard" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ajoutRessourceWireguardLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="ajoutRessourceWireguardLabel">Ajouter une Ressource Wireguard</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form (ngSubmit)="ajoutRessourceWireguard()" [formGroup]="ajoutWireguardForm">
+                      <div class="mb-3">
+                        <label for="nameWireguard" class="form-label">Nom</label>
+                        <input formControlName="nameWireguard" class="form-control" id="nameWireguard">
+                      </div>
+                      <div class="mb-3">
+                        <label for="target_ip" class="form-label">Target IP</label>
+                        <input formControlName="target_ip" class="form-control" id="target_ip">
+                      </div>
+                      <button type="submit" class="btn  btn-outline-secondary">Ajouter la ressource Wireguard</button>
+                    </form>
+            
+                    <div class="mt-5 text-center" *ngIf="messageWiresguard">{{ messageWiresguard }}</div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <!--Fin modal creation ressource SSH-->
+  </div>
+      <div class= "d-flex align-items-center text-center justify-content-center mb-3" style="height: 40px">
+    
+        <div class="col-4 h-100 mb-0 carte border-secondary border-bottom">
+          <span class="d-block p-2 ">Nom</span>
+      
+        </div>
+      
+        <div class="col-4 h-100  mb-0  border-secondary border-bottom" >
+          <span class="d-block p-2 titre">Type de Ressource</span>
+        </div>
+    
+        <div class="col-3 h-100 mb-0" >
+    
+          </div>
+
+          <div class="col-3 h-100 mb-0" >
+    
+          </div>
+      
+      </div>
+    
+      <ng-container *ngIf="listRessources.length > 0">
+        <ng-container *ngFor="let item of listRessources">
+      
+          <app-resource-detail [ressource]="item" (newItemEvent)="refreshList($event)"></app-resource-detail> 
+        </ng-container>
+      </ng-container>
+      
+    
+        </div>
+    </div>
+    

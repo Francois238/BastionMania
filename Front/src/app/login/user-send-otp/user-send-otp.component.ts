@@ -34,7 +34,7 @@ export class UserSendOtpComponent {
 
     this.serviceAuthentication.user_send_otp(this.otpSent).subscribe({
         next: (data: InfoLogin)=> {
-  
+
           this.serviceAuthentication.set_info_login(data);
 
           if (data.change == false){
@@ -45,16 +45,16 @@ export class UserSendOtpComponent {
 
             this.router.navigate(['/user/menu']);
           }
-          
-  
+
+
         },
-  
+
         error: err => {
-  
+
           if(err.status <500){
             this.message = err.error.message;
           }
-  
+
           else{
             this.message = 'Erreur interne';
           }

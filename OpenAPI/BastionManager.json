@@ -611,7 +611,7 @@
                       "type": "string"
                     },
                     "data": {
-                      "$ref": "#/components/schemas/Ressource"
+                      "type": "string"
                     }
                   }
                 }
@@ -643,7 +643,11 @@
                   "ressource_data": {
                     "$ref": "#/components/schemas/RessourceSshCreation"
                   }
-                }
+                },
+                "required": [
+                  "donnees",
+                  "ressource_data"
+                ]
               }
             }
           }
@@ -712,7 +716,11 @@
                   "ressource_data": {
                     "$ref": "#/components/schemas/RessourceWireguardCreation"
                   }
-                }
+                },
+                "required": [
+                  "donnees",
+                  "ressource_data"
+                ]
               }
             }
           }
@@ -795,7 +803,11 @@
                   "sshdata": {
                     "$ref": "#/components/schemas/RessourceCredentialsSsh"
                   }
-                }
+                },
+                "required": [
+                  "donnees",
+                  "sshdata"
+                ]
               }
             }
           }
@@ -863,7 +875,11 @@
                   "wireguarddata": {
                     "$ref": "#/components/schemas/RessourceCredentialsWireguard"
                   }
-                }
+                },
+                "required": [
+                  "donnees",
+                  "wireguarddata"
+                ]
               }
             }
           }
@@ -1001,7 +1017,11 @@
                   "user": {
                     "$ref": "#/components/schemas/UsersCreation"
                   }
-                }
+                },
+                "required": [
+                  "donnees",
+                  "user"
+                ]
               }
             }
           },
@@ -1321,7 +1341,10 @@
                       "type": "string"
                     }
                   }
-                }
+                },
+                "required": [
+                  "donnees"
+                ]
               }
             }
           }
@@ -1398,7 +1421,10 @@
                       "type": "string"
                     }
                   }
-                }
+                },
+                "required": [
+                  "donnees"
+                ]
               }
             }
           }
@@ -1485,20 +1511,16 @@
         },
         "type": "object",
         "properties": {
-          "name": {
+          "bastion_name": {
             "type": "string"
           },
           "subnet_cidr": {
             "type": "string"
-          },
-          "agent_endpoint": {
-            "type": "string"
           }
         },
         "required": [
-          "name",
-          "subnet_cidr",
-          "agent_endpoint"
+          "bastion_name",
+          "subnet_cidr"
         ]
       },
       "UserModification": {
@@ -1511,7 +1533,10 @@
           "id": {
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "id"
+        ]
       },
       "Ressource": {
         "title": "Ressource",
@@ -1548,7 +1573,16 @@
             "type": "string",
             "description": "attribué en fonction des autres ressources du même type"
           }
-        }
+        },
+        "required": [
+          "id",
+          "id_bastion",
+          "name",
+          "rtype",
+          "id_wireguard",
+          "id_ssh",
+          "id_k8s"
+        ]
       },
       "WireguardRessource": {
         "title": "WireguardSession",
@@ -1569,7 +1603,13 @@
           "target_ip": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "id",
+          "id_bastion",
+          "name",
+          "target_ip"
+        ]
       },
       "SSHRessource": {
         "title": "SSHSession",
@@ -1593,7 +1633,14 @@
           "port": {
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "id",
+          "id_bastion",
+          "name",
+          "ip_machine",
+          "port"
+        ]
       },
       "K8SRessource": {
         "title": "K8SRessource",
@@ -1632,7 +1679,12 @@
           "agent_host": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "token",
+          "public_key",
+          "agent_host"
+        ]
       },
       "RessourceWireguardCreation": {
         "title": "RessourceWireguardCreation",
@@ -1650,7 +1702,12 @@
           "target_ip": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "name",
+          "rtype",
+          "target_ip"
+        ]
       },
       "RessourceSshCreation": {
         "title": "RessourceSshCreation",
@@ -1671,7 +1728,13 @@
           "port": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "name",
+          "rtype",
+          "ip_machine",
+          "port"
+        ]
       },
       "RessourceCredentialsSsh": {
         "title": "RessourceCredentialsSsh",
@@ -1686,7 +1749,11 @@
           "username": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "pubkey",
+          "username"
+        ]
       },
       "UserConfigSshInsertable": {
         "title": "UserConfigSshInsertable",
@@ -1707,7 +1774,13 @@
           "username": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "uuid_user",
+          "uuid_ressource",
+          "pubkey",
+          "username"
+        ]
       },
       "RessourceCredentialsWireguard": {
         "title": "RessourceCredentialsWireguard",
@@ -1718,11 +1791,11 @@
         "properties": {
           "pubkey": {
             "type": "string"
-          },
-          "user_net_id": {
-            "type": "integer"
           }
-        }
+        },
+        "required": [
+          "pubkey"
+        ]
       },
       "UserConfigWireguardInsertable": {
         "title": "UserConfigWireguardInsertable",
@@ -1741,9 +1814,15 @@
             "type": "string"
           },
           "user_net_id": {
-            "type": "string"
+            "type": "integer"
           }
-        }
+        },
+        "required": [
+          "uuid_user",
+          "uuid_ressource",
+          "pubkey",
+          "user_net_id"
+        ]
       },
       "UsersCreation": {
         "title": "UsersCreation",
@@ -1758,7 +1837,11 @@
           "ressource_id": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "id",
+          "ressource_id"
+        ]
       }
     },
     "securitySchemes": {}

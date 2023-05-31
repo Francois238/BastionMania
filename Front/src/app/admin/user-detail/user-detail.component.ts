@@ -31,14 +31,14 @@ export class UserDetailComponent {
 
       next: (data : number) => {
         
-        this.message="L'administrateur a bien été supprimé"
+        this.message="L'utilisateur a bien été supprimé"
         this.newItemEvent.emit("delete");
 
         
       },
       error: (e) => {
         
-        this.message="Impossible de supprimer l'administrateur"
+        this.message="Impossible de supprimer l'utilisateur"
       },
     })
 

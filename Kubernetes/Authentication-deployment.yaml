@@ -9,17 +9,17 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    pod-name: authentication
+    app: authentication
   type: ClusterIP
 
 ---
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: authentication
   namespace: bastion
-  labels:
-    app: authentication
 spec:
   replicas: 1
   selector:
@@ -41,7 +41,7 @@ spec:
           containerPort: 8080
         volumeMounts:
           - name: mnt
-            mountPath: /home/runner/app/.env
+            mountPath: /.env
             subPath: fichier.properties
       volumes:
       - name: mnt

@@ -9,7 +9,7 @@ spec:
     protocol: TCP
     targetPort: 8081
   selector:
-    pod-name: admin-management
+    app: admin-management
   type: ClusterIP
 
 ---
@@ -19,8 +19,6 @@ kind: Deployment
 metadata:
   name: admin-management
   namespace: bastion
-  labels:
-    app: admin-management
 spec:
   replicas: 1
   selector:
@@ -42,9 +40,11 @@ spec:
           containerPort: 8081
         volumeMounts:
           - name: mnt
-            mountPath: /home/runner/app/.env
+            mountPath: /.env
             subPath: fichier.properties
       volumes:
       - name: mnt
         secret:
           secretName: gestionadmin.conf
+      imagePullSecrets:
+        - name: repogithub

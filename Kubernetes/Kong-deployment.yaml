@@ -22,7 +22,7 @@ spec:
     protocol: TCP
     targetPort: 8444
   selector:
-    pod-name: kong
+    app: kong
   type: LoadBalancer
 
 ---
@@ -32,8 +32,6 @@ kind: Deployment
 metadata:
   name: kong
   namespace: bastion
-  labels:
-    app: kong
 spec:
   replicas: 1
   selector:
@@ -47,8 +45,8 @@ spec:
     spec:
       containers:
       - name: kong
-        image: "docker.io/francois238/kongoidc:12.0"
-        imagePullPolicy: IfNotPresent
+        image: "ghcr.io/bastionmania/bastionmania/apigateway:dev"
+        imagePullPolicy: Always
         ports:
         - name: proxy
           protocol: TCP
@@ -69,3 +67,5 @@ spec:
           value: 0.0.0.0:8000, 0.0.0.0:8443 ssl
         - name: KONG_ADMIN_LISTEN
           value: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+      imagePullSecrets:
+        - name: repogithub

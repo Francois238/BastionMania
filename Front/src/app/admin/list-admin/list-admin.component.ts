@@ -28,7 +28,6 @@ export class ListAdminComponent implements OnInit {
   public listAdmins : Array<AdminInfo> = new Array<AdminInfo>();
 
   constructor(protected adminService : AdminService, protected serviceAuthentication: AuthenticationService) { 
-    this.adminService.validate_token();
 
     this.nameCrtl = new FormControl('')
     this.last_nameCrtl = new FormControl('')
@@ -67,6 +66,12 @@ export class ListAdminComponent implements OnInit {
     this.last_name = this.last_nameCrtl.value.trim();
     this.mail = this.mailCrtl.value.trim();
     this.password = this.passwordCrtl.value.trim();
+
+    if( this.password.length< 2){
+
+      this.message = "Le mot de passe doit contenir au moins 2 caractères"
+      return
+    }
 
     this.admin = {
       name : this.name,

@@ -13,17 +13,42 @@
     }
   ],
   "paths": {
-    "/login": {
+    "/api/authentication/login": {
       "parameters": [],
       "post": {
         "summary": "",
         "operationId": "post-login",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            },
+            "headers": {
+              "Authorization": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "token"
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -38,16 +63,40 @@
         }
       }
     },
-    "/login/otp": {
+    "/api/authentication/login/otp": {
       "post": {
         "summary": "",
         "operationId": "post-login-otp",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            },
+            "headers": {
+              "Authorization": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "token"
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -59,18 +108,94 @@
             }
           }
         }
+      },
+      "parameters": []
+    },
+    "/api/authentication/login/extern": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "operationId": "get-api-authentication-login-extern",
+        "description": "Endpoint connexion avec OIDC pour un utilisateur.\nRenvoie dans tous les cas sur une page du front.\nSi ok envoie un cookie pour authentifier temporairement l'utilisateur"
       }
     },
-    "/login/admin": {
+    "/api/authentication/login/extern/next": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            },
+            "headers": {
+              "Authorization": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "token"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "operationId": "get-api-authentication-login-extern-next",
+        "description": "Finalise la connexion avec OIDC en renvoyant un jwt et les infos de l'utilisateur"
+      }
+    },
+    "/api/authentication/login/admin": {
       "post": {
         "summary": "",
         "operationId": "post-login-admin",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            },
+            "headers": {
+              "Authorization": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -82,19 +207,49 @@
             }
           }
         }
-      }
+      },
+      "parameters": []
     },
-    "/login/admin/otp": {
+    "/api/authentication/login/admin/otp": {
       "post": {
         "summary": "",
         "operationId": "post-login-admin-otp",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {
+              "Authorization": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden",
             "headers": {}
+          },
+          "": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            }
           }
         },
         "parameters": [],
@@ -107,6 +262,53 @@
             }
           }
         }
+      },
+      "parameters": []
+    },
+    "/api/authentication/login/admin/extern": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "operationId": "get-api-authentication-login-admin-extern",
+        "description": "1ere étapre connexion avec OIDC pour un admin.\nSi ok renvoie un cookie dans la réponse"
+      }
+    },
+    "/api/authentication/login/admin/extern/next": {
+      "get": {
+        "summary": "Your GET endpoint",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRenvoye"
+                }
+              }
+            },
+            "headers": {
+              "Authorization": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "operationId": "get-api-authentication-login-admin-extern-next",
+        "description": "Derniere étape connexion pour un admin avec l'OIDC"
       }
     },
     "/users": {
@@ -346,6 +548,9 @@
         },
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -367,6 +572,9 @@
         },
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -393,6 +601,39 @@
           },
           "claimJWT": {
             "type": "string"
+          }
+        }
+      },
+      "UserRenvoye": {
+        "title": "UserRenvoye",
+        "x-stoplight": {
+          "id": "47b6qf8prqx5p"
+        },
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "mail": {
+            "type": "string"
+          },
+          "change": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "otpactive": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         }
       }
