@@ -1,29 +1,151 @@
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
 metadata:
-  name: "restrict-kong"
+  name: "allow-dns"
   namespace: "bastion"
 spec:
   endpointSelector:
-    matchLabels:
-      pod-name: kong
+    - matchLabels:
+        need-dns: "true"
   egress:
     - toEndpoints:
         - matchLabels:
             k8s-app: kube-dns
             "k8s:io.kubernetes.pod.namespace": kube-system
+    - toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "restrict-kong"
+  namespace: "bastion"
+spec:
+  endpointSelector:
+    matchLabels:
+      app: kong
+  egress:
+    - toEndpoints:
         - matchLabels:
-            pod-name: front
+            app: front
         - matchLabels:
-            pod-name: admin-management
+            app: admin-management
         - matchLabels:
-            pod-name: authentication
+            app: authentication
         - matchLabels:
-            pod-name: user-management
+            app: user-management
         - matchLabels:
             app: bastionbackend
     - toCIDR:
        - 10.10.40.30/32
+    - toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
   ingress:
     - fromEntities:
       - world
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "restrict-front"
+  namespace: "bastion"
+spec:
+    endpointSelector:
+        matchLabels:
+          app: front
+    egress:
+        - {}
+    ingress:
+      - fromEndpoints:
+          - matchLabels:
+              app: kong
+
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "restrict-authentication"
+  namespace: "bastion"
+spec:
+    endpointSelector:
+        matchLabels:
+          app: authentication
+    egress:
+        - toEndpoints:
+            - matchLabels:
+                app: user-management
+    ingress:
+      - fromEndpoints:
+          - matchLabels:
+              app: kong
+          - matchLabels:
+              app: admin-management
+          - matchLabels:
+              app: user-management
+          - matchLabels:
+              app: bastionbackend
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "restrict-user-management"
+  namespace: "bastion"
+spec:
+    endpointSelector:
+        matchLabels:
+          app: user-management
+    egress:
+        - toEndpoints:
+            - matchLabels:
+                app: authentication
+    ingress:
+      - fromEndpoints:
+          - matchLabels:
+              app: kong
+          - matchLabels:
+              app: authentication
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "restrict-admin-management"
+  namespace: "bastion"
+spec:
+    endpointSelector:
+        matchLabels:
+          app: admin-management
+    egress:
+        - toEndpoints:
+            - matchLabels:
+                app: authentication
+    ingress:
+      - fromEndpoints:
+          - matchLabels:
+              app: kong
+---
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "restrict-bastionbackend"
+  namespace: "bastion"
+spec:
+    endpointSelector:
+        matchLabels:
+          app: bastionbackend
+    egress:
+        - toEndpoints:
+            - matchLabels:
+                app: authentication
+            - matchLabels:
+                app: bastion-instancieur
+            - matchLabels:
+                app: bastion
+    ingress:
+      - fromEndpoints:
+          - matchLabels:
+              app: kong
